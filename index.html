@@ -21,7 +21,7 @@
             background-color: #fafafa;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
         .stage {
@@ -118,6 +118,18 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            user-select: none;
+        }
+        th.sortable {
+            cursor: pointer;
+        }
+        th.sortable:hover {
+            background: #e5e7eb;
+        }
+        .sort-icon {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+            color: #9ca3af;
         }
         td input {
             width: 100%;
@@ -162,6 +174,7 @@
     <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
     <div id="stage-2" class="stage">
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">💡 Click the column headers for <b>Participant Name</b> or <b>Class Date</b> to change the sorting order.</p>
         
         <div class="actions">
             <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
@@ -180,15 +193,20 @@
 </div>
 
 <script>
-    // Configured Master Layout Fields
+    // Configuration Master Layout Columns - "Class Date" added to the end
     const MASTER_HEADERS = [
         "SNo", "Participant Name", "Attendance Started at", 
-        "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code"
+        "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
     ];
     
-    // Explicit global memory array tracking file objects directly
     let uploadedFilesArray = [];
     let masterData = [];
+
+    // Sorting state direction tracking (1 = normal/ascending, -1 = reverse/descending)
+    let sortDirections = {
+        "Participant Name": 1,
+        "Class Date": 1
+    };
 
     // DOM Elements
     const csvPicker = document.getElementById('csv-picker');
@@ -203,32 +221,24 @@
     const tableHeaders = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
 
-    // Handle incoming file arrays properly across variable click operations
     csvPicker.addEventListener('change', (e) => {
         if (!e.target.files) return;
-        
         for (let i = 0; i < e.target.files.length; i++) {
             const file = e.target.files[i];
-            // Skip exact file name duplicates to keep array unique
-            if (!uploadedFilesArray.some(existingFile => existingFile.name === file.name)) {
+            if (!uploadedFilesArray.some(f => f.name === file.name)) {
                 uploadedFilesArray.push(file);
             }
         }
-        
-        // Critical Fix: Clear raw input value string cache so browsers trigger 'change' even if same file is picked again later
         csvPicker.value = ""; 
         renderQueueUI();
     });
 
-    // Rebuild the visible Stage 1 file queue list with individual remove triggers
     function renderQueueUI() {
         fileQueue.innerHTML = '';
-        
         if (uploadedFilesArray.length === 0) {
             fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
             return;
         }
-
         uploadedFilesArray.forEach((file, index) => {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
@@ -240,9 +250,8 @@
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
-            removeBtn.title = "Remove file";
             removeBtn.onclick = (e) => {
-                e.stopPropagation(); // Avoid triggering parent clicks
+                e.stopPropagation();
                 uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
             };
@@ -253,7 +262,13 @@
         });
     }
 
-    // Helper utility to safely break CSV syntax commas without breaking on nested quotes
+    // Helper to safely parse strings containing dates out of file names
+    function extractDateFromFilename(filename) {
+        // Matches standard YYYY-MM-DD, DD-MM-YYYY, or MM-DD-YYYY boundaries
+        const match = filename.match(/(\d{4}[-.\/]\d{1,2}[-.\/]\d{1,2})|(\d{1,2}[-.\/]\d{1,2}[-.\/]\d{4})/);
+        return match ? match[0] : "Unknown Date";
+    }
+
     function parseCSVLine(text) {
         let p = '', r = [];
         let q = false;
@@ -267,45 +282,41 @@
         return r;
     }
 
-    // Process & Map datasets before entering Stage 2 view
     nextBtn.addEventListener('click', async () => {
         if (uploadedFilesArray.length === 0) {
-            alert('Please select or upload at least one CSV file first.');
+            alert('Please upload at least one CSV file.');
             return;
         }
 
-        masterData = []; // Clear current table structure array
+        masterData = []; 
 
         for (let file of uploadedFilesArray) {
             try {
                 const text = await file.text();
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                
                 if (lines.length === 0) continue;
 
-                // Line 1 contains headers used to target positions dyamically
-                const fileHeaders = parseCSVLine(lines[0]);
+                                const fileHeaders = parseCSVLine(lines[0]);
+                const fileDate = extractDateFromFilename(file.name);
                 
-                // Track where target master columns reside inside this specific file
                 const indexMap = {};
                 MASTER_HEADERS.forEach(header => {
                     indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
                 });
 
-                // Read data items from row line index 1 onward
                 for (let i = 1; i < lines.length; i++) {
                     const rowValues = parseCSVLine(lines[i]);
-                    
-                    // Filter empty or spacer break strings like ",,,,,,"
                     if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
 
                     let structuredObj = {};
                     MASTER_HEADERS.forEach(header => {
-                        const mappedIdx = indexMap[header];
-                        // Assign values cleanly matching mapping coordinates, else default empty
-                        structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
+                        if (header === "Class Date") {
+                            structuredObj[header] = fileDate;
+                        } else {
+                            const mappedIdx = indexMap[header];
+                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
+                        }
                     });
-
                     masterData.push(structuredObj);
                 }
             } catch (err) {
@@ -313,31 +324,59 @@
             }
         }
 
-        // Render data elements into structural view layout and shift viewport stage
+        sortMasterData();
         renderMasterTableUI();
         stage1.classList.remove('active');
         stage2.classList.add('active');
     });
 
-    // Go back button utility action
     backBtn.addEventListener('click', () => {
         stage2.classList.remove('active');
         stage1.classList.add('active');
     });
 
-    // Render Editable elements onto the Stage 2 grid elements view window
+    function sortMasterData() {
+        masterData.sort((a, b) => {
+            const nameA = (a["Participant Name"] || "").toLowerCase();
+            const nameB = (b["Participant Name"] || "").toLowerCase();
+            
+            if (nameA !== nameB) {
+                return nameA.localeCompare(nameB) * sortDirections["Participant Name"];
+            }
+            
+            const dateA = a["Class Date"] || "";
+            const dateB = b["Class Date"] || "";
+            return dateA.localeCompare(dateB) * sortDirections["Class Date"];
+        });
+    }
+
+    function handleHeaderClick(headerName) {
+        if (sortDirections[headerName] !== undefined) {
+            sortDirections[headerName] *= -1;
+            sortMasterData();
+            renderMasterTableUI();
+        }
+    }
+
     function renderMasterTableUI() {
         tableHeaders.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // Print header columns
         MASTER_HEADERS.forEach(h => {
             const th = document.createElement('th');
             th.textContent = h;
+            
+            if (h === "Participant Name" || h === "Class Date") {
+                th.className = "sortable";
+                const icon = document.createElement('span');
+                icon.className = "sort-icon";
+                icon.innerHTML = sortDirections[h] === 1 ? "▲" : "▼";
+                th.appendChild(icon);
+                th.onclick = () => handleHeaderClick(h);
+            }
             tableHeaders.appendChild(th);
         });
 
-        // Loop rows out into live field controls
         masterData.forEach((row, rowIndex) => {
             const tr = document.createElement('tr');
             MASTER_HEADERS.forEach(header => {
@@ -345,7 +384,6 @@
                 const input = document.createElement('input');
                 input.value = row[header];
                 
-                // Wire structural modifications straight back into master object array strings
                 input.addEventListener('input', (e) => {
                     masterData[rowIndex][header] = e.target.value.trim();
                 });
@@ -357,19 +395,17 @@
         });
     }
 
-    // CSV Compile & Exporter Download Stream Builder
     downloadBtn.addEventListener('click', () => {
-        if (masterData.length === 0) {
-            alert("No data available to download.");
-            return;
-        }
+        if (masterData.length === 0) return;
 
         let csvContent = MASTER_HEADERS.join(",") + "\n";
+        
+        const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
+        csvContent += dynamicSpacer + "\n";
         
         masterData.forEach(row => {
             let rowLine = MASTER_HEADERS.map(header => {
                 let cellValue = row[header] || '';
-                // Quote encapsulation fallback wrap safety structure
                 if (cellValue.includes(',') || cellValue.includes('"')) {
                     cellValue = `"${cellValue.replace(/"/g, '""')}"`;
                 }
@@ -378,12 +414,11 @@
             csvContent += rowLine + "\n";
         });
 
-        // Blob conversion file trigger mechanics
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "master_attendance_report.csv");
+        link.setAttribute("download", "combined_attendance_report.csv");
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -393,4 +428,5 @@
 
 </body>
 </html>
+
 
