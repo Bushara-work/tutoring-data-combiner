@@ -24,43 +24,58 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+        .stage {
+            display: none;
+        }
+        .stage.active {
+            display: block;
+        }
         .upload-section {
             border: 2px dashed var(--gray-300);
-            padding: 2rem;
+            padding: 3rem;
             border-radius: 8px;
             text-align: center;
             background: white;
             margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+        .upload-section:hover {
+            border-color: var(--primary);
         }
         .file-list {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 0.5rem;
             margin-bottom: 1.5rem;
+            max-width: 600px;
         }
-        .file-badge {
-            display: inline-flex;
+        .file-item {
+            display: flex;
             align-items: center;
-            background: var(--gray-100);
-            padding: 0.5rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
+            justify-content: space-between;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
             border: 1px solid var(--gray-300);
         }
-        .file-badge button {
+        .file-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .remove-btn {
             background: none;
             border: none;
             color: var(--danger);
             font-weight: bold;
-            margin-left: 0.5rem;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.25rem;
+            padding: 0 0.5rem;
         }
-        .file-badge button:hover {
+        .remove-btn:hover {
             color: var(--danger-hover);
         }
         .actions {
-            margin-bottom: 1.5rem;
+            margin-top: 1.5rem;
             display: flex;
             gap: 1rem;
         }
@@ -74,6 +89,8 @@
         }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
+        .btn-secondary:hover { background: #cbd5e1; }
         .btn-success { background: #16a34a; color: white; }
         .btn-success:hover { background: #15803d; }
         .table-container {
@@ -83,6 +100,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--gray-300);
             margin-top: 1rem;
+            max-height: 500px;
         }
         table {
             width: 100%;
@@ -93,11 +111,13 @@
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--gray-300);
             font-size: 0.875rem;
+            min-width: 150px;
         }
         th {
             background: var(--gray-100);
             position: sticky;
             top: 0;
+            z-index: 10;
         }
         td input {
             width: 100%;
@@ -120,85 +140,120 @@
 <div class="container">
     <h2>CSV Attendance Merger & Editor</h2>
     
-    <!-- Upload Zone -->
-    <div class="upload-section">
-        <input type="file" id="csv-plugins" multiple accept=".csv" style="display: none;">
-        <button class="btn btn-primary" onclick="document.getElementById('csv-plugins').click()">Select CSV Files</button>
-        <p style="color: #6b7280; margin-top: 0.5rem;">Upload multiple files. Row structures can vary.</p>
+    <!-- STAGE 1: UPLOAD PHASE -->
+    <div id="stage-1" class="stage active">
+        <h3>Stage 1: Upload Attendance CSV Files</h3>
+        <div class="upload-section" onclick="document.getElementById('csv-picker').click()">
+            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
+            <button class="btn btn-primary">Select CSV Files</button>
+            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files. You can choose one by one or group select multiple items.</p>
+        </div>
+
+        <h4>Uploaded Files Queue</h4>
+        <div class="file-list" id="file-queue">
+            <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="next-btn">Combine & Process Data</button>
+        </div>
     </div>
 
-    <!-- Active Files List -->
-    <div class="file-list" id="file-queue"></div>
+    <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
+    <div id="stage-2" class="stage">
+        <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
+        
+        <div class="actions">
+            <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
+            <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
+        </div>
 
-    <!-- Controls -->
-    <div class="actions">
-        <button class="btn btn-primary" id="process-btn">Combine & Generate Master</button>
-        <button class="btn btn-success" id="download-btn" style="display: none;">Download Master File</button>
-    </div>
-
-    <!-- Editable Preview Area -->
-    <div class="table-container" id="table-wrapper" style="display: none;">
-        <table id="master-table">
-            <thead>
-                <tr id="table-headers"></tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
+        <div class="table-container">
+            <table id="master-table">
+                <thead>
+                    <tr id="table-headers"></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // System Configuration
+    // Configured Master Layout Fields
     const MASTER_HEADERS = [
         "SNo", "Participant Name", "Attendance Started at", 
         "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code"
     ];
     
-    let uploadedFiles = [];
+    // Explicit global memory array tracking file objects directly
+    let uploadedFilesArray = [];
     let masterData = [];
 
     // DOM Elements
-    const fileInput = document.getElementById('csv-plugins');
+    const csvPicker = document.getElementById('csv-picker');
     const fileQueue = document.getElementById('file-queue');
-    const processBtn = document.getElementById('process-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-btn');
     const downloadBtn = document.getElementById('download-btn');
-    const tableWrapper = document.getElementById('table-wrapper');
+    
+    const stage1 = document.getElementById('stage-1');
+    const stage2 = document.getElementById('stage-2');
+    
     const tableHeaders = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
 
-    // Handle file selection additions
-    fileInput.addEventListener('change', (e) => {
-        for (let file of e.target.files) {
-            // Prevent duplicates by name checking
-            if (!uploadedFiles.some(f => f.name === file.name)) {
-                uploadedFiles.push(file);
+    // Handle incoming file arrays properly across variable click operations
+    csvPicker.addEventListener('change', (e) => {
+        if (!e.target.files) return;
+        
+        for (let i = 0; i < e.target.files.length; i++) {
+            const file = e.target.files[i];
+            // Skip exact file name duplicates to keep array unique
+            if (!uploadedFilesArray.some(existingFile => existingFile.name === file.name)) {
+                uploadedFilesArray.push(file);
             }
         }
-        fileInput.value = ''; // Reset target wrapper
-        renderQueue();
+        
+        // Critical Fix: Clear raw input value string cache so browsers trigger 'change' even if same file is picked again later
+        csvPicker.value = ""; 
+        renderQueueUI();
     });
 
-    // Render the file list UI with delete buttons
-    function renderQueue() {
+    // Rebuild the visible Stage 1 file queue list with individual remove triggers
+    function renderQueueUI() {
         fileQueue.innerHTML = '';
-        uploadedFiles.forEach((file, index) => {
-            const badge = document.createElement('div');
-            badge.className = 'file-badge';
-            badge.textContent = file.name;
+        
+        if (uploadedFilesArray.length === 0) {
+            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
+            return;
+        }
+
+        uploadedFilesArray.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'file-name';
+            nameSpan.textContent = file.name;
             
             const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = () => {
-                uploadedFiles.splice(index, 1);
-                renderQueue();
+            removeBtn.title = "Remove file";
+            removeBtn.onclick = (e) => {
+                e.stopPropagation(); // Avoid triggering parent clicks
+                uploadedFilesArray.splice(index, 1);
+                renderQueueUI();
             };
             
-            badge.appendChild(removeBtn);
-            fileQueue.appendChild(badge);
+            fileItem.appendChild(nameSpan);
+            fileItem.appendChild(removeBtn);
+            fileQueue.appendChild(fileItem);
         });
     }
 
-    // Helper utility to safely parse CSV line structures
+    // Helper utility to safely break CSV syntax commas without breaking on nested quotes
     function parseCSVLine(text) {
         let p = '', r = [];
         let q = false;
@@ -212,64 +267,77 @@
         return r;
     }
 
-    // Processing Logic
-    processBtn.addEventListener('click', async () => {
-        if (uploadedFiles.length === 0) {
-            alert('Please add at least one CSV file first.');
+    // Process & Map datasets before entering Stage 2 view
+    nextBtn.addEventListener('click', async () => {
+        if (uploadedFilesArray.length === 0) {
+            alert('Please select or upload at least one CSV file first.');
             return;
         }
 
-        masterData = []; // Clear current master dataset
+        masterData = []; // Clear current table structure array
 
-        for (let file of uploadedFiles) {
-            const text = await file.text();
-            const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-            
-            if (lines.length === 0) continue;
-
-            // First line maps index positions dynamically
-            const fileHeaders = parseCSVLine(lines[0]);
-            
-            // Map header indexes dynamically relative to target MASTER definitions
-            const indexMap = {};
-            MASTER_HEADERS.forEach(header => {
-                indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
-            });
-
-            // Extract rows starting from index 1 (or skips blank template items like ',,,,')
-            for (let i = 1; i < lines.length; i++) {
-                const rowValues = parseCSVLine(lines[i]);
+        for (let file of uploadedFilesArray) {
+            try {
+                const text = await file.text();
+                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 
-                // Skip placeholder delimiter-only lines like ",,,,,,"
-                if (rowValues.every(val => val === '')) continue;
+                if (lines.length === 0) continue;
 
-                // Restructure data based on key positions 
-                let structuredObj = {};
+                // Line 1 contains headers used to target positions dyamically
+                const fileHeaders = parseCSVLine(lines[0]);
+                
+                // Track where target master columns reside inside this specific file
+                const indexMap = {};
                 MASTER_HEADERS.forEach(header => {
-                    const mappedIndex = indexMap[header];
-                    structuredObj[header] = (mappedIndex !== -1 && mappedIndex < rowValues.length) ? rowValues[mappedIndex] : '';
+                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
                 });
 
-                masterData.push(structuredObj);
+                // Read data items from row line index 1 onward
+                for (let i = 1; i < lines.length; i++) {
+                    const rowValues = parseCSVLine(lines[i]);
+                    
+                    // Filter empty or spacer break strings like ",,,,,,"
+                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
+
+                    let structuredObj = {};
+                    MASTER_HEADERS.forEach(header => {
+                        const mappedIdx = indexMap[header];
+                        // Assign values cleanly matching mapping coordinates, else default empty
+                        structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
+                    });
+
+                    masterData.push(structuredObj);
+                }
+            } catch (err) {
+                console.error("Error reading file: " + file.name, err);
             }
         }
 
-        renderMasterTable();
+        // Render data elements into structural view layout and shift viewport stage
+        renderMasterTableUI();
+        stage1.classList.remove('active');
+        stage2.classList.add('active');
     });
 
-    // Populate visual UI layout table elements 
-    function renderMasterTable() {
+    // Go back button utility action
+    backBtn.addEventListener('click', () => {
+        stage2.classList.remove('active');
+        stage1.classList.add('active');
+    });
+
+    // Render Editable elements onto the Stage 2 grid elements view window
+    function renderMasterTableUI() {
         tableHeaders.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // Generate headers dynamically
+        // Print header columns
         MASTER_HEADERS.forEach(h => {
             const th = document.createElement('th');
             th.textContent = h;
             tableHeaders.appendChild(th);
         });
 
-        // Generate body rows with live input streams 
+        // Loop rows out into live field controls
         masterData.forEach((row, rowIndex) => {
             const tr = document.createElement('tr');
             MASTER_HEADERS.forEach(header => {
@@ -277,7 +345,7 @@
                 const input = document.createElement('input');
                 input.value = row[header];
                 
-                // Reflect input updates in data model immediately
+                // Wire structural modifications straight back into master object array strings
                 input.addEventListener('input', (e) => {
                     masterData[rowIndex][header] = e.target.value.trim();
                 });
@@ -287,12 +355,42 @@
             });
             tableBody.appendChild(tr);
         });
-
-        tableWrapper.style.display = 'block';
-        downloadBtn.style.display = 'inline-block';
     }
 
-    // CSV Download Stream Compilation
+    // CSV Compile & Exporter Download Stream Builder
     downloadBtn.addEventListener('click', () => {
-        if (masterData.length === 0) return;
+        if (masterData.length === 0) {
+            alert("No data available to download.");
+            return;
+        }
+
+        let csvContent = MASTER_HEADERS.join(",") + "\n";
+        
+        masterData.forEach(row => {
+            let rowLine = MASTER_HEADERS.map(header => {
+                let cellValue = row[header] || '';
+                // Quote encapsulation fallback wrap safety structure
+                if (cellValue.includes(',') || cellValue.includes('"')) {
+                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
+                }
+                return cellValue;
+            }).join(",");
+            csvContent += rowLine + "\n";
+        });
+
+        // Blob conversion file trigger mechanics
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "master_attendance_report.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+</script>
+
+</body>
+</html>
 
