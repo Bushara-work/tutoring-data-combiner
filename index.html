@@ -210,6 +210,7 @@
 
     // DOM Elements
     const csvPicker = document.getElementById('csv-picker');
+    const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
     const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
@@ -221,16 +222,52 @@
     const tableHeaders = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
 
-    csvPicker.addEventListener('change', (e) => {
-        if (!e.target.files) return;
-        for (let i = 0; i < e.target.files.length; i++) {
-            const file = e.target.files[i];
-            if (!uploadedFilesArray.some(f => f.name === file.name)) {
-                uploadedFilesArray.push(file);
+    // Central function to handle files from both click selection and drag-and-drop
+    function handleFileSelection(files) {
+        if (!files) return;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            // Only accept .csv files
+            if (file.name.endsWith('.csv')) {
+                if (!uploadedFilesArray.some(f => f.name === file.name)) {
+                    uploadedFilesArray.push(file);
+                }
             }
         }
-        csvPicker.value = ""; 
         renderQueueUI();
+    }
+
+    // 1. Traditional File Click Picker Event
+    csvPicker.addEventListener('change', (e) => {
+        handleFileSelection(e.target.files);
+        csvPicker.value = ""; // Clear browser file cache
+    });
+
+    // 2. Drag and Drop Visual Feedback Handlers
+    uploadSection.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--primary)';
+        uploadSection.style.background = '#eff6ff'; // Light blue highlight during drag
+    });
+
+    uploadSection.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+    });
+
+    // 3. File Drop Handler
+    uploadSection.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+        
+        if (e.dataTransfer && e.dataTransfer.files) {
+            handleFileSelection(e.dataTransfer.files);
+        }
     });
 
     function renderQueueUI() {
@@ -251,7 +288,7 @@
             removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Stop click from bubbling up to upload area
                 uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
             };
@@ -264,7 +301,6 @@
 
     // Helper to safely parse strings containing dates out of file names
     function extractDateFromFilename(filename) {
-        // Matches standard YYYY-MM-DD, DD-MM-YYYY, or MM-DD-YYYY boundaries
         const match = filename.match(/(\d{4}[-.\/]\d{1,2}[-.\/]\d{1,2})|(\d{1,2}[-.\/]\d{1,2}[-.\/]\d{4})/);
         return match ? match[0] : "Unknown Date";
     }
@@ -284,7 +320,7 @@
 
     nextBtn.addEventListener('click', async () => {
         if (uploadedFilesArray.length === 0) {
-            alert('Please upload at least one CSV file.');
+            alert('Please upload or drag-and-drop at least one CSV file.');
             return;
         }
 
@@ -296,7 +332,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                const fileHeaders = parseCSVLine(lines[0]);
+                const fileHeaders = parseCSVLine(lines[0]); // Targets row index zero directly
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -424,6 +460,7 @@
         link.click();
         document.body.removeChild(link);
     });
+    
 </script>
 
 </body>
