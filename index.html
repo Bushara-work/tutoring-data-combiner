@@ -497,33 +497,91 @@
         renderMasterTableUI();
     }
 
-    function renderMasterTableUI() {
+        function renderMasterTableUI() {
         tableHeaders.innerHTML = '';
         tableBody.innerHTML = '';
 
         const currentPrimary = primarySortSelect.value;
+        const currentSecondary = secondarySortSelect.value;
 
         MASTER_HEADERS.forEach(h => {
             const th = document.createElement('th');
-            th.textContent = h;
             
             if (h === "Participant Name" || h === "Class Date") {
                 th.className = "sortable";
-                const icon = document.createElement('span');
-                icon.className = "sort-icon";
                 
-                if (h === "Participant Name" && currentPrimary.startsWith('name')) {
-                    icon.innerHTML = currentPrimary === "name-asc" ? " ▲ (Primary)" : " ▼ (Primary)";
-                    th.appendChild(icon);
-                } else if (h === "Class Date" && currentPrimary.startsWith('date')) {
-                    icon.innerHTML = currentPrimary === "date-asc" ? " ▲ (Primary)" : " ▼ (Primary)";
-                    th.appendChild(icon);
+                // 1. Create a clickable text label for Ranking (Primary vs Secondary)
+                const textSpan = document.createElement('span');
+                textSpan.textContent = h;
+                
+                // Add explicit Rank text labels based on active selector values
+                let rankLabel = "";
+                let isActiveRule = "";
+                
+                if (h === "Participant Name") {
+                    if (currentPrimary.startsWith('name')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
+                    else if (currentSecondary.startsWith('name')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
+                } else if (h === "Class Date") {
+                    if (currentPrimary.startsWith('date')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
+                    else if (currentSecondary.startsWith('date')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
                 }
-                th.onclick = () => handleHeaderClick(h);
+                
+                textSpan.textContent += rankLabel;
+                
+                // Clicking the text name ONLY sets or swaps the Primary rank allocation
+                textSpan.onclick = (e) => {
+                    e.stopPropagation(); // Prevent triggering any parent header actions
+                    if (h === "Participant Name" && !currentPrimary.startsWith('name')) {
+                        // Swap selector values to maintain unique rule constraints
+                        const oldPrimary = primarySortSelect.value;
+                        primarySortSelect.value = secondarySortSelect.value.startsWith('name') ? secondarySortSelect.value : "name-asc";
+                        secondarySortSelect.value = oldPrimary;
+                    } else if (h === "Class Date" && !currentPrimary.startsWith('date')) {
+                        const oldPrimary = primarySortSelect.value;
+                        primarySortSelect.value = secondarySortSelect.value.startsWith('date') ? secondarySortSelect.value : "date-desc";
+                        secondarySortSelect.value = oldPrimary;
+                    }
+                    sortMasterData();
+                    renderMasterTableUI();
+                };
+                th.appendChild(textSpan);
+
+                // 2. Create a separate clickable Triangle Icon for sorting direction flips only
+                if (isActiveRule) {
+                    const iconBtn = document.createElement('button');
+                    iconBtn.className = "sort-icon";
+                    iconBtn.style.background = "none";
+                    iconBtn.style.border = "none";
+                    iconBtn.style.cursor = "pointer";
+                    iconBtn.style.padding = "0 4px";
+                    iconBtn.style.color = "#2563eb";
+                    iconBtn.style.fontWeight = "bold";
+                    
+                    // Display correct arrow indicator direction
+                    iconBtn.innerHTML = (isActiveRule.endsWith('asc')) ? " ▲" : " ▼";
+                    
+                    // Clicking the triangle ONLY flips direction without modifying the underlying Rank
+                    iconBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        let targetSelect = currentPrimary.startsWith(h === "Participant Name" ? 'name' : 'date') ? primarySortSelect : secondarySortSelect;
+                        
+                        if (h === "Participant Name") {
+                            targetSelect.value = (targetSelect.value === "name-asc") ? "name-desc" : "name-asc";
+                        } else if (h === "Class Date") {
+                            targetSelect.value = (targetSelect.value === "date-desc") ? "date-asc" : "date-desc";
+                        }
+                        sortMasterData();
+                        renderMasterTableUI();
+                    };
+                    th.appendChild(iconBtn);
+                }
+            } else {
+                th.textContent = h; // Standard un-sortable text headers
             }
             tableHeaders.appendChild(th);
         });
 
+        // Loop rows into live UI input elements
         masterData.forEach((row, rowIndex) => {
             const tr = document.createElement('tr');
             MASTER_HEADERS.forEach(header => {
@@ -553,7 +611,7 @@
         masterData.forEach(row => {
             let rowLine = MASTER_HEADERS.map(header => {
                 let cellValue = row[header] || '';
-                                if (cellValue.includes(',') || cellValue.includes('"')) {
+                if (cellValue.includes(',') || cellValue.includes('"')) {
                     cellValue = `"${cellValue.replace(/"/g, '""')}"`;
                 }
                 return cellValue;
