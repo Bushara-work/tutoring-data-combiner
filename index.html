@@ -200,7 +200,6 @@
         <div class="actions">
             <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
             
-            <!-- Dynamic Priority Dashboard Selectors -->
             <div class="sort-controls">
                 <div>
                     <label for="primary-sort"><b>Primary Sort:</b></label>
@@ -245,7 +244,6 @@
     let uploadedFilesArray = [];
     let masterData = [];
 
-    // DOM Elements
     const csvPicker = document.getElementById('csv-picker');
     const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
@@ -296,7 +294,40 @@
 
     uploadSection.addEventListener('drop', (e) => {
         e.preventDefault();
-                        e.stopPropagation(); 
+        e.stopPropagation();
+                uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+    });
+
+    uploadSection.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+        if (e.dataTransfer && e.dataTransfer.files) {
+            handleFileSelection(e.dataTransfer.files);
+        }
+    });
+
+    function renderQueueUI() {
+        fileQueue.innerHTML = '';
+        if (uploadedFilesArray.length === 0) {
+            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
+            return;
+        }
+        uploadedFilesArray.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'file-name';
+            nameSpan.textContent = file.name;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation(); 
                 uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
             };
@@ -522,7 +553,7 @@
         masterData.forEach(row => {
             let rowLine = MASTER_HEADERS.map(header => {
                 let cellValue = row[header] || '';
-                if (cellValue.includes(',') || cellValue.includes('"')) {
+                                if (cellValue.includes(',') || cellValue.includes('"')) {
                     cellValue = `"${cellValue.replace(/"/g, '""')}"`;
                 }
                 return cellValue;
