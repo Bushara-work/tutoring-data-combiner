@@ -3,633 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Attendance Merger</title>
+    <title>Master Attendance Combiner</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --danger: #dc2626;
-            --danger-hover: #b91c1c;
-            --gray-100: #f3f4f6;
-            --gray-300: #d1d5db;
-            --gray-700: #374151;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 2rem;
-            color: var(--gray-700);
-            background-color: #fafafa;
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-        .stage {
-            display: none;
-        }
-        .stage.active {
-            display: block;
-        }
-        .upload-section {
-            border: 2px dashed var(--gray-300);
-            padding: 3rem;
-            border-radius: 8px;
-            text-align: center;
-            background: white;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-        }
-        .upload-section:hover {
-            border-color: var(--primary);
-        }
-        .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            max-width: 600px;
-        }
-        .file-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: white;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-        }
-        .file-name {
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-        .remove-btn {
-            background: none;
-            border: none;
-            color: var(--danger);
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.25rem;
-            padding: 0 0.5rem;
-        }
-        .remove-btn:hover {
-            color: var(--danger-hover);
-        }
-        .actions {
-            margin-top: 1.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            align-items: center;
-        }
-        .sort-controls {
-            background: #ffffff;
-            border: 1px solid var(--gray-300);
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            font-size: 0.9rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .sort-controls select {
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            border: 1px solid var(--gray-300);
-            background-color: #fff;
-            color: var(--gray-700);
-            font-weight: 500;
-        }
-        button.btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
-        .btn-secondary:hover { background: #cbd5e1; }
-        .btn-success { background: #16a34a; color: white; }
-        .btn-success:hover { background: #15803d; }
-        .table-container {
-            overflow-x: auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--gray-300);
-            margin-top: 1rem;
-            max-height: 500px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-        th, td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--gray-300);
-            font-size: 0.875rem;
-            min-width: 150px;
-        }
-        th {
-            background: var(--gray-100);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            user-select: none;
-        }
-        th.sortable {
-            cursor: pointer;
-        }
-        th.sortable:hover {
-            background: #e5e7eb;
-        }
-        .sort-icon {
-            margin-left: 0.5rem;
-            font-size: 0.8rem;
-            color: #2563eb;
-            font-weight: bold;
-        }
-        td input {
-            width: 100%;
-            border: 1px solid transparent;
-            background: transparent;
-            padding: 0.25rem;
-            font-size: 0.875rem;
-            color: var(--gray-700);
-        }
-        td input:focus {
-            border-color: var(--primary);
-            background: white;
-            outline: none;
-            border-radius: 4px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; color: #1f2937; margin: 0; padding: 24px; }
+        .container { max-width: 1350px; margin: 0 auto; background: #ffffff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; margin-bottom: 8px; font-size: 26px; color: #111827; }
+        p { margin-top: 0; margin-bottom: 24px; color: #4b5563; font-size: 15px; }
+        .upload-section { display: flex; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+        .upload-zone { flex: 1; border: 2px dashed #3b82f6; border-radius: 8px; padding: 24px; text-align: center; background: #eff6ff; cursor: pointer; transition: background 0.2s; }
+        .upload-zone:hover { background: #dbeafe; }
+        .upload-text { color: #1d4ed8; font-weight: 600; display: block; font-size: 16px; }
+        .upload-subtext { font-size: 13px; color: #6b7280; display: block; margin-top: 4px; }
+        .clear-btn { background-color: #ef4444; color: white; border: none; padding: 0 24px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .clear-btn:hover { background-color: #dc2626; }
+        .hidden { display: none !important; }
+        
+        /* Loaded Files Tracking Section */
+        .files-panel { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+        .files-title { font-size: 14px; font-weight: 600; color: #4b5563; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .file-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .file-chip { background: #e0e7ff; color: #4338ca; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; border: 1px solid #c7d2fe; }
+        .remove-file-btn { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
+        .remove-file-btn:hover { color: #b91c1c; }
+
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 16px; }
+        h2 { font-size: 18px; margin: 0; color: #374151; }
+        .download-btn { background-color: #059669; color: white; border: none; padding: 12px 28px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .download-btn:hover { background-color: #047857; }
+        
+        .table-wrapper { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px; max-height: 600px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background-color: #f9fafb; padding: 14px 16px; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; position: sticky; top: 0; z-index: 10; }
+        td { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #4b5563; outline: none; }
+        tr:hover { background-color: #f9fafb; }
+        td:focus { background-color: #fffbeb; box-shadow: inset 0 0 0 2px #f59e0b; }
+        .stats-badge { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>CSV Attendance Merger & Editor</h2>
-    
-    <!-- STAGE 1: UPLOAD PHASE -->
-    <div id="stage-1" class="stage active">
-        <h3>Stage 1: Upload Attendance CSV Files</h3>
-        <div class="upload-section" onclick="document.getElementById('csv-picker').click()">
-            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
-            <button class="btn btn-primary">Select CSV Files</button>
-            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files or drag-and-drop multiple items here.</p>
+    <div class="container">
+        <h1>Master Attendance Combiner</h1>
+        <p>Upload files one at a time or together. Line 1 sets your column locations. Clean comma separator lines are ignored automatically.</p>
+
+        <!-- Step 1: Upload Files Area -->
+        <div class="upload-section">
+            <div class="upload-zone" onclick="document.getElementById('csvFiles').click()">
+                <input type="file" id="csvFiles" accept=".csv" multiple style="display:none;" />
+                <span class="upload-text">Click here to select CSV File(s)</span>
+                <span class="upload-subtext">You can add files one by one or upload multiple files at once</span>
+            </div>
+            <button id="clearBtn" class="clear-btn hidden">Clear All</button>
         </div>
 
-        <h4>Uploaded Files Queue</h4>
-        <div class="file-list" id="file-queue">
-            <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>
+        <!-- File Chip Management Tracker View Component -->
+        <div id="filesPanel" class="files-panel hidden">
+            <div class="files-title">Currently Loaded Files</div>
+            <div id="fileList" class="file-list"></div>
         </div>
 
-        <div class="actions">
-            <button class="btn btn-primary" id="next-btn">Combine & Process Data</button>
-        </div>
-    </div>
-
-    <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
-    <div id="stage-2" class="stage">
-        <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
-        
-        <div class="actions">
-            <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
-            
-            <div class="sort-controls">
-                <div>
-                    <label for="primary-sort"><b>Primary Sort:</b></label>
-                    <select id="primary-sort">
-                        <option value="name-asc" selected>Name (A → Z)</option>
-                        <option value="name-desc">Name (Z → A)</option>
-                        <option value="date-desc">Date (Newest → Oldest)</option>
-                        <option value="date-asc">Date (Oldest → Newest)</option>
-                    </select>
+        <!-- Step 2: Output Presentation Table -->
+        <div id="tableContainer" class="hidden">
+            <div class="action-bar">
+                <div style="display: flex; align-items: center;">
+                    <h2>Master Output Grid (Editable)</h2>
+                    <span id="rowCountBadge" class="stats-badge">0 Rows</span>
+                    <span id="fileCountBadge" class="stats-badge" style="background:#fef3c7; color:#92400e;">0 Files</span>
                 </div>
-                <div>
-                    <label for="secondary-sort"><b>Secondary Sort:</b></label>
-                    <select id="secondary-sort">
-                        <option value="date-desc" selected>Date (Newest → Oldest)</option>
-                        <option value="date-asc">Date (Oldest → Newest)</option>
-                        <option value="name-asc">Name (A → Z)</option>
-                        <option value="name-desc">Name (Z → A)</option>
-                    </select>
-                </div>
+                <button id="downloadBtn" class="download-btn">Download Master CSV</button>
             </div>
 
-            <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
-        </div>
-
-        <div class="table-container">
-            <table id="master-table">
-                <thead>
-                    <tr id="table-headers"></tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SNo</th>
+                            <th>Participant Name</th>
+                            <th>Attendance Started at</th>
+                            <th>Joined at(beta)</th>
+                            <th>Attendance Stopped at</th>
+                            <th>Attended Duration</th>
+                            <th>Meeting code</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const MASTER_HEADERS = [
-        "SNo", "Participant Name", "Attendance Started at", 
-        "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
-    ];
-    
-    let uploadedFilesArray = [];
-    let masterData = [];
+    <script>
+        const csvFilesInput = document.getElementById('csvFiles');
+        const tableContainer = document.getElementById('tableContainer');
+        const tableBody = document.getElementById('tableBody');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const filesPanel = document.getElementById('filesPanel');
+        const fileList = document.getElementById('fileList');
+        const rowCountBadge = document.getElementById('rowCountBadge');
+        const fileCountBadge = document.getElementById('fileCountBadge');
 
-    const csvPicker = document.getElementById('csv-picker');
-    const uploadSection = document.querySelector('.upload-section');
-    const fileQueue = document.getElementById('file-queue');
-    const nextBtn = document.getElementById('next-btn');
-    const backBtn = document.getElementById('back-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    
-    const primarySortSelect = document.getElementById('primary-sort');
-    const secondarySortSelect = document.getElementById('secondary-sort');
-    
-    const stage1 = document.getElementById('stage-1');
-    const stage2 = document.getElementById('stage-2');
-    
-    const tableHeaders = document.getElementById('table-headers');
-    const tableBody = document.getElementById('table-body');
+        const targetHeaders = [
+            "SNo", "Participant Name", "Attendance Started at", 
+            "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code"
+        ];
 
-    function handleFileSelection(files) {
-        if (!files) return;
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.name.toLowerCase().endsWith('.csv')) {
-                if (!uploadedFilesArray.some(f => f.name === file.name)) {
-                    uploadedFilesArray.push(file);
+        let masterData = [];
+        let uploadedFilesTrackList = []; 
+
+        // Simplified native CSV parser
+        function parseCSVText(text, fileName) {
+            const lines = [];
+            let currentLine = [""];
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                let next = text[i+1];
+
+                if (c === '"') {
+                    if (inQuotes && next === '"') { currentLine[currentLine.length - 1] += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (c === ',' && !inQuotes) {
+                    currentLine.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(currentLine);
+                    currentLine = [''];
+                } else {
+                    currentLine[currentLine.length - 1] += c;
                 }
             }
-        }
-        renderQueueUI();
-    }
+            if (currentLine.length > 1 || currentLine[0] !== '') lines.push(currentLine);
+            if (lines.length === 0) return [];
 
-    csvPicker.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files);
-        csvPicker.value = ""; 
-    });
+            // Extract the clean header labels from Line 1
+            const headers = lines.shift().map(h => h.trim().replace(/^"|"$/g, ''));
+            const dataRows = [];
 
-    uploadSection.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--primary)';
-        uploadSection.style.background = '#eff6ff'; 
-    });
-
-    uploadSection.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-    });
-
-    uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-                uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-    });
-
-    uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-        if (e.dataTransfer && e.dataTransfer.files) {
-            handleFileSelection(e.dataTransfer.files);
-        }
-    });
-
-    function renderQueueUI() {
-        fileQueue.innerHTML = '';
-        if (uploadedFilesArray.length === 0) {
-            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
-            return;
-        }
-        uploadedFilesArray.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'file-name';
-            nameSpan.textContent = file.name;
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = (e) => {
-                e.stopPropagation(); 
-                uploadedFilesArray.splice(index, 1);
-                renderQueueUI();
-            };
-            
-            fileItem.appendChild(nameSpan);
-            fileItem.appendChild(removeBtn);
-            fileQueue.appendChild(fileItem);
-        });
-    }
-
-    function extractDateFromFilename(filename) {
-        const match = filename.match(/\(([^)]+)\)/);
-        if (!match || !match[1]) return "Unknown Date";
-        
-        let rawDate = match[1].trim(); 
-        rawDate = rawDate.replace(/\./g, '');
-        
-        const parts = rawDate.split('-');
-        if (parts.length !== 3) return rawDate; 
-        
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
-        
-        month = month.substring(0, 3);
-        
-        // --- BASELINE OPTION: All lowercase, no dot (e.g., "25-feb-2026") ---
-        // month = month.toLowerCase();
-        
-        // --- ACTIVE OPTION: First letter capitalized, no dot (e.g., "25-Feb-2026") ---
-        month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-        
-        // --- FUTURE OPTION 1: Add a dot/period to the abbreviation (e.g., "25-feb.-2026") ---
-        // month = month + ".";
-        
-        // --- FUTURE OPTION 2: Completely uppercase month (e.g., "25-FEB-2026") ---
-        // month = month.toUpperCase();
-
-        return `${day}-${month}-${year}`;
-    }
-
-    function parseCSVLine(text) {
-        let p = '', r = [];
-        let q = false;
-        for (let i = 0; i < text.length; i++) {
-            let c = text[i];
-            if (c === '"') { q = !q; }
-            else if (c === ',' && !q) { r.push(p.trim()); p = ''; }
-            else { p += c; }
-        }
-        r.push(p.trim());
-        return r;
-    }
-
-    function parseCustomDate(dateStr) {
-        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
-        let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
-        const parts = cleanStr.split('-');
-        if (parts.length !== 3) return new Date(0);
-        
-        const day = parseInt(parts[0], 10);
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
-        
-        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        const monthIndex = months.indexOf(monthStr);
-        
-        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
-    }
-
-    nextBtn.addEventListener('click', async () => {
-        if (uploadedFilesArray.length === 0) {
-            alert('Please upload or drag-and-drop at least one CSV file.');
-            return;
-        }
-
-        masterData = []; 
-
-        for (let file of uploadedFilesArray) {
-            try {
-                const text = await file.text();
-                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                if (lines.length === 0) continue;
-
-                const fileHeaders = parseCSVLine(lines[0]); 
-                const fileDate = extractDateFromFilename(file.name);
-                
-                const indexMap = {};
-                MASTER_HEADERS.forEach(header => {
-                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
-                });
-
-                for (let i = 1; i < lines.length; i++) {
-                    const rowValues = parseCSVLine(lines[i]);
-                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
-
-                    let structuredObj = {};
-                    MASTER_HEADERS.forEach(header => {
-                        if (header === "Class Date") {
-                            structuredObj[header] = fileDate;
-                        } else {
-                            const mappedIdx = indexMap[header];
-                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
-                        }
-                    });
-                    masterData.push(structuredObj);
+            lines.forEach(line => {
+                const contentTest = line.join('').trim();
+                // Explicitly drop lines that contain only structural commas or are empty
+                if (contentTest === "" || /^,+$/.test(contentTest)) {
+                    return; 
                 }
-            } catch (err) {
-                console.error("Error reading file: " + file.name, err);
-            }
-        }
 
-        sortMasterData();
-        renderMasterTableUI();
-        stage1.classList.remove('active');
-        stage2.classList.add('active');
-    });
-
-    backBtn.addEventListener('click', () => {
-        stage2.classList.remove('active');
-        stage1.classList.add('active');
-    });
-
-    primarySortSelect.addEventListener('change', () => {
-        sortMasterData();
-        renderMasterTableUI();
-    });
-    secondarySortSelect.addEventListener('change', () => {
-        sortMasterData();
-        renderMasterTableUI();
-    });
-
-    function sortMasterData() {
-        const primaryRule = primarySortSelect.value;
-        const secondaryRule = secondarySortSelect.value;
-
-        function executeEvaluation(rule, a, b) {
-            if (rule.startsWith('name')) {
-                const nameA = (a["Participant Name"] || "").toLowerCase();
-                const nameB = (b["Participant Name"] || "").toLowerCase();
-                const comparison = nameA.localeCompare(nameB);
-                return rule === "name-asc" ? comparison : -comparison;
-            } else if (rule.startsWith('date')) {
-                const dateA = parseCustomDate(a["Class Date"]);
-                const dateB = parseCustomDate(b["Class Date"]);
-                const comparison = dateA - dateB;
-                return rule === "date-asc" ? comparison : -comparison;
-            }
-            return 0;
-        }
-
-        masterData.sort((a, b) => {
-            const primaryResult = executeEvaluation(primaryRule, a, b);
-            if (primaryResult !== 0) return primaryResult;
-            return executeEvaluation(secondaryRule, a, b);
-        });
-    }
-
-    function handleHeaderClick(headerName) {
-        const currentValue = primarySortSelect.value;
-        if (headerName === "Participant Name") {
-            primarySortSelect.value = (currentValue === "name-asc") ? "name-desc" : "name-asc";
-        } else if (headerName === "Class Date") {
-            primarySortSelect.value = (currentValue === "date-desc") ? "date-asc" : "date-desc";
-        }
-        sortMasterData();
-        renderMasterTableUI();
-    }
-
-        function renderMasterTableUI() {
-        tableHeaders.innerHTML = '';
-        tableBody.innerHTML = '';
-
-        const currentPrimary = primarySortSelect.value;
-        const currentSecondary = secondarySortSelect.value;
-
-        MASTER_HEADERS.forEach(h => {
-            const th = document.createElement('th');
-            
-            if (h === "Participant Name" || h === "Class Date") {
-                th.className = "sortable";
-                
-                // 1. Create a clickable text label for Ranking (Primary vs Secondary)
-                const textSpan = document.createElement('span');
-                textSpan.textContent = h;
-                
-                // Add explicit Rank text labels based on active selector values
-                let rankLabel = "";
-                let isActiveRule = "";
-                
-                if (h === "Participant Name") {
-                    if (currentPrimary.startsWith('name')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
-                    else if (currentSecondary.startsWith('name')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
-                } else if (h === "Class Date") {
-                    if (currentPrimary.startsWith('date')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
-                    else if (currentSecondary.startsWith('date')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
-                }
-                
-                textSpan.textContent += rankLabel;
-                
-                // Clicking the text name ONLY sets or swaps the Primary rank allocation
-                textSpan.onclick = (e) => {
-                    e.stopPropagation(); // Prevent triggering any parent header actions
-                    if (h === "Participant Name" && !currentPrimary.startsWith('name')) {
-                        // Swap selector values to maintain unique rule constraints
-                        const oldPrimary = primarySortSelect.value;
-                        primarySortSelect.value = secondarySortSelect.value.startsWith('name') ? secondarySortSelect.value : "name-asc";
-                        secondarySortSelect.value = oldPrimary;
-                    } else if (h === "Class Date" && !currentPrimary.startsWith('date')) {
-                        const oldPrimary = primarySortSelect.value;
-                        primarySortSelect.value = secondarySortSelect.value.startsWith('date') ? secondarySortSelect.value : "date-desc";
-                        secondarySortSelect.value = oldPrimary;
+                let rowObject = { _originFile: fileName };
+                headers.forEach((header, index) => {
+                    if (header) {
+                        rowObject[header] = line[index] !== undefined ? line[index].trim().replace(/^"|"$/g, '') : "";
                     }
-                    sortMasterData();
-                    renderMasterTableUI();
-                };
-                th.appendChild(textSpan);
-
-                // 2. Create a separate clickable Triangle Icon for sorting direction flips only
-                if (isActiveRule) {
-                    const iconBtn = document.createElement('button');
-                    iconBtn.className = "sort-icon";
-                    iconBtn.style.background = "none";
-                    iconBtn.style.border = "none";
-                    iconBtn.style.cursor = "pointer";
-                    iconBtn.style.padding = "0 4px";
-                    iconBtn.style.color = "#2563eb";
-                    iconBtn.style.fontWeight = "bold";
-                    
-                    // Display correct arrow indicator direction
-                    iconBtn.innerHTML = (isActiveRule.endsWith('asc')) ? " ▲" : " ▼";
-                    
-                    // Clicking the triangle ONLY flips direction without modifying the underlying Rank
-                    iconBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        let targetSelect = currentPrimary.startsWith(h === "Participant Name" ? 'name' : 'date') ? primarySortSelect : secondarySortSelect;
-                        
-                        if (h === "Participant Name") {
-                            targetSelect.value = (targetSelect.value === "name-asc") ? "name-desc" : "name-asc";
-                        } else if (h === "Class Date") {
-                            targetSelect.value = (targetSelect.value === "date-desc") ? "date-asc" : "date-desc";
-                        }
-                        sortMasterData();
-                        renderMasterTableUI();
-                    };
-                    th.appendChild(iconBtn);
-                }
-            } else {
-                th.textContent = h; // Standard un-sortable text headers
-            }
-            tableHeaders.appendChild(th);
-        });
-
-        // Loop rows into live UI input elements
-        masterData.forEach((row, rowIndex) => {
-            const tr = document.createElement('tr');
-            MASTER_HEADERS.forEach(header => {
-                const td = document.createElement('td');
-                const input = document.createElement('input');
-                input.value = row[header];
-                
-                input.addEventListener('input', (e) => {
-                    masterData[rowIndex][header] = e.target.value.trim();
                 });
-                
-                td.appendChild(input);
-                tr.appendChild(td);
+                dataRows.push(rowObject);
             });
-            tableBody.appendChild(tr);
+
+            return dataRows;
+        }
+
+        csvFilesInput.addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                if (uploadedFilesTrackList.includes(file.name)) {
+                    alert(`"${file.name}" is already loaded.`);
+                    continue;
+                }
+
+                const text = await readFileAsText(file);
+                const parsedRows = parseCSVText(text, file.name);
+                
+                if (parsedRows.length === 0) continue;
+
+                // Title reader fuzzy search mapping logic
+                const mappedRows = parsedRows.map(row => {
+                    let extracted = { _originFile: file.name };
+
+                    const findValue = (exactTarget, fuzzyKeywords) => {
+                        for (let key in row) {
+                            if (key.toLowerCase().trim() === exactTarget.toLowerCase().trim()) {
+                                                        return row[key];
+                    }
+                }
+                for (let key in row) {
+                    let lowerKey = key.toLowerCase();
+                    for (let word of fuzzyKeywords) {
+                        if (lowerKey.includes(word)) return row[key];
+                    }
+                }
+                return "";
+            };
+
+            extracted["SNo"] = findValue("SNo", ["sno", "s no", "number", "id"]);
+            extracted["Participant Name"] = findValue("Participant Name", ["participant name", "student name", "name", "student"]);
+            extracted["Attendance Started at"] = findValue("Attendance Started at", ["started at", "started", "start time"]);
+            extracted["Joined at(beta)"] = findValue("Joined at(beta)", ["joined at", "beta", "join"]);
+            extracted["Attendance Stopped at"] = findValue("Attendance Stopped at", ["stopped at", "stopped", "stop time"]);
+            extracted["Attended Duration"] = findValue("Attended Duration", ["duration", "time spent", "attended"]);
+            extracted["Meeting code"] = findValue("Meeting code", ["meeting code", "meeting id", "code"]);
+            
+            return extracted;
         });
+
+        masterData = masterData.concat(mappedRows);
+        uploadedFilesTrackList.push(file.name);
     }
 
-    downloadBtn.addEventListener('click', () => {
-        if (masterData.length === 0) return;
+    csvFilesInput.value = ""; 
+    refreshSystemUI();
+});
 
-        let csvContent = MASTER_HEADERS.join(",") + "\n";
-        
-        const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
-        csvContent += dynamicSpacer + "\n";
-        
-        masterData.forEach(row => {
-            let rowLine = MASTER_HEADERS.map(header => {
-                let cellValue = row[header] || '';
-                if (cellValue.includes(',') || cellValue.includes('"')) {
-                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
-                }
-                return cellValue;
-            }).join(",");
-            csvContent += rowLine + "\n";
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "combined_attendance_report.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+function readFileAsText(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target.result);
+        reader.readAsText(file);
     });
-</script>
+}
 
-</body>
-</html>
+function removeFile(filename) {
+    masterData = masterData.filter(row => row._originFile !== filename);
+    uploadedFilesTrackList = uploadedFilesTrackList.filter(name => name !== filename);
+    refreshSystemUI();
+}
+
+function sortMasterByName() {
+    masterData.sort((a, b) => {
+        const nameA = (a["Participant Name"] || "").trim();
+        const nameB = (b["Participant Name"] || "").trim();
+        return nameA.localeCompare(nameB, undefined, {sensitivity: 'base', numeric: true});
+    });
+}
+
+function refreshSystemUI() {
+    sortMasterByName();
+    
+    // 1. Render Files Chip List
+    fileList.innerHTML = "";
+    if (uploadedFilesTrackList.length === 0) {
+        filesPanel.classList.add('hidden');
+    } else {
+        uploadedFilesTrackList.forEach(name => {
+            const chip = document.createElement('div');
+            chip.className = "file-chip";
+            chip.innerHTML = `
+                <span>📄 ${name}</span>
+                <button class="remove-file-btn" onclick="removeFile('${name.replace(/'/g, "\\'")}')">×</button>
+            `;
+            fileList.appendChild(chip);
+        });
+        filesPanel.classList.remove('hidden');
+    }
+
+    // 2. Render Master Output Grid
+    tableBody.innerHTML = "";
+    if (masterData.length === 0) {
+        tableContainer.classList.add('hidden');
+        clearBtn.classList.add('hidden');
+        return;
+    }
+
+    masterData.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        targetHeaders.forEach(header => {
+            const td = document.createElement('td');
+            td.contentEditable = "true";
+            td.textContent = row[header] || "";
+            td.addEventListener('blur', () => {
+                masterData[rowIndex][header] = td.textContent.trim();
+                if (header === "Participant Name") {
+                    refreshSystemUI();
+                }
+            });
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+    });
+
+    rowCountBadge.textContent = `${masterData.length} Rows`;
+    fileCountBadge.textContent = `${uploadedFilesTrackList.length} Files Loaded`;
+    tableContainer.classList.remove('hidden');
+    clearBtn.classList.remove('hidden');
+}
+
+clearBtn.addEventListener('click', () => {
+    masterData = [];
+    uploadedFilesTrackList = [];
+    refreshSystemUI();
+});
+
+downloadBtn.addEventListener('click', () => {
+    const escapeCSV = val => `"${String(val).replace(/"/g, '""')}"`;
+    const lines = [targetHeaders.join(',')];
+    
+    masterData.forEach(row => {
+        const line = targetHeaders.map(h => escapeCSV(row[h] || ""));
+        lines.push(line.join(','));
+    });
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `master_attendance_report_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
