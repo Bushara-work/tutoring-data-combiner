@@ -299,10 +299,10 @@
         });
     }
 
-    // Helper to safely parse strings containing dates out of file names
+    // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
     function extractDateFromFilename(filename) {
-        const match = filename.match(/(\d{4}[-.\/]\d{1,2}[-.\/]\d{1,2})|(\d{1,2}[-.\/]\d{1,2}[-.\/]\d{4})/);
-        return match ? match[0] : "Unknown Date";
+        const match = filename.match(/\(([^)]+)\)/);
+        return match ? match[1].trim() : "Unknown Date";
     }
 
     function parseCSVLine(text) {
@@ -316,6 +316,22 @@
         }
         r.push(p.trim());
         return r;
+    }
+
+    // Helper utility to safely convert a "DD-MMM-YYYY" string (e.g., "25-feb-2026") into an actual date object for perfect chronological sorting
+    function parseCustomDate(dateStr) {
+        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return new Date(0);
+        
+        const day = parseInt(parts[0], 10);
+        const monthStr = parts[1].toLowerCase();
+        const year = parseInt(parts[2], 10);
+        
+        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const monthIndex = months.indexOf(monthStr);
+        
+        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
 
     nextBtn.addEventListener('click', async () => {
@@ -376,13 +392,15 @@
             const nameA = (a["Participant Name"] || "").toLowerCase();
             const nameB = (b["Participant Name"] || "").toLowerCase();
             
+            // Primary Sort: Student Name Alphabetical
             if (nameA !== nameB) {
                 return nameA.localeCompare(nameB) * sortDirections["Participant Name"];
             }
             
-            const dateA = a["Class Date"] || "";
-            const dateB = b["Class Date"] || "";
-            return dateA.localeCompare(dateB) * sortDirections["Class Date"];
+            // Secondary Sort: Chronological Class Date (converted properly from text)
+            const dateA = parseCustomDate(a["Class Date"]);
+            const dateB = parseCustomDate(b["Class Date"]);
+            return (dateA - dateB) * sortDirections["Class Date"];
         });
     }
 
@@ -443,23 +461,23 @@
             let rowLine = MASTER_HEADERS.map(header => {
                 let cellValue = row[header] || '';
                 if (cellValue.includes(',') || cellValue.includes('"')) {
-                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
-                }
+                    cellValue = "${cellValue.replace(/"/g, '""')}";
+                    }
                 return cellValue;
-            }).join(",");
-            csvContent += rowLine + "\n";
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "combined_attendance_report.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        }).join(",");
+        csvContent += rowLine + "\n";
     });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "combined_attendance_report.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    });
+
     
 </script>
 
