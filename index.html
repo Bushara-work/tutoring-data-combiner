@@ -210,6 +210,7 @@
 
     // DOM Elements
     const csvPicker = document.getElementById('csv-picker');
+    const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
     const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
@@ -221,16 +222,52 @@
     const tableHeaders = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
 
-    csvPicker.addEventListener('change', (e) => {
-        if (!e.target.files) return;
-        for (let i = 0; i < e.target.files.length; i++) {
-            const file = e.target.files[i];
-            if (!uploadedFilesArray.some(f => f.name === file.name)) {
-                uploadedFilesArray.push(file);
+    // Central function to handle files from both click selection and drag-and-drop
+    function handleFileSelection(files) {
+        if (!files) return;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            // Only accept .csv files
+            if (file.name.endsWith('.csv')) {
+                if (!uploadedFilesArray.some(f => f.name === file.name)) {
+                    uploadedFilesArray.push(file);
+                }
             }
         }
-        csvPicker.value = ""; 
         renderQueueUI();
+    }
+
+    // 1. Traditional File Click Picker Event
+    csvPicker.addEventListener('change', (e) => {
+        handleFileSelection(e.target.files);
+        csvPicker.value = ""; // Clear browser file cache
+    });
+
+    // 2. Drag and Drop Visual Feedback Handlers
+    uploadSection.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--primary)';
+        uploadSection.style.background = '#eff6ff'; // Light blue highlight during drag
+    });
+
+    uploadSection.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+    });
+
+    // 3. File Drop Handler
+    uploadSection.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+        
+        if (e.dataTransfer && e.dataTransfer.files) {
+            handleFileSelection(e.dataTransfer.files);
+        }
     });
 
     function renderQueueUI() {
@@ -251,7 +288,7 @@
             removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Stop click from bubbling up to upload area
                 uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
             };
@@ -262,11 +299,10 @@
         });
     }
 
-    // Helper to safely parse strings containing dates out of file names
+    // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
     function extractDateFromFilename(filename) {
-        // Matches standard YYYY-MM-DD, DD-MM-YYYY, or MM-DD-YYYY boundaries
-        const match = filename.match(/(\d{4}[-.\/]\d{1,2}[-.\/]\d{1,2})|(\d{1,2}[-.\/]\d{1,2}[-.\/]\d{4})/);
-        return match ? match[0] : "Unknown Date";
+        const match = filename.match(/\(([^)]+)\)/);
+        return match ? match[1].trim() : "Unknown Date";
     }
 
     function parseCSVLine(text) {
@@ -282,9 +318,25 @@
         return r;
     }
 
+    // Helper utility to safely convert a "DD-MMM-YYYY" string (e.g., "25-feb-2026") into an actual date object for perfect chronological sorting
+    function parseCustomDate(dateStr) {
+        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return new Date(0);
+        
+        const day = parseInt(parts[0], 10);
+        const monthStr = parts[1].toLowerCase();
+        const year = parseInt(parts[2], 10);
+        
+        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const monthIndex = months.indexOf(monthStr);
+        
+        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
+    }
+
     nextBtn.addEventListener('click', async () => {
         if (uploadedFilesArray.length === 0) {
-            alert('Please upload at least one CSV file.');
+            alert('Please upload or drag-and-drop at least one CSV file.');
             return;
         }
 
@@ -296,7 +348,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                const fileHeaders = parseCSVLine(lines[0]);
+                const fileHeaders = parseCSVLine(lines[0]); // Targets row index zero directly
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -340,13 +392,15 @@
             const nameA = (a["Participant Name"] || "").toLowerCase();
             const nameB = (b["Participant Name"] || "").toLowerCase();
             
+            // Primary Sort: Student Name Alphabetical
             if (nameA !== nameB) {
                 return nameA.localeCompare(nameB) * sortDirections["Participant Name"];
             }
             
-            const dateA = a["Class Date"] || "";
-            const dateB = b["Class Date"] || "";
-            return dateA.localeCompare(dateB) * sortDirections["Class Date"];
+            // Secondary Sort: Chronological Class Date (converted properly from text)
+            const dateA = parseCustomDate(a["Class Date"]);
+            const dateB = parseCustomDate(b["Class Date"]);
+            return (dateA - dateB) * sortDirections["Class Date"];
         });
     }
 
@@ -401,29 +455,19 @@
         let csvContent = MASTER_HEADERS.join(",") + "\n";
         
         const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
-        csvContent += dynamicSpacer + "\n";
-        
-        masterData.forEach(row => {
-            let rowLine = MASTER_HEADERS.map(header => {
-                let cellValue = row[header] || '';
-                if (cellValue.includes(',') || cellValue.includes('"')) {
-                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
-                }
-                return cellValue;
-            }).join(",");
-            csvContent += rowLine + "\n";
-        });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "combined_attendance_report.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        csvContent += dynamicSpacer + "\n";
+        masterData.forEach(row => {let rowLine = MASTER_HEADERS.map(header => {let cellValue = row[header] || '';
+            if (cellValue.includes(',') || cellValue.includes('"')) {cellValue = "${cellValue.replace(/"/g, '""')}";
+                }return cellValue;}).join(",");
+                csvContent += rowLine + "\n";});const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);const link = document.createElement("a");link.setAttribute("href", url);
+    link.setAttribute("download", "combined_attendance_report.csv");link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     });
+
 </script>
 
 </body>
