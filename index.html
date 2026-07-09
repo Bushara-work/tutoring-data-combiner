@@ -301,11 +301,12 @@
 
     // Fix: Looks strictly inside parenthesis for formats like (25-feb-2026)
      // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
+       // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
         if (!match) return "Unknown Date";
         
-        let rawDate = match[1].trim();
+        let rawDate = match[1].trim(); // Safely targets the inner text inside the parentheses
         
         // Step 1: Strip out any accidental dots/periods (e.g., "feb." becomes "feb")
         rawDate = rawDate.replace(/\./g, '');
@@ -318,20 +319,26 @@
         let month = parts[1].trim();
         let year = parts[2].trim();
         
-        // Ensure month abbreviation is truncated to exactly 3 characters
+        // Step 3: Ensure month abbreviation is truncated to exactly 3 characters
         month = month.substring(0, 3);
         
-        // --- FORMAT OPTION A: First letter capitalized, no dot (e.g., "Feb") ---
-        // THIS IS CURRENTLY ACTIVE
+        // ==========================================
+        // TEXT DISPLAY OPTIONS (UNCOMMENT TO SWITCH)
+        // ==========================================
+        
+        // --- BASELINE OPTION: All lowercase, no dot (e.g., "25-feb-2026") ---
+        month = month.toLowerCase();
+        
+        // --- ACTIVE OPTION: First letter capitalized, no dot (e.g., "25-Feb-2026") ---
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
         
-        // --- FORMAT OPTION B: Completely lowercase month, no dot (e.g., "feb") ---
-        // To use this in the future, uncomment the line below:
-        // month = month.toLowerCase();
-        
-        // --- FORMAT OPTION C: Add a dot/period to the abbreviation (e.g., "Feb.") ---
+        // --- FUTURE OPTION 1: Add a dot/period to the abbreviation (e.g., "25-feb.-2026") ---
         // To use this in the future, uncomment the line below:
         // month = month + ".";
+        
+        // --- FUTURE OPTION 2: Completely uppercase month (e.g., "25-FEB-2026") ---
+        // To use this in the future, uncomment the line below:
+        // month = month.toUpperCase();
 
         return `${day}-${month}-${year}`;
     }
@@ -353,7 +360,7 @@
     function parseCustomDate(dateStr) {
         if (!dateStr || dateStr === "Unknown Date") return new Date(0);
         
-        // Clean out periods and make lowercase so internal matching works flawlessly regardless of presentation styling
+        // Clean out periods and make lowercase so internal matching works flawlessly regardless of display configuration
         let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
