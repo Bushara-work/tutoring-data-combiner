@@ -301,12 +301,12 @@
 
     // Fix: Looks strictly inside parenthesis for formats like (25-feb-2026)
      // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
-       // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
+        // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
-        if (!match) return "Unknown Date";
+        if (!match || !match[1]) return "Unknown Date";
         
-        let rawDate = match[1].trim(); // Safely targets the inner text inside the parentheses
+        let rawDate = match[1].trim(); // CRITICAL FIX: match[1] isolates the exact text inside the brackets
         
         // Step 1: Strip out any accidental dots/periods (e.g., "feb." becomes "feb")
         rawDate = rawDate.replace(/\./g, '');
@@ -413,7 +413,7 @@
                     masterData.push(structuredObj);
                 }
             } catch (err) {
-                console.error("Error reading file: " + file.name, err);
+                console.error("Error reading file: " + file.name , err);
             }
         }
 
