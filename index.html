@@ -227,8 +227,8 @@
         if (!files) return;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            // Only accept .csv files
-            if (file.name.endsWith('.csv')) {
+            // Fix: Handles uppercase .CSV extensions properly
+            if (file.name.toLowerCase().endsWith('.csv')) {
                 if (!uploadedFilesArray.some(f => f.name === file.name)) {
                     uploadedFilesArray.push(file);
                 }
@@ -248,7 +248,7 @@
         e.preventDefault();
         e.stopPropagation();
         uploadSection.style.borderColor = 'var(--primary)';
-        uploadSection.style.background = '#eff6ff'; // Light blue highlight during drag
+        uploadSection.style.background = '#eff6ff'; 
     });
 
     uploadSection.addEventListener('dragleave', (e) => {
@@ -288,7 +288,7 @@
             removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = (e) => {
-                e.stopPropagation(); // Stop click from bubbling up to upload area
+                e.stopPropagation(); // Stops parent click trigger
                 uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
             };
@@ -299,7 +299,7 @@
         });
     }
 
-    // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
+    // Fix: Looks strictly inside parenthesis for formats like (25-feb-2026)
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
         return match ? match[1].trim() : "Unknown Date";
@@ -318,7 +318,7 @@
         return r;
     }
 
-    // Helper utility to safely convert a "DD-MMM-YYYY" string (e.g., "25-feb-2026") into an actual date object for perfect chronological sorting
+    // Converts text dates (25-feb-2026) into filter timestamps for flawless sorting
     function parseCustomDate(dateStr) {
         if (!dateStr || dateStr === "Unknown Date") return new Date(0);
         const parts = dateStr.split('-');
@@ -348,7 +348,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                const fileHeaders = parseCSVLine(lines[0]); // Targets row index zero directly
+                const fileHeaders = parseCSVLine(lines[0]); 
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -392,12 +392,10 @@
             const nameA = (a["Participant Name"] || "").toLowerCase();
             const nameB = (b["Participant Name"] || "").toLowerCase();
             
-            // Primary Sort: Student Name Alphabetical
             if (nameA !== nameB) {
                 return nameA.localeCompare(nameB) * sortDirections["Participant Name"];
             }
             
-            // Secondary Sort: Chronological Class Date (converted properly from text)
             const dateA = parseCustomDate(a["Class Date"]);
             const dateB = parseCustomDate(b["Class Date"]);
             return (dateA - dateB) * sortDirections["Class Date"];
@@ -455,22 +453,32 @@
         let csvContent = MASTER_HEADERS.join(",") + "\n";
         
         const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
-
         csvContent += dynamicSpacer + "\n";
-        masterData.forEach(row => {let rowLine = MASTER_HEADERS.map(header => {let cellValue = row[header] || '';
-            if (cellValue.includes(',') || cellValue.includes('"')) {cellValue = "${cellValue.replace(/"/g, '""')}";
-                }return cellValue;}).join(",");
-                csvContent += rowLine + "\n";});const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);const link = document.createElement("a");link.setAttribute("href", url);
-    link.setAttribute("download", "combined_attendance_report.csv");link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    });
+        
+        masterData.forEach(row => {
+            let rowLine = MASTER_HEADERS.map(header => {
+                let cellValue = row[header] || '';
+                                if (cellValue.includes(',') || cellValue.includes('"')) {
+                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
+                }
+                return cellValue;
+            }).join(",");
+            csvContent += rowLine + "\n";
+        });
 
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "combined_attendance_report.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
 </script>
 
 </body>
 </html>
 
-
+    
