@@ -120,7 +120,7 @@
         }
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-top: 0.75rem;
         }
@@ -133,6 +133,9 @@
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
         }
         .filter-input {
             padding: 0.45rem 0.6rem;
@@ -321,7 +324,7 @@
             <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
         </div>
 
-        <!-- Advanced Multi-Condition Engine Display Panel -->
+        <!-- Advanced Multi-Condition Engine Panel Layout -->
         <div class="filter-panel">
             <strong>📊 Multi-Condition Filters</strong>
             <div class="filter-grid">
@@ -334,18 +337,28 @@
                     <input type="text" id="filter-code" class="filter-input" placeholder="Search code...">
                 </div>
                 <div class="filter-box">
-                    <label>Duration Threshold (Minutes)</label>
+                    <label>Duration Range (Minutes)</label>
                     <div class="range-inputs">
                         <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min">
                         <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max">
                     </div>
                 </div>
                 <div class="filter-box">
-                    <label>Class Date Filtering</label>
-                    <div class="range-inputs">
-                        <input type="text" id="filter-date-match" class="filter-input" placeholder="Include (e.g. Feb)">
-                        <input type="text" id="filter-date-exclude" class="filter-input" placeholder="Exclude">
-                    </div>
+                    <label>
+                        Class Date Query
+                        <span style="font-weight: normal; margin-left: auto; display: flex; align-items: center; gap: 4px;">
+                            <input type="checkbox" id="filter-date-checkbox" checked style="cursor: pointer;"> Include
+                        </span>
+                    </label>
+                    <input type="text" id="filter-date-text" class="filter-input" placeholder="Type date (e.g. Feb)">
+                </div>
+                <div class="filter-box">
+                    <label>Join Time (Started at)</label>
+                    <input type="text" id="filter-join-time" class="filter-input" placeholder="e.g. 10:15">
+                </div>
+                <div class="filter-box">
+                    <label>Leave Time (Stopped at)</label>
+                    <input type="text" id="filter-leave-time" class="filter-input" placeholder="e.g. 11:30">
                 </div>
             </div>
         </div>
@@ -382,13 +395,15 @@
     const secondarySortSelect = document.getElementById('secondary-sort');
     const rankLockBtn = document.getElementById('rank-lock-btn');
     
-    // Filter Dashboard Targets
+    // Filter Dashboard Target Elements
     const filterName = document.getElementById('filter-name');
     const filterCode = document.getElementById('filter-code');
     const filterDurMin = document.getElementById('filter-dur-min');
     const filterDurMax = document.getElementById('filter-dur-max');
-    const filterDateMatch = document.getElementById('filter-date-match');
-    const filterDateExclude = document.getElementById('filter-date-exclude');
+    const filterDateText = document.getElementById('filter-date-text');
+    const filterDateCheckbox = document.getElementById('filter-date-checkbox');
+    const filterJoinTime = document.getElementById('filter-join-time');
+    const filterLeaveTime = document.getElementById('filter-leave-time');
     
     const stage1 = document.getElementById('stage-1');
     const stage2 = document.getElementById('stage-2');
@@ -473,17 +488,17 @@
 
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
-        if (!match || !match) return "Unknown Date";
+        if (!match || !match[1]) return "Unknown Date";
         
-        let rawDate = match.trim(); 
+        let rawDate = match[1].trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
         const parts = rawDate.split('-');
         if (parts.length !== 3) return rawDate; 
         
-        let day = parts.trim();
-        let month = parts.trim();
-        let year = parts.trim();
+        let day = parts[0].trim();
+        let month = parts[1].trim();
+        let year = parts[2].trim();
         
         month = month.substring(0, 3);
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
@@ -510,9 +525,9 @@
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
         
-        const day = parseInt(parts, 10);
-        const monthStr = parts.substring(0, 3);
-        const year = parseInt(parts, 10);
+        const day = parseInt(parts[0], 10);
+        const monthStr = parts[1].substring(0, 3);
+        const year = parseInt(parts[2], 10);
         
         const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         const monthIndex = months.indexOf(monthStr);
@@ -520,22 +535,19 @@
         return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
 
-    // Helper to safely extract total numerical minutes from mixed format strings (e.g. "45 min", "1h 12m")
     function parseDurationToMinutes(durStr) {
         if (!durStr) return 0;
         let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '');
         let totalMin = 0;
         
-        // If it explicitly maps out hours and minutes
         if (clean.includes('h') || clean.includes('m')) {
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
-            if (minMatch) totalMin += parseInt(minMatch, 10);
+            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
+            if (minMatch) totalMin += parseInt(minMatch[1], 10);
             return totalMin;
         }
         
-        // Fallback for purely numeric digits
         let parsed = parseInt(clean, 10);
         return isNaN(parsed) ? 0 : parsed;
     }
@@ -554,7 +566,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                const fileHeaders = parseCSVLine(lines); 
+                const fileHeaders = parseCSVLine(lines[0]); 
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -602,10 +614,11 @@
         renderMasterTableUI();
     });
 
-    // Wire up listeners to every single multi-condition filter field input
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateMatch, filterDateExclude].forEach(input => {
-        input.addEventListener('input', () => {
-            renderMasterTableUI(); // Re-render table on any search query changes
+    // Re-render data table on any multi-condition query changes
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateText, filterDateCheckbox, filterJoinTime, filterLeaveTime].forEach(input => {
+        const eventType = input.type === 'checkbox' ? 'change' : 'input';
+        input.addEventListener(eventType, () => {
+            renderMasterTableUI(); 
         });
     });
 
@@ -649,7 +662,7 @@
         });
     }
 
-    // FIXED CRITICAL DIRECTIONAL SEPARATION: Swapping dropdown target values directly without altering priorities
+    // FIXED ARROW FUNCTION: Reverses directions cleanly without modifying layout ranking
     function flipDirectionOnly(columnKey) {
         if (columnKey === "Participant Name") {
             if (primarySortSelect.value.startsWith('name')) {
@@ -723,7 +736,6 @@
                 
                 textSpan.textContent = h + rankLabel;
                 
-                // Clicking text name label ONLY toggles priority ranking
                 textSpan.onclick = (e) => {
                     e.stopPropagation();
                     setPrimaryRankColumn(h);
@@ -753,7 +765,6 @@
                         arrowBtn.style.transform = "scale(1)";
                     };
                     
-                    // Arrow click ONLY triggers direction flip, completely independent of priority order
                     arrowBtn.onclick = (e) => {
                         e.stopPropagation();
                         flipDirectionOnly(h);
@@ -766,18 +777,22 @@
             tableHeaders.appendChild(th);
         });
 
-        // Capture multi-condition values
+        // Capture all current multi-condition search parameters
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
         const valMaxDur = parseFloat(filterDurMax.value);
-        const valMatchDate = filterDateMatch.value.toLowerCase().trim();
-        const valExcludeDate = filterDateExclude.value.toLowerCase().trim();
+        const valDateText = filterDateText.value.toLowerCase().trim();
+        const isDateIncludeMode = filterDateCheckbox.checked;
+        const valJoin = filterJoinTime.value.toLowerCase().trim();
+        const valLeave = filterLeaveTime.value.toLowerCase().trim();
 
-        // Evaluate all rules in a single loop
+        // Process search evaluation validation checks across dataset
         const filteredData = masterData.filter(row => {
             if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
             if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
+            if (valJoin && !String(row["Attendance Started at"] || "").toLowerCase().includes(valJoin)) return false;
+            if (valLeave && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valLeave)) return false;
             
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
                 const totalMins = parseDurationToMinutes(row["Attended Duration"]);
@@ -785,13 +800,16 @@
                 if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
             }
             
-            if (valMatchDate && !String(row["Class Date"] || "").toLowerCase().includes(valMatchDate)) return false;
-            if (valExcludeDate && String(row["Class Date"] || "").toLowerCase().includes(valExcludeDate)) return false;
+            if (valDateText) {
+                const containsDate = String(row["Class Date"] || "").toLowerCase().includes(valDateText);
+                if (isDateIncludeMode && !containsDate) return false; // Fail if include checked but missing
+                if (!isDateIncludeMode && containsDate) return false; // Fail if exclude checked and found
+            }
             
             return true;
         });
 
-        // Loop rows out into live field controls
+        // Loop rows into live UI input elements
         filteredData.forEach((row, index) => {
             const tr = document.createElement('tr');
             MASTER_HEADERS.forEach(header => {
