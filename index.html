@@ -85,6 +85,7 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
         .header-row-2 {
             display: flex;
@@ -367,9 +368,9 @@
                 <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
                 <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
                 
-                <!-- Grid Mutators & Reset Actions -->
                 <button class="btn btn-primary" id="insert-row-btn">+ Insert Blank Row</button>
                 <button class="btn btn-primary" id="insert-col-btn">+ Insert Blank Column</button>
+                <button class="btn btn-danger" id="delete-col-btn">- Delete Custom Column</button>
                 <button class="btn btn-danger" id="reset-filters-btn">Reset Filters ↺</button>
             </div>
             
@@ -463,11 +464,13 @@
 </div>
 
 <script>
-    // Configured Master Layout Columns Tracker (Made mutable to allow dynamic blank column injection)
     let MASTER_HEADERS = [
         "SNo", "Participant Name", "Attendance Started at", 
         "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
     ];
+    
+    // Explicit array caching base template keys to prevent accidental drops
+    const SYSTEM_PROTECTED_HEADERS = [...MASTER_HEADERS];
     
     let uploadedFilesArray = [];
     let masterData = [];
@@ -485,9 +488,9 @@
     const downloadBtn = document.getElementById('download-btn');
     const timeConvertBtn = document.getElementById('time-convert-btn');
     
-    // Grid Element Mutators
     const insertRowBtn = document.getElementById('insert-row-btn');
     const insertColBtn = document.getElementById('insert-col-btn');
+    const deleteColBtn = document.getElementById('delete-col-btn');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     
     const nameSortRule = document.getElementById('name-sort-rule');
@@ -495,7 +498,6 @@
     const prioritySwitchBtn = document.getElementById('priority-switch-btn');
     const rankLockBtn = document.getElementById('rank-lock-btn');
     
-    // Filter Elements
     const filterName = document.getElementById('filter-name');
     const filterCode = document.getElementById('filter-code');
     const filterDurMin = document.getElementById('filter-dur-min');
@@ -610,11 +612,9 @@
         return `${day}-${month}-${year}`;
     }
 
-    // FIXED BULLETPROOF CSV LINE SPLITTER: Safely handles Windows CRLF layout tokens robustly
     function parseCSVLine(text) {
         let p = '', r = [];
         let q = false;
-        // Clean trailing Carriage Return (\r) indicators from end of lines
         const cleanText = text.replace(/\r$/, '');
         for (let i = 0; i < cleanText.length; i++) {
             let c = cleanText[i];
@@ -701,10 +701,11 @@
         for (let file of uploadedFilesArray) {
             try {
                 const text = await file.text();
-                // FIX: Splits line fragments clean across alternate architecture Windows platform text files cleanly
-                const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                // FIX: Splits line tokens cleanly using an optimized browser regex stream
+                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
+                // Captures header mapping data cleanly from row position index zero
                 const fileHeaders = parseCSVLine(lines[0]); 
                 const fileDate = extractDateFromFilename(file.name);
                 
@@ -723,6 +724,7 @@
                             structuredObj[header] = fileDate;
                         } else {
                             const mappedIdx = indexMap[header];
+                            // FIX: Successfully extracts raw data strings into the grid memory registry
                             structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
                         }
                     });
@@ -744,7 +746,6 @@
         stage2.classList.remove('active');
     });
 
-    // 1. Mutator: Dynamic Clean Row Insertion Mechanism
     insertRowBtn.addEventListener('click', () => {
         let newBlankObj = {};
         MASTER_HEADERS.forEach(h => {
@@ -754,7 +755,6 @@
         renderMasterTableUI();
     });
 
-    // 2. Mutator: Dynamic Custom Column Insertion Prompt Engine
     insertColBtn.addEventListener('click', () => {
         const rawColName = prompt("Enter a unique name for your new custom column:");
         if (!rawColName) return;
@@ -768,7 +768,30 @@
         renderMasterTableUI();
     });
 
-    // 3. Mutator: Universal Reset Query Filter Dashboard Action
+    // New Mutator: Delete Column Action Controller
+    deleteColBtn.addEventListener('click', () => {
+        const targetCol = prompt("Type the exact name of the custom column you wish to remove:");
+        if (!targetCol) return;
+        const cleanTarget = targetCol.trim();
+        
+        // Prevent deletion of base system-protected tracking keys
+        if (SYSTEM_PROTECTED_HEADERS.includes(cleanTarget)) {
+            alert("Error: Core system tracking columns cannot be deleted.");
+            return;
+        }
+        
+        const colIdx = MASTER_HEADERS.indexOf(cleanTarget);
+        if (colIdx === -1) {
+            alert("Column name not found.");
+            return;
+        }
+        
+        // Remove from headers list array and prune objects
+        MASTER_HEADERS.splice(colIdx, 1);
+        masterData.forEach(row => { delete row[cleanTarget]; });
+        renderMasterTableUI();
+    });
+
     resetFiltersBtn.addEventListener('click', () => {
         [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
         isStartDateInclusive = true;
@@ -982,7 +1005,6 @@
             return true;
         });
 
-        // Clear and rebuild table entries dynamically
         tableBody.innerHTML = '';
         filteredData.forEach((row) => {
             const tr = document.createElement('tr');
