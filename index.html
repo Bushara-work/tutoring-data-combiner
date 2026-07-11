@@ -137,7 +137,7 @@
         }
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 0.75rem;
         }
@@ -159,6 +159,8 @@
             border-radius: 4px;
             border: 1px solid var(--gray-300);
             font-size: 0.875rem;
+            width: 100%;
+            box-sizing: border-box;
         }
         .filter-input:focus {
             outline: none;
@@ -170,6 +172,14 @@
         }
         .range-inputs input {
             width: 50%;
+        }
+        .toggle-link {
+            font-size: 0.75rem;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            user-select: none;
+            font-weight: normal;
         }
         button.btn {
             padding: 0.75rem 1.5rem;
@@ -185,6 +195,9 @@
         .btn-secondary:hover { background: #cbd5e1; }
         .btn-success { background: #16a34a; color: white; }
         .btn-success:hover { background: #15803d; }
+        .btn-warn { background: #ea580c; color: white; user-select: none; }
+        .btn-warn:hover { background: #c2410c; }
+        
         .table-container {
             overflow-x: auto;
             background: white;
@@ -315,7 +328,6 @@
             <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
             
             <div class="sort-controls">
-                <!-- Dual Rule Independent Dropdowns -->
                 <div class="control-group">
                     <label for="name-sort-rule"><b>Name Order:</b></label>
                     <select id="name-sort-rule">
@@ -324,8 +336,7 @@
                     </select>
                 </div>
                 
-                <!-- Priority Swap Toggle Intermediary Control Button -->
-                <button id="priority-switch-btn" class="switch-btn" title="Swap Sorting Priority Chain">Name Priority First ⇄</button>
+                <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
                 
                 <div class="control-group">
                     <label for="date-sort-rule"><b>Date Order:</b></label>
@@ -340,12 +351,14 @@
                 </div>
             </div>
 
+            <!-- Peak overlay holder utility trigger element -->
+            <button id="time-peek-btn" class="btn btn-warn">HOLD TO PEEK CLOCK FORMAT</button>
             <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
         </div>
 
-        <!-- Multi-Condition Filters Grid -->
+        <!-- Advanced Concise Multi-Condition Filters Grid -->
         <div class="filter-panel">
-            <strong>📊 Multi-Condition Filters</strong>
+            <strong>📊 Condition Filters</strong>
             <div class="filter-grid">
                 <div class="filter-box">
                     <label>Participant Name</label>
@@ -356,28 +369,34 @@
                     <input type="text" id="filter-code" class="filter-input" placeholder="Search code...">
                 </div>
                 <div class="filter-box">
-                    <label>Duration Range (Minutes)</label>
+                    <label>Duration Threshold (Minutes)</label>
                     <div class="range-inputs">
-                        <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min">
+                        <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min (e.g. 45)">
                         <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max">
                     </div>
                 </div>
                 <div class="filter-box">
                     <label>
-                        Class Date Query
-                        <span style="font-weight: normal; margin-left: auto; display: flex; align-items: center; gap: 4px;">
-                            <input type="checkbox" id="filter-date-checkbox" checked style="cursor: pointer;"> Include
-                        </span>
+                        Class Date Bounds
+                        <span id="start-date-toggle" class="toggle-link">Inc</span>
+                        <span id="end-date-toggle" class="toggle-link">Inc</span>
                     </label>
-                    <input type="text" id="filter-date-text" class="filter-input" placeholder="Type date (e.g. Feb)">
+                    <div class="range-inputs">
+                        <input type="text" id="filter-date-start" class="filter-input" placeholder="Start Date">
+                        <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now">
+                    </div>
                 </div>
                 <div class="filter-box">
-                    <label>Join Time (Started at)</label>
-                    <input type="text" id="filter-join-time" class="filter-input" placeholder="e.g. 10:15">
+                    <label>Started At</label>
+                    <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
                 </div>
                 <div class="filter-box">
-                    <label>Leave Time (Stopped at)</label>
-                    <input type="text" id="filter-leave-time" class="filter-input" placeholder="e.g. 11:30">
+                    <label>Joined At (beta)</label>
+                    <input type="text" id="filter-joined-time" class="filter-input" placeholder="Search beta timestamp...">
+                </div>
+                <div class="filter-box">
+                    <label>Stopped At</label>
+                    <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
                 </div>
             </div>
         </div>
@@ -401,10 +420,13 @@
     
     let uploadedFilesArray = [];
     let masterData = [];
-    
-    // Core Layout Hierarchy Configuration Properties
     let isRankLocked = false;
-    let isNamePriorityPrimary = true; // Tracks priority state: true = Name first, false = Date first
+    let isNamePriorityPrimary = true;
+    let isPeekingAlternativeTime = false; // Tracks temporary peek button overlay state
+
+    // Advanced range condition states (true = Inclusive, false = Exclusive)
+    let isStartDateInclusive = true;
+    let isEndDateInclusive = true;
 
     const csvPicker = document.getElementById('csv-picker');
     const uploadSection = document.querySelector('.upload-section');
@@ -412,21 +434,26 @@
     const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
     const downloadBtn = document.getElementById('download-btn');
+    const timePeekBtn = document.getElementById('time-peek-btn');
     
-    // UI Dashboard Targets
     const nameSortRule = document.getElementById('name-sort-rule');
     const dateSortRule = document.getElementById('date-sort-rule');
     const prioritySwitchBtn = document.getElementById('priority-switch-btn');
     const rankLockBtn = document.getElementById('rank-lock-btn');
     
+    // Filter Elements
     const filterName = document.getElementById('filter-name');
     const filterCode = document.getElementById('filter-code');
     const filterDurMin = document.getElementById('filter-dur-min');
     const filterDurMax = document.getElementById('filter-dur-max');
-    const filterDateText = document.getElementById('filter-date-text');
-    const filterDateCheckbox = document.getElementById('filter-date-checkbox');
-    const filterJoinTime = document.getElementById('filter-join-time');
-    const filterLeaveTime = document.getElementById('filter-leave-time');
+    const filterDateStart = document.getElementById('filter-date-start');
+    const filterDateEnd = document.getElementById('filter-date-end');
+    const startDateToggle = document.getElementById('start-date-toggle');
+    const endDateToggle = document.getElementById('end-date-toggle');
+    
+    const filterStartedTime = document.getElementById('filter-started-time');
+    const filterJoinedTime = document.getElementById('filter-joined-time');
+    const filterStoppedTime = document.getElementById('filter-stopped-time');
     
     const stage1 = document.getElementById('stage-1');
     const stage2 = document.getElementById('stage-2');
@@ -558,21 +585,52 @@
         return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
 
+    // CRITICAL DURATION PARSING REPAIR: Standardizes "1h 12m", "45 min", and purely numeric cells accurately
     function parseDurationToMinutes(durStr) {
         if (!durStr) return 0;
-        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '');
-        let totalMin = 0;
+        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
+        if (!clean) return 0;
         
         if (clean.includes('h') || clean.includes('m')) {
+            let totalMin = 0;
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1]) * 60;
-            if (minMatch) totalMin += parseInt(minMatch[1]);
+            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
+            if (minMatch) totalMin += parseInt(minMatch[1], 10);
             return totalMin;
         }
         
         let parsed = parseInt(clean, 10);
         return isNaN(parsed) ? 0 : parsed;
+    }
+
+    // Bidirectional 24 <-> 12 Hour String Syntax Translator Engine
+    function convertTimeStringSyntax(timeStr) {
+        if (!timeStr) return "";
+        let clean = timeStr.trim().toUpperCase();
+        
+        // Match 12-hour elements (e.g., "10:15 AM", "4:30 PM")
+        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+        if (ampmMatch) {
+            let hrs = parseInt(ampmMatch[1], 10);
+            let mins = ampmMatch[2];
+            let period = ampmMatch[3];
+            if (period === "PM" && hrs < 12) hrs += 12;
+            if (period === "AM" && hrs === 12) hrs = 0;
+            return `${String(hrs).padStart(2, '0')}:${mins}`;
+        }
+        
+        // Match 24-hour elements (e.g., "14:20", "04:15")
+        const militaryMatch = clean.match(/^(\d{2}):(\d{2})$/);
+        if (militaryMatch) {
+            let hrs = parseInt(militaryMatch[1], 10);
+            let mins = militaryMatch[2];
+            let period = "AM";
+            if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
+            if (hrs === 0) hrs = 12;
+            return `${hrs}:${mins} ${period}`;
+        }
+        return timeStr; // Return unchanged if non-standard structure
     }
 
         nextBtn.addEventListener('click', async () => {
@@ -628,7 +686,6 @@
         stage2.classList.remove('active');
     });
 
-    // Handle Dropdown Updates
     [nameSortRule, dateSortRule].forEach(select => {
         select.addEventListener('change', () => {
             sortMasterData();
@@ -636,15 +693,28 @@
         });
     });
 
-    // Filter Query Event Wireups
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateText, filterDateCheckbox, filterJoinTime, filterLeaveTime].forEach(input => {
-        const eventType = input.type === 'checkbox' ? 'change' : 'input';
-        input.addEventListener(eventType, () => {
-            renderMasterTableUI(); 
-        });
+    // Wire up advanced text condition filters
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
+        input.addEventListener('input', () => { renderMasterTableUI(); });
     });
 
-    // Priority Swap Button Action Handler
+    // Toggle Link Interactive Actions (Inc vs Exc boundaries)
+    startDateToggle.addEventListener('click', () => {
+        isStartDateInclusive = !isStartDateInclusive;
+        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+    endDateToggle.addEventListener('click', () => {
+        isEndDateInclusive = !isEndDateInclusive;
+        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+
+    // Clock syntax interactive peek mouse tracking hooks
+    timePeekBtn.addEventListener('mousedown', () => { isPeekingAlternativeTime = true; renderMasterTableUI(); });
+    timePeekBtn.addEventListener('mouseup', () => { isPeekingAlternativeTime = false; renderMasterTableUI(); });
+    timePeekBtn.addEventListener('mouseleave', () => { isPeekingAlternativeTime = false; renderMasterTableUI(); });
+
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isNamePriorityPrimary = !isNamePriorityPrimary;
@@ -653,20 +723,15 @@
         renderMasterTableUI();
     });
 
-    // Global Safety Padlock Toggle Handler
     rankLockBtn.addEventListener('click', () => {
         isRankLocked = !isRankLocked;
         if (isRankLocked) {
             rankLockBtn.className = "lock-container is-locked";
-            primarySortSelect.disabled = true; // Kept intact for background sync compatibility
-            secondarySortSelect.disabled = true;
             nameSortRule.disabled = true;
             dateSortRule.disabled = true;
             prioritySwitchBtn.disabled = true;
         } else {
             rankLockBtn.className = "lock-container is-unlocked";
-            primarySortSelect.disabled = false;
-            secondarySortSelect.disabled = false;
             nameSortRule.disabled = false;
             dateSortRule.disabled = false;
             prioritySwitchBtn.disabled = false;
@@ -674,7 +739,6 @@
         renderMasterTableUI();
     });
 
-    // Simplified Layout Priority Evaluator
     function sortMasterData() {
         const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
         const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
@@ -693,12 +757,10 @@
 
         masterData.sort((a, b) => {
             if (isNamePriorityPrimary) {
-                // Tier 1: Name, Tier 2: Date
                 const res = checkNameLayer(a, b);
                 if (res !== 0) return res;
                 return checkDateLayer(a, b);
             } else {
-                // Tier 1: Date, Tier 2: Name
                 const res = checkDateLayer(a, b);
                 if (res !== 0) return res;
                 return checkNameLayer(a, b);
@@ -706,10 +768,8 @@
         });
     }
 
-    // Isolated Direction Flipper (Clicking arrows updates dropdowns safely)
     function flipDirectionOnly(columnKey) {
-        if (isRankLocked) return; // Completely blocked if locked down
-        
+        if (isRankLocked) return;
         if (columnKey === "Participant Name") {
             nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
         } else if (columnKey === "Class Date") {
@@ -719,7 +779,6 @@
         renderMasterTableUI();
     }
 
-    // Clicking text headers changes ranking priorities safely
     function setPrimaryRankFromHeaderClick(columnKey) {
         if (isRankLocked) return;
         if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
@@ -733,18 +792,6 @@
         renderMasterTableUI();
     }
 
-    /*
-    ========================================================================
-    INACTIVE COMPATIBILITY LAYERS (RETAINED AS REQUESTED)
-    ========================================================================
-    const primarySortSelect = { value: "" };
-    const secondarySortSelect = { value: "" };
-    function handleHeaderClick(headerName) {
-        // Obsolete multi-priority layout routing hook - Safely out of execution stream
-    }
-    ========================================================================
-    */
-
         function renderMasterTableUI() {
         tableHeaders.innerHTML = '';
         tableBody.innerHTML = '';
@@ -754,7 +801,6 @@
             
             if (h === "Participant Name" || h === "Class Date") {
                 th.style.verticalAlign = "middle";
-                
                 const textSpan = document.createElement('span');
                 textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
                 textSpan.style.fontSize = "1rem"; 
@@ -765,36 +811,19 @@
                     textSpan.onmouseout = () => textSpan.style.color = "";
                 }
                 
-                // Print priority labels based on hierarchy switches
-                let rankLabel = "";
-                let isActiveDirection = "";
-                
-                if (h === "Participant Name") {
-                    rankLabel = isNamePriorityPrimary ? " (Primary)" : " (Secondary)";
-                    isActiveDirection = nameSortRule.value;
-                } else if (h === "Class Date") {
-                    rankLabel = !isNamePriorityPrimary ? " (Primary)" : " (Secondary)";
-                    isActiveDirection = dateSortRule.value;
-                }
+                let rankLabel = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
+                let isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
                 
                 textSpan.textContent = h + rankLabel;
-                
-                // Header clicks only swap the Primary priority ranking
-                textSpan.onclick = (e) => {
-                    e.stopPropagation();
-                    setPrimaryRankFromHeaderClick(h);
-                };
+                textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
                 th.appendChild(textSpan);
 
-                // Add arrow button
                 const arrowBtn = document.createElement('button');
                 arrowBtn.style.background = "none";
                 arrowBtn.style.border = "none";
                 arrowBtn.style.cursor = isRankLocked ? "not-allowed" : "pointer";
                 arrowBtn.style.padding = "0 8px";
                 arrowBtn.style.fontSize = "1.3rem"; 
-                
-                // DESIGN CHANGE: Change to a muted grey color if the lock is enabled
                 arrowBtn.style.color = isRankLocked ? "#9ca3af" : "#2563eb";
                 arrowBtn.style.fontWeight = "bold";
                 arrowBtn.style.transition = "transform 0.1s, color 0.2s";
@@ -803,21 +832,11 @@
                 arrowBtn.innerHTML = (isActiveDirection === 'asc') ? "▲" : "▼";
                 
                 if (!isRankLocked) {
-                    arrowBtn.onmouseover = () => {
-                        arrowBtn.style.color = "#1d4ed8";
-                        arrowBtn.style.transform = "scale(1.3)";
-                    };
-                    arrowBtn.onmouseout = () => {
-                        arrowBtn.style.color = "#2563eb";
-                        arrowBtn.style.transform = "scale(1)";
-                    };
+                    arrowBtn.onmouseover = () => { arrowBtn.style.color = "#1d4ed8"; arrowBtn.style.transform = "scale(1.3)"; };
+                    arrowBtn.onmouseout = () => { arrowBtn.style.color = "#2563eb"; arrowBtn.style.transform = "scale(1)"; };
                 }
                 
-                // Arrow click only flips the sorting direction, completely independent of priority
-                arrowBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    flipDirectionOnly(h);
-                };
+                arrowBtn.onclick = (e) => { e.stopPropagation(); flipDirectionOnly(h); };
                 th.appendChild(arrowBtn);
             } else {
                 th.textContent = h;
@@ -825,22 +844,25 @@
             tableHeaders.appendChild(th);
         });
 
-        // Capture current multi-condition search parameters
+        // Capture Advanced Filters
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
         const valMaxDur = parseFloat(filterDurMax.value);
-        const valDateText = filterDateText.value.toLowerCase().trim();
-        const isDateIncludeMode = filterDateCheckbox.checked;
-        const valJoin = filterJoinTime.value.toLowerCase().trim();
-        const valLeave = filterLeaveTime.value.toLowerCase().trim();
+        
+        const dateStartObj = parseCustomDate(filterDateStart.value.trim());
+        const dateEndObj = parseCustomDate(filterDateEnd.value.trim());
+        
+        const valStarted = filterStartedTime.value.toLowerCase().trim();
+        const valJoined = filterJoinedTime.value.toLowerCase().trim();
+        const valStopped = filterStoppedTime.value.toLowerCase().trim();
 
-        // Process search evaluation validation checks across dataset
         const filteredData = masterData.filter(row => {
             if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
             if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
-            if (valJoin && !String(row["Attendance Started at"] || "").toLowerCase().includes(valJoin)) return false;
-            if (valLeave && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valLeave)) return false;
+            if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
+            if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
+            if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
             
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
                 const totalMins = parseDurationToMinutes(row["Attended Duration"]);
@@ -848,23 +870,35 @@
                 if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
             }
             
-            if (valDateText) {
-                const containsDate = String(row["Class Date"] || "").toLowerCase().includes(valDateText);
-                if (isDateIncludeMode && !containsDate) return false; 
-                if (!isDateIncludeMode && containsDate) return false; 
+            if (filterDateStart.value.trim() || filterDateEnd.value.trim()) {
+                const targetDateObj = parseCustomDate(row["Class Date"]);
+                
+                if (filterDateStart.value.trim()) {
+                    if (isStartDateInclusive && targetDateObj < dateStartObj) return false;
+                    if (!isStartDateInclusive && targetDateObj <= dateStartObj) return false;
+                }
+                if (filterDateEnd.value.trim()) {
+                    if (isEndDateInclusive && targetDateObj > dateEndObj) return false;
+                    if (!isEndDateInclusive && targetDateObj >= dateEndObj) return false;
+                }
             }
-            
             return true;
         });
 
-        // Loop rows into live UI input elements
-        filteredData.forEach((row, index) => {
+        filteredData.forEach((row) => {
             const tr = document.createElement('tr');
             MASTER_HEADERS.forEach(header => {
                 const td = document.createElement('td');
                 const input = document.createElement('input');
-                input.value = row[header];
                 
+                let displayVal = row[header] || '';
+                
+                // If the clock peek button is actively held down, toggle the format of the time columns
+                if (isPeekingAlternativeTime && ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].includes(header)) {
+                    displayVal = convertTimeStringSyntax(displayVal);
+                }
+                
+                input.value = displayVal;
                 const baseIndex = masterData.indexOf(row);
                 
                 input.addEventListener('input', (e) => {
