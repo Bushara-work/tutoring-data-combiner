@@ -147,12 +147,69 @@
         th.sortable:hover {
             background: #e5e7eb;
         }
-        .sort-icon {
-            margin-left: 0.5rem;
-            font-size: 0.8rem;
-            color: #2563eb;
-            font-weight: bold;
+        
+        /* Custom CSS Layout drawn Padlocks */
+        .lock-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            vertical-align: middle;
+            margin-left: 6px;
+            transition: transform 0.1s;
         }
+        .lock-container:hover {
+            transform: scale(1.2);
+        }
+        .css-lock {
+            width: 14px;
+            height: 11px;
+            background-color: #9ca3af;
+            border-radius: 3px;
+            position: relative;
+            margin-top: 6px;
+            transition: background-color 0.2s;
+        }
+        .css-lock::before {
+            content: "";
+            position: absolute;
+            border: 2px solid #9ca3af;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            width: 6px;
+            height: 7px;
+            left: 2px;
+            top: -7px;
+            transition: transform 0.2s, left 0.2s, border-color 0.2s;
+        }
+        /* Locked configuration states */
+        .lock-container.is-locked .css-lock {
+            background-color: #dc2626;
+        }
+        .lock-container.is-locked .css-lock::before {
+            border-color: #dc2626;
+            transform: translate(0, 0);
+        }
+        /* Unlocked configuration states (Shackle open sliding translation animation) */
+        .lock-container.is-unlocked .css-lock::before {
+            transform: translate(2px, -2px) rotate(15deg);
+        }
+        .lock-container:hover .css-lock {
+            background-color: #4b5563;
+        }
+        .lock-container.is-locked:hover .css-lock {
+            background-color: #b91c1c;
+        }
+        .lock-container.is-locked:hover .css-lock::before {
+            border-color: #b91c1c;
+        }
+        
         td input {
             width: 100%;
             border: 1px solid transparent;
@@ -587,29 +644,16 @@
                     th.appendChild(iconBtn);
                 }
 
-                const lockBtn = document.createElement('button');
-                lockBtn.style.background = "none";
-                lockBtn.style.border = "none";
-                lockBtn.style.cursor = "pointer";
-                lockBtn.style.padding = "0 6px";
-                lockBtn.style.fontSize = "1.1rem"; 
-                lockBtn.style.color = isLocked ? "#dc2626" : "#9ca3af"; 
-                lockBtn.style.transition = "transform 0.1s, color 0.2s";
-                lockBtn.style.verticalAlign = "middle";
-                lockBtn.title = isLocked ? "Unlock Column Sort Settings" : "Lock Column Sort Settings";
+                // Inject the Custom CSS-drawn Padlock
+                const lockContainer = document.createElement('button');
+                lockContainer.className = `lock-container ${isLocked ? 'is-locked' : 'is-unlocked'}`;
+                lockContainer.title = isLocked ? "Unlock Column Sort Settings" : "Lock Column Sort Settings";
                 
-                lockBtn.innerHTML = isLocked ? "🔒" : "🔓";
+                const lockBody = document.createElement('div');
+                lockBody.className = "css-lock";
+                lockContainer.appendChild(lockBody);
                 
-                lockBtn.onmouseover = () => {
-                    lockBtn.style.color = isLocked ? "#b91c1c" : "#4b5563";
-                    lockBtn.style.transform = "scale(1.2)";
-                };
-                lockBtn.onmouseout = () => {
-                    lockBtn.style.color = isLocked ? "#dc2626" : "#9ca3af";
-                    lockBtn.style.transform = "scale(1)";
-                };
-                
-                lockBtn.onclick = (e) => {
+                lockContainer.onclick = (e) => {
                     e.stopPropagation();
                     lockedColumns[h] = !lockedColumns[h];
                     
@@ -618,7 +662,7 @@
                     
                     renderMasterTableUI();
                 };
-                th.appendChild(lockBtn);
+                th.appendChild(lockContainer);
                 
             } else {
                 th.textContent = h;
@@ -677,4 +721,3 @@
 
 </body>
 </html>
-
