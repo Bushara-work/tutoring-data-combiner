@@ -140,7 +140,6 @@
             opacity: 0.6;
         }
         
-        /* Compact Small Size Clock Format Utility Button */
         .btn-toggle-time {
             padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
@@ -361,13 +360,11 @@
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
         
         <div class="stage-2-header">
-            <!-- Row 1: Left Back Button, Right Download Button -->
             <div class="header-row-1">
                 <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
                 <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
             </div>
             
-            <!-- Row 2: Sort Module on Left, Compact Time Format Modifier Directly on Right -->
             <div class="header-row-2">
                 <div class="sort-controls">
                     <div class="control-group">
@@ -393,15 +390,12 @@
                     </div>
                 </div>
                 
-                <!-- Clean Compact Sized Timing Toggle Button Element -->
                 <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
             </div>
         </div>
 
-        <!-- Filter Panel Wrapper Workspace Area -->
         <div class="filter-panel">
             <div class="filter-header-title">
-                <!-- Custom CSS/SVG drawn funnel artwork graphic layout -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563;">
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                 </svg>
@@ -487,7 +481,6 @@
     const prioritySwitchBtn = document.getElementById('priority-switch-btn');
     const rankLockBtn = document.getElementById('rank-lock-btn');
     
-    // Filter Elements
     const filterName = document.getElementById('filter-name');
     const filterCode = document.getElementById('filter-code');
     const filterDurMin = document.getElementById('filter-dur-min');
@@ -511,7 +504,7 @@
     lockBodyElement.className = "css-lock";
     rankLockBtn.appendChild(lockBodyElement);
 
-    function handleFileSelection(files) {
+        function handleFileSelection(files) {
         if (!files) return;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -555,7 +548,7 @@
 
     function renderQueueUI() {
         fileQueue.innerHTML = '';
-                if (uploadedFilesArray.length === 0) {
+        if (uploadedFilesArray.length === 0) {
             fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
             return;
         }
@@ -584,17 +577,17 @@
 
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
-        if (!match || !match[1]) return "Unknown Date";
+        if (!match || !match) return "Unknown Date";
         
-        let rawDate = match[1].trim(); 
+        let rawDate = match.trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
         const parts = rawDate.split('-');
         if (parts.length !== 3) return rawDate; 
         
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
+        let day = parts.trim();
+        let month = parts.trim();
+        let year = parts.trim();
         
         month = month.substring(0, 3);
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
@@ -621,9 +614,9 @@
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
         
-        const day = parseInt(parts[0], 10);
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
+        const day = parseInt(parts, 10);
+        const monthStr = parts.substring(0, 3);
+        const year = parseInt(parts, 10);
         
         const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         const monthIndex = months.indexOf(monthStr);
@@ -640,7 +633,7 @@
             let totalMin = 0;
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
+            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
             if (minMatch) totalMin += parseInt(minMatch, 10);
             return totalMin;
         }
@@ -653,24 +646,28 @@
         if (!timeStr) return "";
         let clean = timeStr.trim().toUpperCase();
         
-        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
         if (ampmMatch) {
-            let hrs = parseInt(ampmMatch[1], 10);
-            let mins = ampmMatch[2];
-            let period = ampmMatch[3];
+            let hrs = parseInt(ampmMatch, 10);
+            let mins = ampmMatch;
+            let secs = ampmMatch ? `:${ampmMatch}` : "";
+            let period = ampmMatch;
+            
             if (period === "PM" && hrs < 12) hrs += 12;
             if (period === "AM" && hrs === 12) hrs = 0;
-            return `${String(hrs).padStart(2, '0')}:${mins}`;
+            return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
         }
         
-        const militaryMatch = clean.match(/^(\d{2}):(\d{2})$/);
+        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
         if (militaryMatch) {
-            let hrs = parseInt(militaryMatch[1], 10);
-            let mins = militaryMatch[2];
+            let hrs = parseInt(militaryMatch, 10);
+            let mins = militaryMatch;
+            let secs = militaryMatch ? `:${militaryMatch}` : "";
             let period = "AM";
+            
             if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
             if (hrs === 0) hrs = 12;
-            return `${hrs}:${mins} ${period}`;
+            return `${hrs}:${mins}${secs} ${period}`;
         }
         return timeStr; 
     }
@@ -686,12 +683,10 @@
         for (let file of uploadedFilesArray) {
             try {
                 const text = await file.text();
-                // Read rows, handling line breaks cleanly
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                // FIX: Reads headers correctly from index #0 row block
-                const fileHeaders = parseCSVLine(lines[0]); 
+                const fileHeaders = parseCSVLine(lines); 
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -709,7 +704,6 @@
                             structuredObj[header] = fileDate;
                         } else {
                             const mappedIdx = indexMap[header];
-                            // FIX: Captures string row values cleanly matching mapped headers
                             structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
                         }
                     });
@@ -894,7 +888,6 @@
             tableHeaders.appendChild(th);
         });
 
-        // Capture Advanced Filters
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
@@ -935,6 +928,7 @@
             return true;
         });
 
+        tableBody.innerHTML = '';
         filteredData.forEach((row) => {
             const tr = document.createElement('tr');
             MASTER_HEADERS.forEach(header => {
