@@ -77,7 +77,28 @@
         .actions {
             margin-top: 1.5rem;
             display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
+            align-items: center;
+        }
+        .sort-controls {
+            background: #ffffff;
+            border: 1px solid var(--gray-300);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .sort-controls select {
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid var(--gray-300);
+            background-color: #fff;
+            color: var(--gray-700);
+            font-weight: 500;
         }
         button.btn {
             padding: 0.75rem 1.5rem;
@@ -129,7 +150,8 @@
         .sort-icon {
             margin-left: 0.5rem;
             font-size: 0.8rem;
-            color: #9ca3af;
+            color: #2563eb;
+            font-weight: bold;
         }
         td input {
             width: 100%;
@@ -158,7 +180,7 @@
         <div class="upload-section" onclick="document.getElementById('csv-picker').click()">
             <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
             <button class="btn btn-primary">Select CSV Files</button>
-            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files. You can choose one by one or group select multiple items.</p>
+            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files or drag-and-drop multiple items here.</p>
         </div>
 
         <h4>Uploaded Files Queue</h4>
@@ -174,10 +196,31 @@
     <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
     <div id="stage-2" class="stage">
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">💡 Click the column headers for <b>Participant Name</b> or <b>Class Date</b> to change the sorting order.</p>
         
         <div class="actions">
             <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
+            
+            <div class="sort-controls">
+                <div>
+                    <label for="primary-sort"><b>Primary Sort:</b></label>
+                    <select id="primary-sort">
+                        <option value="name-asc" selected>Name (A → Z)</option>
+                        <option value="name-desc">Name (Z → A)</option>
+                        <option value="date-desc">Date (Newest → Oldest)</option>
+                        <option value="date-asc">Date (Oldest → Newest)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="secondary-sort"><b>Secondary Sort:</b></label>
+                    <select id="secondary-sort">
+                        <option value="date-desc" selected>Date (Newest → Oldest)</option>
+                        <option value="date-asc">Date (Oldest → Newest)</option>
+                        <option value="name-asc">Name (A → Z)</option>
+                        <option value="name-desc">Name (Z → A)</option>
+                    </select>
+                </div>
+            </div>
+
             <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
         </div>
 
@@ -193,7 +236,6 @@
 </div>
 
 <script>
-    // Configuration Master Layout Columns - "Class Date" added to the end
     const MASTER_HEADERS = [
         "SNo", "Participant Name", "Attendance Started at", 
         "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
@@ -202,13 +244,6 @@
     let uploadedFilesArray = [];
     let masterData = [];
 
-    // Sorting state direction tracking (1 = normal/ascending, -1 = reverse/descending)
-    let sortDirections = {
-        "Participant Name": 1,
-        "Class Date": 1
-    };
-
-    // DOM Elements
     const csvPicker = document.getElementById('csv-picker');
     const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
@@ -216,18 +251,19 @@
     const backBtn = document.getElementById('back-btn');
     const downloadBtn = document.getElementById('download-btn');
     
+    const primarySortSelect = document.getElementById('primary-sort');
+    const secondarySortSelect = document.getElementById('secondary-sort');
+    
     const stage1 = document.getElementById('stage-1');
     const stage2 = document.getElementById('stage-2');
     
     const tableHeaders = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
 
-    // Central function to handle files from both click selection and drag-and-drop
     function handleFileSelection(files) {
         if (!files) return;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            // Fix: Handles uppercase .CSV extensions properly
             if (file.name.toLowerCase().endsWith('.csv')) {
                 if (!uploadedFilesArray.some(f => f.name === file.name)) {
                     uploadedFilesArray.push(file);
@@ -237,13 +273,11 @@
         renderQueueUI();
     }
 
-    // 1. Traditional File Click Picker Event
     csvPicker.addEventListener('change', (e) => {
         handleFileSelection(e.target.files);
-        csvPicker.value = ""; // Clear browser file cache
+        csvPicker.value = ""; 
     });
 
-    // 2. Drag and Drop Visual Feedback Handlers
     uploadSection.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -258,13 +292,11 @@
         uploadSection.style.background = 'white';
     });
 
-    // 3. File Drop Handler
     uploadSection.addEventListener('drop', (e) => {
         e.preventDefault();
         e.stopPropagation();
         uploadSection.style.borderColor = 'var(--gray-300)';
         uploadSection.style.background = 'white';
-        
         if (e.dataTransfer && e.dataTransfer.files) {
             handleFileSelection(e.dataTransfer.files);
         }
@@ -272,7 +304,7 @@
 
     function renderQueueUI() {
         fileQueue.innerHTML = '';
-        if (uploadedFilesArray.length === 0) {
+                if (uploadedFilesArray.length === 0) {
             fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
             return;
         }
@@ -288,7 +320,7 @@
             removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = (e) => {
-                e.stopPropagation(); // Stops parent click trigger
+                e.stopPropagation(); 
                 uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
             };
@@ -299,45 +331,32 @@
         });
     }
 
-    // Fix: Looks strictly inside parenthesis for formats like (25-feb-2026)
-     // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
-        // Extraction helper optimized specifically for text inside parentheses (e.g., "(25-feb-2026)")
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
         if (!match || !match[1]) return "Unknown Date";
         
-        let rawDate = match[1].trim(); // CRITICAL FIX: match[1] isolates the exact text inside the brackets
-        
-        // Step 1: Strip out any accidental dots/periods (e.g., "feb." becomes "feb")
+        let rawDate = match[1].trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
-        // Step 2: Split by dashes to separate Day, Month, Year
         const parts = rawDate.split('-');
-        if (parts.length !== 3) return rawDate; // Fallback if structure is unexpected
+        if (parts.length !== 3) return rawDate; 
         
         let day = parts[0].trim();
         let month = parts[1].trim();
         let year = parts[2].trim();
         
-        // Step 3: Ensure month abbreviation is truncated to exactly 3 characters
         month = month.substring(0, 3);
         
-        // ==========================================
-        // TEXT DISPLAY OPTIONS (UNCOMMENT TO SWITCH)
-        // ==========================================
-        
         // --- BASELINE OPTION: All lowercase, no dot (e.g., "25-feb-2026") ---
-        month = month.toLowerCase();
+        // month = month.toLowerCase();
         
         // --- ACTIVE OPTION: First letter capitalized, no dot (e.g., "25-Feb-2026") ---
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
         
         // --- FUTURE OPTION 1: Add a dot/period to the abbreviation (e.g., "25-feb.-2026") ---
-        // To use this in the future, uncomment the line below:
         // month = month + ".";
         
         // --- FUTURE OPTION 2: Completely uppercase month (e.g., "25-FEB-2026") ---
-        // To use this in the future, uncomment the line below:
         // month = month.toUpperCase();
 
         return `${day}-${month}-${year}`;
@@ -356,11 +375,8 @@
         return r;
     }
 
-    // Converts text dates safely into absolute browser timestamps for perfect chronological sorting
     function parseCustomDate(dateStr) {
         if (!dateStr || dateStr === "Unknown Date") return new Date(0);
-        
-        // Clean out periods and make lowercase so internal matching works flawlessly regardless of display configuration
         let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
@@ -375,7 +391,7 @@
         return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
 
-    nextBtn.addEventListener('click', async () => {
+        nextBtn.addEventListener('click', async () => {
         if (uploadedFilesArray.length === 0) {
             alert('Please upload or drag-and-drop at least one CSV file.');
             return;
@@ -413,7 +429,7 @@
                     masterData.push(structuredObj);
                 }
             } catch (err) {
-                console.error("Error reading file: " + file.name , err);
+                console.error("Error reading file: " + file.name, err);
             }
         }
 
@@ -424,48 +440,188 @@
     });
 
     backBtn.addEventListener('click', () => {
-        stage2.classList.remove('active');
         stage1.classList.add('active');
+        stage2.classList.remove('active');
+    });
+
+    primarySortSelect.addEventListener('change', () => {
+        sortMasterData();
+        renderMasterTableUI();
+    });
+    secondarySortSelect.addEventListener('change', () => {
+        sortMasterData();
+        renderMasterTableUI();
     });
 
     function sortMasterData() {
-        masterData.sort((a, b) => {
-            const nameA = (a["Participant Name"] || "").toLowerCase();
-            const nameB = (b["Participant Name"] || "").toLowerCase();
-            
-            if (nameA !== nameB) {
-                return nameA.localeCompare(nameB) * sortDirections["Participant Name"];
+        const primaryRule = primarySortSelect.value;
+        const secondaryRule = secondarySortSelect.value;
+
+        function executeEvaluation(rule, a, b) {
+            if (rule.startsWith('name')) {
+                const nameA = (a["Participant Name"] || "").toLowerCase();
+                const nameB = (b["Participant Name"] || "").toLowerCase();
+                const comparison = nameA.localeCompare(nameB);
+                return rule === "name-asc" ? comparison : -comparison;
+            } else if (rule.startsWith('date')) {
+                const dateA = parseCustomDate(a["Class Date"]);
+                const dateB = parseCustomDate(b["Class Date"]);
+                const comparison = dateA - dateB;
+                return rule === "date-asc" ? comparison : -comparison;
             }
-            
-            const dateA = parseCustomDate(a["Class Date"]);
-            const dateB = parseCustomDate(b["Class Date"]);
-            return (dateA - dateB) * sortDirections["Class Date"];
+            return 0;
+        }
+
+        masterData.sort((a, b) => {
+            const primaryResult = executeEvaluation(primaryRule, a, b);
+            if (primaryResult !== 0) return primaryResult;
+            return executeEvaluation(secondaryRule, a, b);
         });
     }
 
-    function handleHeaderClick(headerName) {
-        if (sortDirections[headerName] !== undefined) {
-            sortDirections[headerName] *= -1;
-            sortMasterData();
-            renderMasterTableUI();
+    let lockedColumns = {
+        "Participant Name": false,
+        "Class Date": false
+    };
+
+        function handleHeaderClick(headerName) {
+        if (lockedColumns[headerName]) return;
+        const currentValue = primarySortSelect.value;
+        if (headerName === "Participant Name") {
+            primarySortSelect.value = (currentValue === "name-asc") ? "name-desc" : "name-asc";
+        } else if (headerName === "Class Date") {
+            primarySortSelect.value = (currentValue === "date-desc") ? "date-asc" : "date-desc";
         }
+        sortMasterData();
+        renderMasterTableUI();
     }
 
     function renderMasterTableUI() {
         tableHeaders.innerHTML = '';
         tableBody.innerHTML = '';
 
+        const currentPrimary = primarySortSelect.value;
+        const currentSecondary = secondarySortSelect.value;
+
         MASTER_HEADERS.forEach(h => {
             const th = document.createElement('th');
-            th.textContent = h;
             
             if (h === "Participant Name" || h === "Class Date") {
                 th.className = "sortable";
-                const icon = document.createElement('span');
-                icon.className = "sort-icon";
-                icon.innerHTML = sortDirections[h] === 1 ? "▲" : "▼";
-                th.appendChild(icon);
-                th.onclick = () => handleHeaderClick(h);
+                th.style.verticalAlign = "middle";
+                
+                const isLocked = lockedColumns[h];
+                
+                const textSpan = document.createElement('span');
+                textSpan.style.cursor = isLocked ? "not-allowed" : "pointer";
+                textSpan.style.fontSize = "1rem"; 
+                textSpan.style.opacity = isLocked ? "0.6" : "1";
+                textSpan.style.transition = "color 0.2s";
+                
+                if (!isLocked) {
+                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
+                    textSpan.onmouseout = () => textSpan.style.color = "";
+                }
+                
+                let rankLabel = "";
+                let isActiveRule = "";
+                
+                if (h === "Participant Name") {
+                    if (currentPrimary.startsWith('name')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
+                    else if (currentSecondary.startsWith('name')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
+                } else if (h === "Class Date") {
+                    if (currentPrimary.startsWith('date')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
+                    else if (currentSecondary.startsWith('date')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
+                }
+                
+                textSpan.textContent = h + rankLabel;
+                
+                textSpan.onclick = (e) => {
+                    e.stopPropagation();
+                    if (isLocked) return;
+                    
+                    if (h === "Participant Name" && !currentPrimary.startsWith('name')) {
+                        const oldPrimary = primarySortSelect.value;
+                        primarySortSelect.value = secondarySortSelect.value.startsWith('name') ? secondarySortSelect.value : "name-asc";
+                        secondarySortSelect.value = oldPrimary;
+                    } else if (h === "Class Date" && !currentPrimary.startsWith('date')) {
+                        const oldPrimary = primarySortSelect.value;
+                        primarySortSelect.value = secondarySortSelect.value.startsWith('date') ? secondarySortSelect.value : "date-desc";
+                        secondarySortSelect.value = oldPrimary;
+                    }
+                    sortMasterData();
+                    renderMasterTableUI();
+                };
+                th.appendChild(textSpan);
+
+                if (isActiveRule) {
+                    const iconBtn = document.createElement('button');
+                    iconBtn.style.background = "none";
+                    iconBtn.style.border = "none";
+                    iconBtn.style.cursor = isLocked ? "not-allowed" : "pointer";
+                    iconBtn.style.padding = "0 6px";
+                    iconBtn.style.fontSize = "1.2rem"; 
+                    iconBtn.style.color = isLocked ? "#9ca3af" : "#2563eb";
+                    iconBtn.style.fontWeight = "bold";
+                    iconBtn.style.transition = "transform 0.1s, color 0.2s";
+                    iconBtn.style.verticalAlign = "middle";
+                    
+                    iconBtn.innerHTML = (isActiveRule.endsWith('asc')) ? "▲" : "▼";
+                    
+                    if (!isLocked) {
+                        iconBtn.onmouseover = () => {
+                            iconBtn.style.color = "#1d4ed8";
+                            iconBtn.style.transform = "scale(1.2)";
+                        };
+                        iconBtn.onmouseout = () => {
+                            iconBtn.style.color = "#2563eb";
+                            iconBtn.style.transform = "scale(1)";
+                        };
+                    }
+                    
+                    iconBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (isLocked) return;
+                        handleHeaderClick(h);
+                    };
+                    th.appendChild(iconBtn);
+                }
+
+                const lockBtn = document.createElement('button');
+                lockBtn.style.background = "none";
+                lockBtn.style.border = "none";
+                lockBtn.style.cursor = "pointer";
+                lockBtn.style.padding = "0 6px";
+                lockBtn.style.fontSize = "1.1rem"; 
+                lockBtn.style.color = isLocked ? "#dc2626" : "#9ca3af"; 
+                lockBtn.style.transition = "transform 0.1s, color 0.2s";
+                lockBtn.style.verticalAlign = "middle";
+                lockBtn.title = isLocked ? "Unlock Column Sort Settings" : "Lock Column Sort Settings";
+                
+                lockBtn.innerHTML = isLocked ? "🔒" : "🔓";
+                
+                lockBtn.onmouseover = () => {
+                    lockBtn.style.color = isLocked ? "#b91c1c" : "#4b5563";
+                    lockBtn.style.transform = "scale(1.2)";
+                };
+                lockBtn.onmouseout = () => {
+                    lockBtn.style.color = isLocked ? "#dc2626" : "#9ca3af";
+                    lockBtn.style.transform = "scale(1)";
+                };
+                
+                lockBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    lockedColumns[h] = !lockedColumns[h];
+                    
+                    primarySortSelect.disabled = lockedColumns["Participant Name"] || lockedColumns["Class Date"];
+                    secondarySortSelect.disabled = lockedColumns["Participant Name"] || lockedColumns["Class Date"];
+                    
+                    renderMasterTableUI();
+                };
+                th.appendChild(lockBtn);
+                
+            } else {
+                th.textContent = h;
             }
             tableHeaders.appendChild(th);
         });
@@ -488,7 +644,7 @@
         });
     }
 
-    downloadBtn.addEventListener('click', () => {
+        downloadBtn.addEventListener('click', () => {
         if (masterData.length === 0) return;
 
         let csvContent = MASTER_HEADERS.join(",") + "\n";
@@ -521,3 +677,4 @@
 
 </body>
 </html>
+
