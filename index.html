@@ -74,13 +74,26 @@
         .remove-btn:hover {
             color: var(--danger-hover);
         }
-        .actions {
-            margin-top: 1.5rem;
+        
+        /* Layout Grid Architecture Updates */
+        .stage-2-header {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .header-row-1 {
+            display: flex;
             gap: 1rem;
             align-items: center;
         }
+        .header-row-2 {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
         .sort-controls {
             background: #ffffff;
             border: 1px solid var(--gray-300);
@@ -324,36 +337,42 @@
     <div id="stage-2" class="stage">
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
         
-        <div class="actions">
-            <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
-            
-            <div class="sort-controls">
-                <div class="control-group">
-                    <label for="name-sort-rule"><b>Name Order:</b></label>
-                    <select id="name-sort-rule">
-                        <option value="asc" selected>Alphabetical (A → Z)</option>
-                        <option value="desc">Reverse Alphabetical (Z → A)</option>
-                    </select>
-                </div>
-                
-                <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
-                
-                <div class="control-group">
-                    <label for="date-sort-rule"><b>Date Order:</b></label>
-                    <select id="date-sort-rule">
-                        <option value="desc" selected>Newest → Oldest</option>
-                        <option value="asc">Oldest → Newest</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts"></button>
-                </div>
+        <div class="stage-2-header">
+            <!-- Row 1: Go Back Button on Left, Download Button Directly to its Right -->
+            <div class="header-row-1">
+                <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
+                <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
             </div>
-
-            <!-- Peak overlay holder utility trigger element -->
-            <button id="time-peek-btn" class="btn btn-warn">HOLD TO PEEK CLOCK FORMAT</button>
-            <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
+            
+            <!-- Row 2: Sort Controls Selector on Left, Permanent Clock Converter Directly to its Right -->
+            <div class="header-row-2">
+                <div class="sort-controls">
+                    <div class="control-group">
+                        <label for="name-sort-rule"><b>Name Order:</b></label>
+                        <select id="name-sort-rule">
+                            <option value="asc" selected>Alphabetical (A → Z)</option>
+                            <option value="desc">Reverse Alphabetical (Z → A)</option>
+                        </select>
+                    </div>
+                    
+                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
+                    
+                    <div class="control-group">
+                        <label for="date-sort-rule"><b>Date Order:</b></label>
+                        <select id="date-sort-rule">
+                            <option value="desc" selected>Newest → Oldest</option>
+                            <option value="asc">Oldest → Newest</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts"></button>
+                    </div>
+                </div>
+                
+                <!-- Permanent Instant Toggle Conversion Button Element -->
+                <button id="time-convert-btn" class="btn btn-warn">Convert Clock Formats (12h ⇄ 24h)</button>
+            </div>
         </div>
 
         <!-- Advanced Concise Multi-Condition Filters Grid -->
@@ -422,7 +441,6 @@
     let masterData = [];
     let isRankLocked = false;
     let isNamePriorityPrimary = true;
-    let isPeekingAlternativeTime = false; // Tracks temporary peek button overlay state
 
     // Advanced range condition states (true = Inclusive, false = Exclusive)
     let isStartDateInclusive = true;
@@ -434,7 +452,7 @@
     const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
     const downloadBtn = document.getElementById('download-btn');
-    const timePeekBtn = document.getElementById('time-peek-btn');
+    const timeConvertBtn = document.getElementById('time-convert-btn');
     
     const nameSortRule = document.getElementById('name-sort-rule');
     const dateSortRule = document.getElementById('date-sort-rule');
@@ -538,17 +556,17 @@
 
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
-        if (!match || !match[1]) return "Unknown Date";
+        if (!match || !match) return "Unknown Date";
         
-        let rawDate = match[1].trim(); 
+        let rawDate = match.trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
         const parts = rawDate.split('-');
         if (parts.length !== 3) return rawDate; 
         
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
+        let day = parts.trim();
+        let month = parts.trim();
+        let year = parts.trim();
         
         month = month.substring(0, 3);
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
@@ -575,9 +593,9 @@
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
         
-        const day = parseInt(parts[0], 10);
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
+        const day = parseInt(parts, 10);
+        const monthStr = parts.substring(0, 3);
+        const year = parseInt(parts, 10);
         
         const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         const monthIndex = months.indexOf(monthStr);
@@ -585,7 +603,7 @@
         return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
 
-    // CRITICAL DURATION PARSING REPAIR: Standardizes "1h 12m", "45 min", and purely numeric cells accurately
+    // FIXED PARSING STAGE: Safely tracks and computes multi-hour strings accurately
     function parseDurationToMinutes(durStr) {
         if (!durStr) return 0;
         let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
@@ -595,8 +613,8 @@
             let totalMin = 0;
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
-            if (minMatch) totalMin += parseInt(minMatch[1], 10);
+            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
+            if (minMatch) totalMin += parseInt(minMatch, 10);
             return totalMin;
         }
         
@@ -604,33 +622,31 @@
         return isNaN(parsed) ? 0 : parsed;
     }
 
-    // Bidirectional 24 <-> 12 Hour String Syntax Translator Engine
+    // Modern 12h <-> 24h Time Conversion Rule Generator
     function convertTimeStringSyntax(timeStr) {
         if (!timeStr) return "";
         let clean = timeStr.trim().toUpperCase();
         
-        // Match 12-hour elements (e.g., "10:15 AM", "4:30 PM")
         const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
         if (ampmMatch) {
-            let hrs = parseInt(ampmMatch[1], 10);
-            let mins = ampmMatch[2];
-            let period = ampmMatch[3];
+            let hrs = parseInt(ampmMatch, 10);
+            let mins = ampmMatch;
+            let period = ampmMatch;
             if (period === "PM" && hrs < 12) hrs += 12;
             if (period === "AM" && hrs === 12) hrs = 0;
             return `${String(hrs).padStart(2, '0')}:${mins}`;
         }
         
-        // Match 24-hour elements (e.g., "14:20", "04:15")
         const militaryMatch = clean.match(/^(\d{2}):(\d{2})$/);
         if (militaryMatch) {
-            let hrs = parseInt(militaryMatch[1], 10);
-            let mins = militaryMatch[2];
+            let hrs = parseInt(militaryMatch, 10);
+            let mins = militaryMatch;
             let period = "AM";
             if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
             if (hrs === 0) hrs = 12;
             return `${hrs}:${mins} ${period}`;
         }
-        return timeStr; // Return unchanged if non-standard structure
+        return timeStr; 
     }
 
         nextBtn.addEventListener('click', async () => {
@@ -647,7 +663,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                const fileHeaders = parseCSVLine(lines[0]); 
+                const fileHeaders = parseCSVLine(lines); 
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -693,12 +709,10 @@
         });
     });
 
-    // Wire up advanced text condition filters
     [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
         input.addEventListener('input', () => { renderMasterTableUI(); });
     });
 
-    // Toggle Link Interactive Actions (Inc vs Exc boundaries)
     startDateToggle.addEventListener('click', () => {
         isStartDateInclusive = !isStartDateInclusive;
         startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
@@ -710,10 +724,17 @@
         renderMasterTableUI();
     });
 
-    // Clock syntax interactive peek mouse tracking hooks
-    timePeekBtn.addEventListener('mousedown', () => { isPeekingAlternativeTime = true; renderMasterTableUI(); });
-    timePeekBtn.addEventListener('mouseup', () => { isPeekingAlternativeTime = false; renderMasterTableUI(); });
-    timePeekBtn.addEventListener('mouseleave', () => { isPeekingAlternativeTime = false; renderMasterTableUI(); });
+    // Permanent click conversion event loop (Modifies base data strings instantly)
+    timeConvertBtn.addEventListener('click', () => {
+        masterData.forEach(row => {
+            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
+                if (row[header]) {
+                    row[header] = convertTimeStringSyntax(row[header]);
+                }
+            });
+        });
+        renderMasterTableUI(); // Instantly refresh row display fields
+    });
 
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
@@ -891,14 +912,7 @@
                 const td = document.createElement('td');
                 const input = document.createElement('input');
                 
-                let displayVal = row[header] || '';
-                
-                // If the clock peek button is actively held down, toggle the format of the time columns
-                if (isPeekingAlternativeTime && ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].includes(header)) {
-                    displayVal = convertTimeStringSyntax(displayVal);
-                }
-                
-                input.value = displayVal;
+                input.value = row[header] || '';
                 const baseIndex = masterData.indexOf(row);
                 
                 input.addEventListener('input', (e) => {
