@@ -92,9 +92,14 @@
         }
         .header-row-2 {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             align-items: center;
             flex-wrap: wrap;
+        }
+        .vertical-button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
         
         .sort-controls {
@@ -127,7 +132,6 @@
             cursor: not-allowed;
         }
         
-        /* Custom CSS-Drawn Swap Priority Button Layout */
         .switch-btn {
             padding: 0.4rem 0.8rem;
             background: var(--gray-100);
@@ -136,9 +140,6 @@
             cursor: pointer;
             font-weight: 600;
             color: var(--gray-700);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
             transition: background 0.2s;
         }
         .switch-btn:hover:not(:disabled) {
@@ -148,33 +149,11 @@
             cursor: not-allowed;
             opacity: 0.6;
         }
-        .css-swap-icon {
-            width: 14px;
-            height: 10px;
-            position: relative;
-        }
-        .css-swap-icon::before, .css-swap-icon::after {
-            content: "";
-            position: absolute;
-            height: 2px;
-            background: var(--gray-700);
-            border-radius: 1px;
-        }
-        .css-swap-icon::before {
-            top: 2px; left: 0; width: 10px;
-            border-top: 2px solid transparent;
-            border-right: 3px solid var(--gray-700);
-        }
-        .css-swap-icon::after {
-            bottom: 2px; right: 0; width: 10px;
-            border-bottom: 2px solid transparent;
-            border-left: 3px solid var(--gray-700);
-        }
         
+        /* Time format selective active mode tracker colors */
         .btn-toggle-time {
             padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
-            font-weight: 600;
             background: white;
             border: 1px solid var(--gray-300);
             border-radius: 4px;
@@ -185,6 +164,13 @@
         }
         .btn-toggle-time:hover {
             border-color: var(--primary);
+        }
+        .time-mode-label {
+            font-weight: normal;
+            color: var(--gray-400);
+        }
+        .time-mode-label.is-active {
+            font-weight: bold;
             color: var(--primary);
         }
         
@@ -224,6 +210,7 @@
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 0.75rem;
+            align-items: flex-end;
         }
         .filter-box {
             display: flex;
@@ -324,7 +311,6 @@
             background-color: #fef08a;
         }
         
-        /* Floating Dropdown Context Management Layout Menu Actions */
         .context-menu-mask {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -354,7 +340,6 @@
         .context-item:hover { background: var(--gray-100); color: var(--primary); }
         .context-item.item-danger:hover { background: #fee2e2; color: var(--danger); }
         
-        /* Custom CSS Padlock Vector Definitions */
         .lock-container {
             display: inline-flex;
             align-items: center;
@@ -386,7 +371,6 @@
         .lock-container.is-locked .css-lock::before { border-color: #dc2626; transform: translate(0, 0); }
         .lock-container.is-unlocked .css-lock::before { transform: translate(2px, -2px) rotate(15deg); }
         
-        /* Custom CSS-Drawn Sizing Triangle Direction Vectors */
         .css-arrow-icon {
             display: inline-block;
             width: 0; height: 0;
@@ -412,7 +396,6 @@
             transform: scale(1.3);
         }
         
-        /* Custom CSS-Drawn Context Trashcan Vector Graphic Icons */
         .css-trash-icon {
             width: 12px;
             height: 14px;
@@ -468,18 +451,20 @@
         <div class="actions">
             <button class="btn btn-primary" id="next-btn">Combine & Process Data</button>
         </div>
-        </div>
+    </div>
 
     <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
     <div id="stage-2" class="stage">
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
         
         <div class="stage-2-header">
+            <!-- Row 1: Left Back Button, Right Download Button -->
             <div class="header-row-1">
                 <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
                 <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
             </div>
             
+            <!-- Row 2: Left Sort Module, Right Stacked Time Conversion and Drag Reorder Controls -->
             <div class="header-row-2">
                 <div class="sort-controls">
                     <div class="control-group">
@@ -490,11 +475,8 @@
                         </select>
                     </div>
                     
-                    <!-- Swap Priority custom icon attachment integration -->
-                    <button id="priority-switch-btn" class="switch-btn">
-                        <span>Name Priority First</span>
-                        <div class="css-swap-icon"></div>
-                    </button>
+                    <!-- Original clean textual layout restored -->
+                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
                     
                     <div class="control-group">
                         <label for="date-sort-rule"><b>Date Order:</b></label>
@@ -509,13 +491,17 @@
                     </div>
                 </div>
                 
-                <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
-                <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Reset Filters ↺</button>
-                <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
+                <div class="vertical-button-stack">
+                    <!-- Button displays selection explicitly with bold tracking classes -->
+                    <button id="time-convert-btn" class="btn-toggle-time">
+                        Time Format: <span id="label-12h" class="time-mode-label is-active">12h</span> ⇄ <span id="label-24h" class="time-mode-label">24h</span>
+                    </button>
+                    <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
+                </div>
             </div>
         </div>
 
-        <!-- Advanced Multi-Condition Filters Grid -->
+        <!-- Advanced Query Filters Engine Panel Grid -->
         <div class="filter-panel">
             <div class="filter-header-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;">
@@ -561,6 +547,11 @@
                 <div class="filter-box">
                     <label>Stopped At</label>
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
+                </div>
+                
+                <!-- Reset Filters Button moved beside Stopped At input -->
+                <div class="filter-box">
+                    <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.45rem 1rem; font-size: 0.875rem; height: 34px; width: 100%;">Reset Filters ↺</button>
                 </div>
             </div>
         </div>
@@ -612,6 +603,9 @@
     let isStartDateInclusive = true;
     let isEndDateInclusive = true;
     
+    // Time syntax toggle format selection tracking indicator rules
+    let currentActiveTimeMode = "12h";
+
     let isDragReorderModeActive = false;
     let draggedColumnHeaderIndex = null;
     let activeContextColumnHeaderKey = null;
@@ -656,7 +650,7 @@
     const columnContextMenu = document.getElementById('column-context-menu');
     const rowContextMenu = document.getElementById('row-context-menu');
 
-    function handleFileSelection(files) {
+        function handleFileSelection(files) {
         if (!files) return;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -731,15 +725,15 @@
         const match = filename.match(/\(([^)]+)\)/);
         if (!match || !match) return "Unknown Date";
         
-        let rawDate = match[1].trim(); 
+        let rawDate = match.trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
         const parts = rawDate.split('-');
         if (parts.length !== 3) return rawDate; 
         
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
+        let day = parts.trim();
+        let month = parts.trim();
+        let year = parts.trim();
         
         month = month.substring(0, 3);
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
@@ -767,9 +761,9 @@
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
         
-        const day = parseInt(parts[0], 10);
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
+        const day = parseInt(parts, 10);
+        const monthStr = parts.substring(0, 3);
+        const year = parseInt(parts, 10);
         
         const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         const monthIndex = months.indexOf(monthStr);
@@ -786,7 +780,7 @@
             let totalMin = 0;
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
+            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
             if (minMatch) totalMin += parseInt(minMatch, 10);
             return totalMin;
         }
@@ -801,10 +795,10 @@
         
         const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
         if (ampmMatch) {
-            let hrs = parseInt(ampmMatch[1], 10);
-            let mins = ampmMatch[2];
-            let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
-            let period = ampmMatch[4];
+            let hrs = parseInt(ampmMatch, 10);
+            let mins = ampmMatch;
+            let secs = ampmMatch ? `:${ampmMatch}` : "";
+            let period = ampmMatch;
             
             if (period === "PM" && hrs < 12) hrs += 12;
             if (period === "AM" && hrs === 12) hrs = 0;
@@ -813,9 +807,9 @@
         
         const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
         if (militaryMatch) {
-            let hrs = parseInt(militaryMatch[1], 10);
-            let mins = militaryMatch[2];
-            let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
+            let hrs = parseInt(militaryMatch, 10);
+            let mins = militaryMatch;
+            let secs = militaryMatch ? `:${militaryMatch}` : "";
             let period = "AM";
             
             if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
@@ -970,6 +964,19 @@
     });
 
     timeConvertBtn.addEventListener('click', () => {
+        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
+        
+        // Highlight active layout text styles dynamically on button
+        const lbl12 = document.getElementById('label-12h');
+        const lbl24 = document.getElementById('label-24h');
+        if (currentActiveTimeMode === "12h") {
+            lbl12.className = "time-mode-label is-active";
+            lbl24.className = "time-mode-label";
+        } else {
+            lbl12.className = "time-mode-label";
+            lbl24.className = "time-mode-label is-active";
+        }
+        
         masterData.forEach(row => {
             ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
                 if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
@@ -981,8 +988,464 @@
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isNamePriorityPrimary = !isNamePriorityPrimary;
-        const textSpan = prioritySwitchBtn.querySelector('span');
-        textSpan.textContent = isNamePriorityPrimary ? "Name Priority First" : "Date Priority First";
+        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
+        sortMasterData();
+        renderMasterTableUI();
+    });
+
+    rankLockBtn.addEventListener('click', () => {
+        isRankLocked = !isRankLocked;
+        if (isRankLocked) {
+            rankLockBtn.className = "lock-container is-locked";
+            nameSortRule.disabled = true;
+            dateSortRule.disabled = true;
+            prioritySwitchBtn.disabled = true;
+            toggleReorderBtn.disabled = true;
+            isDragReorderModeActive = false;
+            toggleReorderBtn.textContent = "Enable Drag Reorder Mode";
+            toggleReorderBtn.style.background = "var(--excel-green)";
+        } else {
+            rankLockBtn.className = "lock-container is-unlocked";
+            nameSortRule.disabled = false;
+            dateSortRule.disabled = false;
+            prioritySwitchBtn.disabled = false;
+            toggleReorderBtn.disabled = false;
+        }
+        renderMasterTableUI();
+    });
+
+    function sortMasterData() {
+        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
+        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
+
+        function checkNameLayer(a, b) {
+            const nameA = (a["Participant Name"] || "").toLowerCase();
+            const nameB = (b["Participant Name"] || "").toLowerCase();
+            return nameA.localeCompare(nameB) * nameDirection;
+        }
+
+        function checkDateLayer(a, b) {
+            const dateA = parseCustomDate(a["Class Date"]);
+            const dateB = parseCustomDate(b["Class Date"]);
+            return (dateA - dateB) * dateDirection;
+        }
+
+        masterData.sort((a, b) => {
+            if (isNamePriorityPrimary) {
+                const res = checkNameLayer(a, b);
+                if (res !== 0) return res;
+                return checkDateLayer(a, b);
+            } else {
+                const res = checkDateLayer(a, b);
+                if (res !== 0) return res;
+                return checkNameLayer(a, b);
+            }
+        });
+    }
+
+    function flipDirectionOnly(columnKey) {
+        if (isRankLocked) return;
+        if (columnKey === "Participant Name") {
+            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
+        } else if (columnKey === "Class Date") {
+            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
+        }
+        sortMasterData();
+        renderMasterTableUI();
+    }
+
+    function setPrimaryRankFromHeaderClick(columnKey) {
+        if (isRankLocked || isDragReorderModeActive) return;
+        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
+                let isNamePriorityPrimary = true;
+    let isStartDateInclusive = true;
+    let isEndDateInclusive = true;
+    
+    // Time syntax toggle format selection tracking indicator rules
+    let currentActiveTimeMode = "12h";
+
+    let isDragReorderModeActive = false;
+    let draggedColumnHeaderIndex = null;
+    let activeContextColumnHeaderKey = null;
+    let activeContextRowDataIndex = null;
+
+    const csvPicker = document.getElementById('csv-picker');
+    const uploadSection = document.querySelector('.upload-section');
+    const fileQueue = document.getElementById('file-queue');
+    const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const timeConvertBtn = document.getElementById('time-convert-btn');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    const toggleReorderBtn = document.getElementById('toggle-reorder-btn');
+    
+    const nameSortRule = document.getElementById('name-sort-rule');
+    const dateSortRule = document.getElementById('date-sort-rule');
+    const prioritySwitchBtn = document.getElementById('priority-switch-btn');
+    const rankLockBtn = document.getElementById('rank-lock-btn');
+    
+    const filterName = document.getElementById('filter-name');
+    const filterCode = document.getElementById('filter-code');
+    const filterDurMin = document.getElementById('filter-dur-min');
+    const filterDurMax = document.getElementById('filter-dur-max');
+    const filterDateStart = document.getElementById('filter-date-start');
+    const filterDateEnd = document.getElementById('filter-date-end');
+    const startDateToggle = document.getElementById('start-date-toggle');
+    const endDateToggle = document.getElementById('end-date-toggle');
+    
+    const filterStartedTime = document.getElementById('filter-started-time');
+    const filterJoinedTime = document.getElementById('filter-joined-time');
+    const filterStoppedTime = document.getElementById('filter-stopped-time');
+    
+    const stage1 = document.getElementById('stage-1');
+    const stage2 = document.getElementById('stage-2');
+    
+    const tableHeaders = document.getElementById('table-headers');
+    const tableHeaderLetters = document.getElementById('table-header-letters');
+    const tableBody = document.getElementById('table-body');
+    
+    const contextMask = document.getElementById('context-mask');
+    const columnContextMenu = document.getElementById('column-context-menu');
+    const rowContextMenu = document.getElementById('row-context-menu');
+
+    function handleFileSelection(files) {
+        if (!files) return;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                if (!uploadedFilesArray.some(f => f.name === file.name)) {
+                    uploadedFilesArray.push(file);
+                }
+            }
+        }
+        renderQueueUI();
+    }
+
+    csvPicker.addEventListener('change', (e) => {
+        handleFileSelection(e.target.files);
+        csvPicker.value = ""; 
+    });
+
+    uploadSection.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--primary)';
+        uploadSection.style.background = '#eff6ff'; 
+    });
+
+    uploadSection.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+    });
+
+    uploadSection.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadSection.style.borderColor = 'var(--gray-300)';
+        uploadSection.style.background = 'white';
+        if (e.dataTransfer && e.dataTransfer.files) {
+            handleFileSelection(e.dataTransfer.files);
+        }
+    });
+
+    function renderQueueUI() {
+        fileQueue.innerHTML = '';
+        if (uploadedFilesArray.length === 0) {
+            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
+            return;
+        }
+        uploadedFilesArray.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'file-name';
+            nameSpan.textContent = file.name;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation(); 
+                uploadedFilesArray.splice(index, 1);
+                renderQueueUI();
+            };
+            
+            fileItem.appendChild(nameSpan);
+            fileItem.appendChild(removeBtn);
+            fileQueue.appendChild(fileItem);
+        });
+    }
+
+    function extractDateFromFilename(filename) {
+        const match = filename.match(/\(([^)]+)\)/);
+        if (!match || !match) return "Unknown Date";
+        
+        let rawDate = match.trim(); 
+        rawDate = rawDate.replace(/\./g, '');
+        
+        const parts = rawDate.split('-');
+        if (parts.length !== 3) return rawDate; 
+        
+        let day = parts.trim();
+        let month = parts.trim();
+        let year = parts.trim();
+        
+        month = month.substring(0, 3);
+        month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    function parseCSVLine(text) {
+        let p = '', r = [];
+        let q = false;
+        const cleanText = text.replace(/\r$/, '');
+        for (let i = 0; i < cleanText.length; i++) {
+            let c = cleanText[i];
+            if (c === '"') { q = !q; }
+            else if (c === ',' && !q) { r.push(p.trim()); p = ''; }
+            else { p += c; }
+        }
+        r.push(p.trim());
+        return r;
+    }
+
+    function parseCustomDate(dateStr) {
+        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
+        let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
+        const parts = cleanStr.split('-');
+        if (parts.length !== 3) return new Date(0);
+        
+        const day = parseInt(parts, 10);
+        const monthStr = parts.substring(0, 3);
+        const year = parseInt(parts, 10);
+        
+        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const monthIndex = months.indexOf(monthStr);
+        
+        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
+    }
+
+    function parseDurationToMinutes(durStr) {
+        if (!durStr) return 0;
+        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
+        if (!clean) return 0;
+        
+        if (clean.includes('h') || clean.includes('m')) {
+            let totalMin = 0;
+            const hrMatch = clean.match(/(\d+)\s*h/);
+            const minMatch = clean.match(/(\d+)\s*m/);
+            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
+            if (minMatch) totalMin += parseInt(minMatch, 10);
+            return totalMin;
+        }
+        
+        let parsed = parseInt(clean, 10);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function convertTimeStringSyntax(timeStr) {
+        if (!timeStr) return "";
+        let clean = timeStr.trim().toUpperCase();
+        
+        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
+        if (ampmMatch) {
+            let hrs = parseInt(ampmMatch, 10);
+            let mins = ampmMatch;
+            let secs = ampmMatch ? `:${ampmMatch}` : "";
+            let period = ampmMatch;
+            
+            if (period === "PM" && hrs < 12) hrs += 12;
+            if (period === "AM" && hrs === 12) hrs = 0;
+            return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
+        }
+        
+        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+        if (militaryMatch) {
+            let hrs = parseInt(militaryMatch, 10);
+            let mins = militaryMatch;
+            let secs = militaryMatch ? `:${militaryMatch}` : "";
+            let period = "AM";
+            
+            if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
+            if (hrs === 0) hrs = 12;
+            return `${hrs}:${mins}${secs} ${period}`;
+        }
+        return timeStr; 
+    }
+
+    nextBtn.addEventListener('click', async () => {
+        if (uploadedFilesArray.length === 0) {
+            alert('Please upload or drag-and-drop at least one CSV file.');
+            return;
+        }
+
+        masterData = []; 
+
+        for (let file of uploadedFilesArray) {
+            try {
+                const text = await file.text();
+                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                if (lines.length === 0) continue;
+
+                const fileHeaders = parseCSVLine(lines); 
+                const fileDate = extractDateFromFilename(file.name);
+                
+                const indexMap = {};
+                MASTER_HEADERS.forEach(header => {
+                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
+                });
+
+                for (let i = 1; i < lines.length; i++) {
+                    const rowValues = parseCSVLine(lines[i]);
+                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
+
+                                        let structuredObj = {};
+                    MASTER_HEADERS.forEach(header => {
+                        if (header === "Class Date") {
+                            structuredObj[header] = fileDate;
+                        } else {
+                            const mappedIdx = indexMap[header];
+                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
+                        }
+                    });
+                    masterData.push(structuredObj);
+                }
+            } catch (err) {
+                console.error("Error reading file: " + file.name, err);
+            }
+        }
+
+        sortMasterData();
+        renderMasterTableUI();
+        stage1.classList.remove('active');
+        stage2.classList.add('active');
+    });
+
+    backBtn.addEventListener('click', () => {
+        stage1.classList.add('active');
+        stage2.classList.remove('active');
+    });
+
+    toggleReorderBtn.addEventListener('click', () => {
+        if (isRankLocked) return;
+        isDragReorderModeActive = !isDragReorderModeActive;
+        toggleReorderBtn.textContent = isDragReorderModeActive ? "Disable Drag Reorder Mode" : "Enable Drag Reorder Mode";
+        toggleReorderBtn.style.background = isDragReorderModeActive ? "#dc2626" : "var(--excel-green)";
+        toggleReorderBtn.style.borderColor = isDragReorderModeActive ? "#dc2626" : "var(--excel-green)";
+        renderMasterTableUI();
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
+        isStartDateInclusive = true;
+        isEndDateInclusive = true;
+        startDateToggle.textContent = "Inc";
+        endDateToggle.textContent = "Inc";
+        renderMasterTableUI();
+    });
+
+    function closeAllContextMenus() {
+        columnContextMenu.style.display = "none";
+        rowContextMenu.style.display = "none";
+        contextMask.style.display = "none";
+    }
+    contextMask.addEventListener('click', closeAllContextMenus);
+
+    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        const newColName = prompt("Enter a unique name for your new custom column:");
+        if (!newColName) return;
+        const cleanCol = newColName.trim();
+        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
+        
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) {
+            MASTER_HEADERS.splice(idx, 0, cleanCol);
+            masterData.forEach(row => { row[cleanCol] = ""; });
+        }
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-col').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
+            alert("Protected base headers cannot be deleted.");
+            return;
+        }
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) {
+            MASTER_HEADERS.splice(idx, 1);
+            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
+        }
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
+        if (isRankLocked || activeContextRowDataIndex === null) return;
+        let blankRow = {};
+        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
+        masterData.splice(activeContextRowDataIndex, 0, blankRow);
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-row').addEventListener('click', () => {
+        if (isRankLocked || activeContextRowDataIndex === null) return;
+        masterData.splice(activeContextRowDataIndex, 1);
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    [nameSortRule, dateSortRule].forEach(select => {
+        select.addEventListener('change', () => { sortMasterData(); renderMasterTableUI(); });
+    });
+
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
+        input.addEventListener('input', () => { renderMasterTableUI(); });
+    });
+
+    startDateToggle.addEventListener('click', () => {
+        isStartDateInclusive = !isStartDateInclusive;
+        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+    endDateToggle.addEventListener('click', () => {
+        isEndDateInclusive = !isEndDateInclusive;
+        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+
+    timeConvertBtn.addEventListener('click', () => {
+        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
+        
+        const lbl12 = document.getElementById('label-12h');
+        const lbl24 = document.getElementById('label-24h');
+        if (currentActiveTimeMode === "12h") {
+            lbl12.className = "time-mode-label is-active";
+            lbl24.className = "time-mode-label";
+        } else {
+            lbl12.className = "time-mode-label";
+            lbl24.className = "time-mode-label is-active";
+        }
+        
+        masterData.forEach(row => {
+            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
+                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
+            });
+        });
+        renderMasterTableUI(); 
+    });
+
+    prioritySwitchBtn.addEventListener('click', () => {
+        if (isRankLocked) return;
+        isNamePriorityPrimary = !isNamePriorityPrimary;
+        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
         sortMasterData();
         renderMasterTableUI();
     });
@@ -1052,18 +1515,16 @@
         if (isRankLocked || isDragReorderModeActive) return;
         if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
             isNamePriorityPrimary = true;
-            const textSpan = prioritySwitchBtn.querySelector('span');
-            textSpan.textContent = "Name Priority First";
+            prioritySwitchBtn.textContent = "Name Priority First ⇄";
         } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
             isNamePriorityPrimary = false;
-            const textSpan = prioritySwitchBtn.querySelector('span');
-            textSpan.textContent = "Date Priority First";
+            prioritySwitchBtn.textContent = "Date Priority First ⇄";
         }
         sortMasterData();
         renderMasterTableUI();
     }
 
-        function getExcelColumnLetterLabel(index) {
+    function getExcelColumnLetterLabel(index) {
         let label = '';
         while (index >= 0) {
             label = String.fromCharCode((index % 26) + 65) + label;
@@ -1085,7 +1546,7 @@
         MASTER_HEADERS.forEach((h, index) => {
             const letterTh = document.createElement('th');
             letterTh.textContent = getExcelColumnLetterLabel(index);
-            letterTh.className = "excel-row-header";
+                        letterTh.className = "excel-row-header";
             
             letterTh.addEventListener('click', (e) => {
                 if (isRankLocked) return;
@@ -1116,7 +1577,7 @@
                 th.addEventListener('drop', (e) => {
                     e.preventDefault();
                     if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const targetItem = MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1)[0];
+                        const targetItem = MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
                         MASTER_HEADERS.splice(index, 0, targetItem);
                         renderMasterTableUI();
                     }
@@ -1142,7 +1603,6 @@
                 textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
                 th.appendChild(textSpan);
 
-                // Mount Custom pure CSS-drawn Sizing Arrow Vectors
                 const arrowIndicator = document.createElement('div');
                 arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
                 if (isRankLocked) arrowIndicator.classList.add('is-disabled');
@@ -1265,3 +1725,4 @@
 
 </body>
 </html>
+
