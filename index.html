@@ -96,6 +96,11 @@
             align-items: center;
             flex-wrap: wrap;
         }
+        .vertical-button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
         
         .sort-controls {
             background: #ffffff;
@@ -127,7 +132,6 @@
             cursor: not-allowed;
         }
         
-        /* Custom CSS-Drawn Swap Priority Button Layout */
         .switch-btn {
             padding: 0.4rem 0.8rem;
             background: var(--gray-100);
@@ -147,28 +151,6 @@
         .switch-btn:disabled {
             cursor: not-allowed;
             opacity: 0.6;
-        }
-        .css-swap-icon {
-            width: 14px;
-            height: 10px;
-            position: relative;
-        }
-        .css-swap-icon::before, .css-swap-icon::after {
-            content: "";
-            position: absolute;
-            height: 2px;
-            background: var(--gray-700);
-            border-radius: 1px;
-        }
-        .css-swap-icon::before {
-            top: 2px; left: 0; width: 10px;
-            border-top: 2px solid transparent;
-            border-right: 3px solid var(--gray-700);
-        }
-        .css-swap-icon::after {
-            bottom: 2px; right: 0; width: 10px;
-            border-bottom: 2px solid transparent;
-            border-left: 3px solid var(--gray-700);
         }
         
         .btn-toggle-time {
@@ -224,6 +206,7 @@
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 0.75rem;
+            align-items: flex-end;
         }
         .filter-box {
             display: flex;
@@ -324,7 +307,6 @@
             background-color: #fef08a;
         }
         
-        /* Floating Dropdown Context Management Layout Menu Actions */
         .context-menu-mask {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -354,7 +336,6 @@
         .context-item:hover { background: var(--gray-100); color: var(--primary); }
         .context-item.item-danger:hover { background: #fee2e2; color: var(--danger); }
         
-        /* Custom CSS Padlock Vector Definitions */
         .lock-container {
             display: inline-flex;
             align-items: center;
@@ -386,7 +367,6 @@
         .lock-container.is-locked .css-lock::before { border-color: #dc2626; transform: translate(0, 0); }
         .lock-container.is-unlocked .css-lock::before { transform: translate(2px, -2px) rotate(15deg); }
         
-        /* Custom CSS-Drawn Sizing Triangle Direction Vectors */
         .css-arrow-icon {
             display: inline-block;
             width: 0; height: 0;
@@ -412,7 +392,6 @@
             transform: scale(1.3);
         }
         
-        /* Custom CSS-Drawn Context Trashcan Vector Graphic Icons */
         .css-trash-icon {
             width: 12px;
             height: 14px;
@@ -490,11 +469,7 @@
                         </select>
                     </div>
                     
-                    <!-- Swap Priority custom icon attachment integration -->
-                    <button id="priority-switch-btn" class="switch-btn">
-                        <span>Name Priority First</span>
-                        <div class="css-swap-icon"></div>
-                    </button>
+                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
                     
                     <div class="control-group">
                         <label for="date-sort-rule"><b>Date Order:</b></label>
@@ -509,13 +484,14 @@
                     </div>
                 </div>
                 
-                <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
-                <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Reset Filters ↺</button>
-                <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
+                <!-- Vertical button stack container below the sort indicators layout -->
+                <div class="vertical-button-stack">
+                    <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
+                    <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder</button>
+                </div>
             </div>
         </div>
 
-        <!-- Advanced Multi-Condition Filters Grid -->
         <div class="filter-panel">
             <div class="filter-header-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;">
@@ -561,6 +537,11 @@
                 <div class="filter-box">
                     <label>Stopped At</label>
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
+                </div>
+                
+                <!-- Expanded height Reset Filters action button positioned right beside Stopped At section grid row -->
+                <div class="filter-box">
+                    <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
                 </div>
             </div>
         </div>
@@ -612,6 +593,8 @@
     let isStartDateInclusive = true;
     let isEndDateInclusive = true;
     
+    let currentActiveTimeMode = "12h";
+
     let isDragReorderModeActive = false;
     let draggedColumnHeaderIndex = null;
     let activeContextColumnHeaderKey = null;
@@ -698,7 +681,7 @@
         }
     });
 
-    function renderQueueUI() {
+        function renderQueueUI() {
         fileQueue.innerHTML = '';
         if (uploadedFilesArray.length === 0) {
             fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
@@ -881,7 +864,8 @@
     toggleReorderBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isDragReorderModeActive = !isDragReorderModeActive;
-        toggleReorderBtn.textContent = isDragReorderModeActive ? "Disable Drag Reorder Mode" : "Enable Drag Reorder Mode";
+        // Text updated to cleanly prun off the trailing word label spec rule
+        toggleReorderBtn.textContent = isDragReorderModeActive ? "Disable Drag Reorder" : "Enable Drag Reorder";
         toggleReorderBtn.style.background = isDragReorderModeActive ? "#dc2626" : "var(--excel-green)";
         toggleReorderBtn.style.borderColor = isDragReorderModeActive ? "#dc2626" : "var(--excel-green)";
         renderMasterTableUI();
@@ -970,6 +954,7 @@
     });
 
     timeConvertBtn.addEventListener('click', () => {
+        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
         masterData.forEach(row => {
             ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
                 if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
@@ -981,8 +966,8 @@
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isNamePriorityPrimary = !isNamePriorityPrimary;
-        const textSpan = prioritySwitchBtn.querySelector('span');
-        textSpan.textContent = isNamePriorityPrimary ? "Name Priority First" : "Date Priority First";
+        // Restored clean text syntax utilizing matching format
+        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
         sortMasterData();
         renderMasterTableUI();
     });
@@ -996,7 +981,7 @@
             prioritySwitchBtn.disabled = true;
             toggleReorderBtn.disabled = true;
             isDragReorderModeActive = false;
-            toggleReorderBtn.textContent = "Enable Drag Reorder Mode";
+            toggleReorderBtn.textContent = "Enable Drag Reorder";
             toggleReorderBtn.style.background = "var(--excel-green)";
         } else {
             rankLockBtn.className = "lock-container is-unlocked";
@@ -1052,12 +1037,10 @@
         if (isRankLocked || isDragReorderModeActive) return;
         if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
             isNamePriorityPrimary = true;
-            const textSpan = prioritySwitchBtn.querySelector('span');
-            textSpan.textContent = "Name Priority First";
+            prioritySwitchBtn.textContent = "Name Priority First ⇄";
         } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
             isNamePriorityPrimary = false;
-            const textSpan = prioritySwitchBtn.querySelector('span');
-            textSpan.textContent = "Date Priority First";
+            prioritySwitchBtn.textContent = "Date Priority First ⇄";
         }
         sortMasterData();
         renderMasterTableUI();
@@ -1077,7 +1060,6 @@
         tableHeaderLetters.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // 1. Build Excel Sidebar Handle Row Elements (A, B, C...)
         const emptyTh = document.createElement('th');
         emptyTh.style.width = "50px";
         tableHeaderLetters.appendChild(emptyTh);
@@ -1098,7 +1080,6 @@
             tableHeaderLetters.appendChild(letterTh);
         });
 
-        // 2. Build Column Data Header Matrix Labels
         const cornerTh = document.createElement('th');
         cornerTh.className = "excel-row-header";
         tableHeaders.appendChild(cornerTh);
@@ -1116,8 +1097,9 @@
                 th.addEventListener('drop', (e) => {
                     e.preventDefault();
                     if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const targetItem = MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1)[0];
-                        MASTER_HEADERS.splice(index, 0, targetItem);
+                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
+                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
+                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
                         renderMasterTableUI();
                     }
                 });
@@ -1142,7 +1124,6 @@
                 textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
                 th.appendChild(textSpan);
 
-                // Mount Custom pure CSS-drawn Sizing Arrow Vectors
                 const arrowIndicator = document.createElement('div');
                 arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
                 if (isRankLocked) arrowIndicator.classList.add('is-disabled');
@@ -1159,7 +1140,6 @@
             tableHeaders.appendChild(th);
         });
 
-        // Advanced Filter Computations Engine Loop
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
@@ -1196,7 +1176,7 @@
             return true;
         });
 
-        // 3. Render rows matching leading numeric Excel Handles (1, 2, 3...)
+        tableBody.innerHTML = '';
         filteredData.forEach((row, index) => {
             const tr = document.createElement('tr');
             
