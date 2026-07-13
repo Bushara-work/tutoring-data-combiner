@@ -92,14 +92,9 @@
         }
         .header-row-2 {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
-        }
-        .vertical-button-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
         }
         
         .sort-controls {
@@ -132,6 +127,7 @@
             cursor: not-allowed;
         }
         
+        /* Custom CSS-Drawn Swap Priority Button Layout */
         .switch-btn {
             padding: 0.4rem 0.8rem;
             background: var(--gray-100);
@@ -140,6 +136,9 @@
             cursor: pointer;
             font-weight: 600;
             color: var(--gray-700);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             transition: background 0.2s;
         }
         .switch-btn:hover:not(:disabled) {
@@ -149,11 +148,33 @@
             cursor: not-allowed;
             opacity: 0.6;
         }
+        .css-swap-icon {
+            width: 14px;
+            height: 10px;
+            position: relative;
+        }
+        .css-swap-icon::before, .css-swap-icon::after {
+            content: "";
+            position: absolute;
+            height: 2px;
+            background: var(--gray-700);
+            border-radius: 1px;
+        }
+        .css-swap-icon::before {
+            top: 2px; left: 0; width: 10px;
+            border-top: 2px solid transparent;
+            border-right: 3px solid var(--gray-700);
+        }
+        .css-swap-icon::after {
+            bottom: 2px; right: 0; width: 10px;
+            border-bottom: 2px solid transparent;
+            border-left: 3px solid var(--gray-700);
+        }
         
-        /* Time format selective active mode tracker colors */
         .btn-toggle-time {
             padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
+            font-weight: 600;
             background: white;
             border: 1px solid var(--gray-300);
             border-radius: 4px;
@@ -164,13 +185,6 @@
         }
         .btn-toggle-time:hover {
             border-color: var(--primary);
-        }
-        .time-mode-label {
-            font-weight: normal;
-            color: var(--gray-400);
-        }
-        .time-mode-label.is-active {
-            font-weight: bold;
             color: var(--primary);
         }
         
@@ -210,7 +224,6 @@
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 0.75rem;
-            align-items: flex-end;
         }
         .filter-box {
             display: flex;
@@ -311,6 +324,7 @@
             background-color: #fef08a;
         }
         
+        /* Floating Dropdown Context Management Layout Menu Actions */
         .context-menu-mask {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -340,6 +354,7 @@
         .context-item:hover { background: var(--gray-100); color: var(--primary); }
         .context-item.item-danger:hover { background: #fee2e2; color: var(--danger); }
         
+        /* Custom CSS Padlock Vector Definitions */
         .lock-container {
             display: inline-flex;
             align-items: center;
@@ -371,6 +386,7 @@
         .lock-container.is-locked .css-lock::before { border-color: #dc2626; transform: translate(0, 0); }
         .lock-container.is-unlocked .css-lock::before { transform: translate(2px, -2px) rotate(15deg); }
         
+        /* Custom CSS-Drawn Sizing Triangle Direction Vectors */
         .css-arrow-icon {
             display: inline-block;
             width: 0; height: 0;
@@ -396,6 +412,7 @@
             transform: scale(1.3);
         }
         
+        /* Custom CSS-Drawn Context Trashcan Vector Graphic Icons */
         .css-trash-icon {
             width: 12px;
             height: 14px;
@@ -458,13 +475,11 @@
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
         
         <div class="stage-2-header">
-            <!-- Row 1: Left Back Button, Right Download Button -->
             <div class="header-row-1">
                 <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
                 <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
             </div>
             
-            <!-- Row 2: Left Sort Module, Right Stacked Time Conversion and Drag Reorder Controls -->
             <div class="header-row-2">
                 <div class="sort-controls">
                     <div class="control-group">
@@ -475,8 +490,11 @@
                         </select>
                     </div>
                     
-                    <!-- Original clean textual layout restored -->
-                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
+                    <!-- Swap Priority custom icon attachment integration -->
+                    <button id="priority-switch-btn" class="switch-btn">
+                        <span>Name Priority First</span>
+                        <div class="css-swap-icon"></div>
+                    </button>
                     
                     <div class="control-group">
                         <label for="date-sort-rule"><b>Date Order:</b></label>
@@ -491,17 +509,13 @@
                     </div>
                 </div>
                 
-                <div class="vertical-button-stack">
-                    <!-- Button displays selection explicitly with bold tracking classes -->
-                    <button id="time-convert-btn" class="btn-toggle-time">
-                        Time Format: <span id="label-12h" class="time-mode-label is-active">12h</span> ⇄ <span id="label-24h" class="time-mode-label">24h</span>
-                    </button>
-                    <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
-                </div>
+                <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
+                <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Reset Filters ↺</button>
+                <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
             </div>
         </div>
 
-        <!-- Advanced Query Filters Engine Panel Grid -->
+        <!-- Advanced Multi-Condition Filters Grid -->
         <div class="filter-panel">
             <div class="filter-header-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;">
@@ -547,11 +561,6 @@
                 <div class="filter-box">
                     <label>Stopped At</label>
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
-                </div>
-                
-                <!-- Reset Filters Button moved beside Stopped At input -->
-                <div class="filter-box">
-                    <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.45rem 1rem; font-size: 0.875rem; height: 34px; width: 100%;">Reset Filters ↺</button>
                 </div>
             </div>
         </div>
@@ -603,9 +612,6 @@
     let isStartDateInclusive = true;
     let isEndDateInclusive = true;
     
-    // Time syntax toggle format selection tracking indicator rules
-    let currentActiveTimeMode = "12h";
-
     let isDragReorderModeActive = false;
     let draggedColumnHeaderIndex = null;
     let activeContextColumnHeaderKey = null;
@@ -725,15 +731,15 @@
         const match = filename.match(/\(([^)]+)\)/);
         if (!match || !match) return "Unknown Date";
         
-        let rawDate = match.trim(); 
+        let rawDate = match[1].trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
         const parts = rawDate.split('-');
         if (parts.length !== 3) return rawDate; 
         
-        let day = parts.trim();
-        let month = parts.trim();
-        let year = parts.trim();
+        let day = parts[0].trim();
+        let month = parts[1].trim();
+        let year = parts[2].trim();
         
         month = month.substring(0, 3);
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
@@ -761,9 +767,9 @@
         const parts = cleanStr.split('-');
         if (parts.length !== 3) return new Date(0);
         
-        const day = parseInt(parts, 10);
-        const monthStr = parts.substring(0, 3);
-        const year = parseInt(parts, 10);
+        const day = parseInt(parts[0], 10);
+        const monthStr = parts[1].substring(0, 3);
+        const year = parseInt(parts[2], 10);
         
         const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         const monthIndex = months.indexOf(monthStr);
@@ -780,7 +786,7 @@
             let totalMin = 0;
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
+            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
             if (minMatch) totalMin += parseInt(minMatch, 10);
             return totalMin;
         }
@@ -795,10 +801,10 @@
         
         const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
         if (ampmMatch) {
-            let hrs = parseInt(ampmMatch, 10);
-            let mins = ampmMatch;
-            let secs = ampmMatch ? `:${ampmMatch}` : "";
-            let period = ampmMatch;
+            let hrs = parseInt(ampmMatch[1], 10);
+            let mins = ampmMatch[2];
+            let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
+            let period = ampmMatch[4];
             
             if (period === "PM" && hrs < 12) hrs += 12;
             if (period === "AM" && hrs === 12) hrs = 0;
@@ -807,9 +813,9 @@
         
         const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
         if (militaryMatch) {
-            let hrs = parseInt(militaryMatch, 10);
-            let mins = militaryMatch;
-            let secs = militaryMatch ? `:${militaryMatch}` : "";
+            let hrs = parseInt(militaryMatch[1], 10);
+            let mins = militaryMatch[2];
+            let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
             let period = "AM";
             
             if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
@@ -964,19 +970,6 @@
     });
 
     timeConvertBtn.addEventListener('click', () => {
-        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
-        
-        // Highlight active layout text styles dynamically on button
-        const lbl12 = document.getElementById('label-12h');
-        const lbl24 = document.getElementById('label-24h');
-        if (currentActiveTimeMode === "12h") {
-            lbl12.className = "time-mode-label is-active";
-            lbl24.className = "time-mode-label";
-        } else {
-            lbl12.className = "time-mode-label";
-            lbl24.className = "time-mode-label is-active";
-        }
-        
         masterData.forEach(row => {
             ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
                 if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
@@ -988,7 +981,8 @@
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isNamePriorityPrimary = !isNamePriorityPrimary;
-        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
+        const textSpan = prioritySwitchBtn.querySelector('span');
+        textSpan.textContent = isNamePriorityPrimary ? "Name Priority First" : "Date Priority First";
         sortMasterData();
         renderMasterTableUI();
     });
@@ -1058,10 +1052,12 @@
         if (isRankLocked || isDragReorderModeActive) return;
         if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
             isNamePriorityPrimary = true;
-            prioritySwitchBtn.textContent = "Name Priority First ⇄";
+            const textSpan = prioritySwitchBtn.querySelector('span');
+            textSpan.textContent = "Name Priority First";
         } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
             isNamePriorityPrimary = false;
-            prioritySwitchBtn.textContent = "Date Priority First ⇄";
+            const textSpan = prioritySwitchBtn.querySelector('span');
+            textSpan.textContent = "Date Priority First";
         }
         sortMasterData();
         renderMasterTableUI();
@@ -1120,9 +1116,8 @@
                 th.addEventListener('drop', (e) => {
                     e.preventDefault();
                     if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
+                        const targetItem = MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1)[0];
+                        MASTER_HEADERS.splice(index, 0, targetItem);
                         renderMasterTableUI();
                     }
                 });
@@ -1147,6 +1142,7 @@
                 textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
                 th.appendChild(textSpan);
 
+                // Mount Custom pure CSS-drawn Sizing Arrow Vectors
                 const arrowIndicator = document.createElement('div');
                 arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
                 if (isRankLocked) arrowIndicator.classList.add('is-disabled');
@@ -1264,3 +1260,8 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    });
+</script>
+
+</body>
+</html>
