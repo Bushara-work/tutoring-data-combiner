@@ -526,6 +526,14 @@
                         <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now">
                     </div>
                 </div>
+                
+                <!-- New Student Number filter input field placed directly to the right of Class Date Bounds -->
+                <div class="filter-box">
+                    <label>Student Number</label>
+                    <input type="text" id="filter-sno" class="filter-input" placeholder="Search student number...">
+                </div>
+
+                <!-- Bottom row sequence re-ordered exactly as requested -->
                 <div class="filter-box">
                     <label>Started At</label>
                     <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
@@ -539,7 +547,7 @@
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
                 </div>
                 
-                <!-- Expanded height Reset Filters action button positioned right beside Stopped At section grid row -->
+                <!-- Reset Filters action button positioned on the far bottom right edge of the grid -->
                 <div class="filter-box">
                     <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
                 </div>
@@ -624,6 +632,9 @@
     const startDateToggle = document.getElementById('start-date-toggle');
     const endDateToggle = document.getElementById('end-date-toggle');
     
+    // Captured student number element tracker register hook
+    const filterSno = document.getElementById('filter-sno');
+    
     const filterStartedTime = document.getElementById('filter-started-time');
     const filterJoinedTime = document.getElementById('filter-joined-time');
     const filterStoppedTime = document.getElementById('filter-stopped-time');
@@ -640,6 +651,8 @@
     const rowContextMenu = document.getElementById('row-context-menu');
 
     function handleFileSelection(files) {
+
+        
         if (!files) return;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -938,7 +951,8 @@
         select.addEventListener('change', () => { sortMasterData(); renderMasterTableUI(); });
     });
 
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
+        // Include student number inside your filter event execution hooks array
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
         input.addEventListener('input', () => { renderMasterTableUI(); });
     });
 
@@ -950,6 +964,15 @@
     endDateToggle.addEventListener('click', () => {
         isEndDateInclusive = !isEndDateInclusive;
         endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
+        isStartDateInclusive = true;
+        isEndDateInclusive = true;
+        startDateToggle.textContent = "Inc";
+        endDateToggle.textContent = "Inc";
         renderMasterTableUI();
     });
 
@@ -966,7 +989,6 @@
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isNamePriorityPrimary = !isNamePriorityPrimary;
-        // Restored clean text syntax utilizing matching format
         prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
         sortMasterData();
         renderMasterTableUI();
@@ -1056,6 +1078,7 @@
     }
 
     function renderMasterTableUI() {
+    
         tableHeaders.innerHTML = '';
         tableHeaderLetters.innerHTML = '';
         tableBody.innerHTML = '';
@@ -1140,8 +1163,10 @@
             tableHeaders.appendChild(th);
         });
 
+                // Capture Student Number query string state value properties
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
+        const valSno = filterSno.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
         const valMaxDur = parseFloat(filterDurMax.value);
         const dateStartObj = parseCustomDate(filterDateStart.value.trim());
@@ -1156,6 +1181,9 @@
             if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
             if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
             if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
+            
+            // Check matching input condition value constraints across Student Number (SNo) cell rows
+            if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
             
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
                 const totalMins = parseDurationToMinutes(row["Attended Duration"]);
