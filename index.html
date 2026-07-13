@@ -1,3 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Attendance Merger</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-700: #374151;
+            --excel-green: #107c41;
+            --excel-green-hover: #0b5931;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 2rem;
+            color: var(--gray-700);
+            background-color: #fafafa;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .stage {
+            display: none;
+        }
+        .stage.active {
+            display: block;
+        }
+        .upload-section {
+            border: 2px dashed var(--gray-300);
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+        .upload-section:hover {
+            border-color: var(--primary);
+        }
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--gray-300);
+        }
+        .file-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0 0.5rem;
+        }
+        .remove-btn:hover {
+            color: var(--danger-hover);
+        }
+        
+        .stage-2-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .header-row-1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-row-2 {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .vertical-button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .sort-controls {
+            background: #ffffff;
+            border: 1px solid var(--gray-300);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sort-controls select {
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid var(--gray-300);
+            background-color: #fff;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+        .sort-controls select:disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .switch-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--gray-100);
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-700);
+            transition: background 0.2s;
+        }
+        .switch-btn:hover:not(:disabled) {
+            background: #e5e7eb;
+        }
+        .switch-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* Time format selective active mode tracker colors */
+        .btn-toggle-time {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            color: var(--gray-700);
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-toggle-time:hover {
+            border-color: var(--primary);
+        }
+        .time-mode-label {
+            font-weight: normal;
+            color: var(--gray-400);
+        }
+        .time-mode-label.is-active {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .btn-excel-tool {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: var(--excel-green);
+            border: 1px solid var(--excel-green);
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: background 0.2s;
+        }
+        .btn-excel-tool:hover:not(:disabled) { background: var(--excel-green-hover); }
+        .btn-excel-tool:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .filter-panel {
+            background: #ffffff;
+            border: 1px solid var(--gray-300);
+            padding: 1.25rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .filter-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+            color: var(--gray-700);
+            width: 100%;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 0.75rem;
+            align-items: flex-end;
+        }
+        .filter-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .filter-box label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .filter-input {
+            padding: 0.45rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid var(--gray-300);
+            font-size: 0.875rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .range-inputs {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .range-inputs input {
+            width: 50%;
+        }
+        .toggle-link {
+            font-size: 0.75rem;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            user-select: none;
+            font-weight: normal;
+        }
+        button.btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--gray-300);
+            margin-top: 1rem;
+            max-height: 550px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            font-size: 0.875rem;
+            min-width: 150px;
+        }
+        th {
+            background: var(--gray-100);
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .excel-row-header {
+            background-color: var(--gray-100);
+            font-weight: bold;
+            text-align: center;
+            width: 50px;
+            min-width: 50px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .excel-row-header:hover { background-color: var(--gray-200); }
+        
+        th.draggable-header {
+            cursor: move;
+            background-color: #fef08a;
+        }
+        
+        .context-menu-mask {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 999; display: none;
+        }
+        .excel-context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid var(--gray-300);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px;
+            padding: 0.25rem 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+        }
+        .context-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+        .context-item:hover { background: var(--gray-100); color: var(--primary); }
+        .context-item.item-danger:hover { background: #fee2e2; color: var(--danger); }
+        
+        .lock-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: transform 0.1s;
+        }
+        .lock-container:hover { transform: scale(1.2); }
+        .css-lock {
+            width: 14px;
+            height: 11px;
+            background-color: #9ca3af;
+            border-radius: 3px;
+            position: relative;
+            margin-top: 6px;
+            transition: background-color 0.2s;
+        }
+        .css-lock::before {
+            content: ""; position: absolute; border: 2px solid #9ca3af; border-bottom: none;
+            border-top-left-radius: 6px; border-top-right-radius: 6px; width: 6px; height: 7px;
+            left: 2px; top: -7px; transition: transform 0.2s, left 0.2s, border-color 0.2s;
+        }
+        .lock-container.is-locked .css-lock { background-color: #dc2626; }
+        .lock-container.is-locked .css-lock::before { border-color: #dc2626; transform: translate(0, 0); }
+        .lock-container.is-unlocked .css-lock::before { transform: translate(2px, -2px) rotate(15deg); }
+        
+        .css-arrow-icon {
+            display: inline-block;
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            vertical-align: middle;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+        .css-arrow-icon.arrow-up {
+            border-bottom: 7px solid #2563eb;
+        }
+        .css-arrow-icon.arrow-down {
+            border-top: 7px solid #2563eb;
+        }
+        .css-arrow-icon.is-disabled {
+            border-bottom-color: #9ca3af !important;
+            border-top-color: #9ca3af !important;
+            cursor: not-allowed;
+        }
+        .css-arrow-icon:hover:not(.is-disabled) {
+            transform: scale(1.3);
+        }
+        
+        .css-trash-icon {
+            width: 12px;
+            height: 14px;
+            position: relative;
+            border: 2px solid currentColor;
+            border-bottom-left-radius: 2px;
+            border-bottom-right-radius: 2px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .css-trash-icon::before {
+            content: "";
+            position: absolute;
+            top: -4px; left: -3px; width: 14px; height: 2px;
+            background: currentColor;
+        }
+        .css-trash-icon::after {
+            content: "";
+            position: absolute;
+            top: -6px; left: 2px; width: 4px; height: 2px;
+            border: 2px solid currentColor;
+            border-bottom: none;
+            border-top-left-radius: 1px;
+            border-top-right-radius: 1px;
+        }
+        
+        td input {
+            width: 100%; border: 1px solid transparent; background: transparent;
+            padding: 0.25rem 0; font-size: 0.875rem; color: var(--gray-700); box-sizing: border-box;
+        }
+        td input:focus { border-color: var(--primary); background: white; outline: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CSV Attendance Merger & Editor</h2>
+    
+    <!-- STAGE 1: UPLOAD PHASE -->
+    <div id="stage-1" class="stage active">
+        <h3>Stage 1: Upload Attendance CSV Files</h3>
+        <div class="upload-section" onclick="document.getElementById('csv-picker').click()">
+            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
+            <button class="btn btn-primary">Select CSV Files</button>
+            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files or drag-and-drop multiple items here.</p>
+        </div>
+
+        <h4>Uploaded Files Queue</h4>
+        <div class="file-list" id="file-queue">
+            <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="next-btn">Combine & Process Data</button>
+        </div>
+    </div>
+
+    <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
+    <div id="stage-2" class="stage">
+        <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
+        
+        <div class="stage-2-header">
+            <!-- Row 1: Left Back Button, Right Download Button -->
+            <div class="header-row-1">
+                <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
+                <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
+            </div>
+            
+            <!-- Row 2: Left Sort Module, Right Stacked Time Conversion and Drag Reorder Controls -->
+            <div class="header-row-2">
+                <div class="sort-controls">
+                    <div class="control-group">
+                        <label for="name-sort-rule"><b>Name Order:</b></label>
+                        <select id="name-sort-rule">
+                            <option value="asc" selected>Alphabetical (A → Z)</option>
+                            <option value="desc">Reverse Alphabetical (Z → A)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Original clean textual layout restored -->
+                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
+                    
+                    <div class="control-group">
+                        <label for="date-sort-rule"><b>Date Order:</b></label>
+                        <select id="date-sort-rule">
+                            <option value="desc" selected>Newest → Oldest</option>
+                            <option value="asc">Oldest → Newest</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts"></button>
+                    </div>
+                </div>
+                
+                <div class="vertical-button-stack">
+                    <!-- Button displays selection explicitly with bold tracking classes -->
+                    <button id="time-convert-btn" class="btn-toggle-time">
+                        Time Format: <span id="label-12h" class="time-mode-label is-active">12h</span> ⇄ <span id="label-24h" class="time-mode-label">24h</span>
+                    </button>
+                    <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Query Filters Engine Panel Grid -->
+        <div class="filter-panel">
+            <div class="filter-header-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                <span>Condition Filters</span>
+            </div>
+            <div class="filter-grid">
+                <div class="filter-box">
+                    <label>Participant Name</label>
+                    <input type="text" id="filter-name" class="filter-input" placeholder="Search name...">
+                </div>
+                <div class="filter-box">
+                    <label>Meeting Code</label>
+                    <input type="text" id="filter-code" class="filter-input" placeholder="Search code...">
+                </div>
+                <div class="filter-box">
+                    <label>Duration Threshold (Minutes)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min (e.g. 45)">
+                        <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max">
+                    </div>
+                </div>
+                <div class="filter-box">
+                    <label>
+                        Class Date Bounds
+                        <span id="start-date-toggle" class="toggle-link">Inc</span>
+                        <span id="end-date-toggle" class="toggle-link">Inc</span>
+                    </label>
+                    <div class="range-inputs">
+                        <input type="text" id="filter-date-start" class="filter-input" placeholder="Start Date">
+                        <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now">
+                    </div>
+                </div>
+                <div class="filter-box">
+                    <label>Started At</label>
+                    <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
+                </div>
+                <div class="filter-box">
+                    <label>Joined At (beta)</label>
+                    <input type="text" id="filter-joined-time" class="filter-input" placeholder="Search beta timestamp...">
+                </div>
+                <div class="filter-box">
+                    <label>Stopped At</label>
+                    <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
+                </div>
+                
+                <!-- Reset Filters Button moved beside Stopped At input -->
+                <div class="filter-box">
+                    <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.45rem 1rem; font-size: 0.875rem; height: 34px; width: 100%;">Reset Filters ↺</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="master-table">
+                <thead>
+                    <tr id="table-header-letters"></tr>
+                    <tr id="table-headers"></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="context-mask" class="context-menu-mask"></div>
+<div id="column-context-menu" class="excel-context-menu">
+    <div class="context-item" id="ctx-insert-col-left">
+        <span style="font-weight: bold; color: var(--primary);">+</span>
+        <span>Insert Column Left</span>
+    </div>
+    <div class="context-item item-danger" id="ctx-delete-col">
+        <div class="css-trash-icon"></div>
+        <span>Delete Column</span>
+    </div>
+</div>
+<div id="row-context-menu" class="excel-context-menu">
+    <div class="context-item" id="ctx-insert-row-above">
+        <span style="font-weight: bold; color: var(--primary);">+</span>
+        <span>Insert Row Above</span>
+    </div>
+    <div class="context-item item-danger" id="ctx-delete-row">
+        <div class="css-trash-icon"></div>
+        <span>Delete Row</span>
+    </div>
+</div>
 <script>
     let MASTER_HEADERS = [
         "SNo", "Participant Name", "Attendance Started at", 
@@ -12,6 +603,7 @@
     let isStartDateInclusive = true;
     let isEndDateInclusive = true;
     
+    // Time syntax toggle format selection tracking indicator rules
     let currentActiveTimeMode = "12h";
 
     let isDragReorderModeActive = false;
@@ -241,7 +833,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
-                const fileHeaders = parseCSVLine(lines); 
+                const fileHeaders = parseCSVLine(lines[0]); 
                 const fileDate = extractDateFromFilename(file.name);
                 
                 const indexMap = {};
@@ -374,6 +966,7 @@
     timeConvertBtn.addEventListener('click', () => {
         currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
         
+        // Highlight active layout text styles dynamically on button
         const lbl12 = document.getElementById('label-12h');
         const lbl24 = document.getElementById('label-24h');
         if (currentActiveTimeMode === "12h") {
@@ -488,6 +1081,7 @@
         tableHeaderLetters.innerHTML = '';
         tableBody.innerHTML = '';
 
+        // 1. Build Excel Sidebar Handle Row Elements (A, B, C...)
         const emptyTh = document.createElement('th');
         emptyTh.style.width = "50px";
         tableHeaderLetters.appendChild(emptyTh);
@@ -508,6 +1102,7 @@
             tableHeaderLetters.appendChild(letterTh);
         });
 
+        // 2. Build Column Data Header Matrix Labels
         const cornerTh = document.createElement('th');
         cornerTh.className = "excel-row-header";
         tableHeaders.appendChild(cornerTh);
@@ -568,6 +1163,7 @@
             tableHeaders.appendChild(th);
         });
 
+        // Advanced Filter Computations Engine Loop
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
@@ -604,7 +1200,7 @@
             return true;
         });
 
-        tableBody.innerHTML = '';
+        // 3. Render rows matching leading numeric Excel Handles (1, 2, 3...)
         filteredData.forEach((row, index) => {
             const tr = document.createElement('tr');
             
@@ -668,8 +1264,3 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    });
-</script>
-
-</body>
-</html>
