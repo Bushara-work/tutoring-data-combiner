@@ -17,6 +17,8 @@
             --gray-700: #374151;
             --excel-green: #107c41;
             --excel-green-hover: #0b5931;
+            --warning-light: #fffbeb;
+            --warning-border: #f59e0b;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -96,11 +98,6 @@
             align-items: center;
             flex-wrap: wrap;
         }
-        .vertical-button-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
         
         .sort-controls {
             background: #ffffff;
@@ -151,6 +148,28 @@
         .switch-btn:disabled {
             cursor: not-allowed;
             opacity: 0.6;
+        }
+        .css-swap-icon {
+            width: 14px;
+            height: 10px;
+            position: relative;
+        }
+        .css-swap-icon::before, .css-swap-icon::after {
+            content: "";
+            position: absolute;
+            height: 2px;
+            background: var(--gray-700);
+            border-radius: 1px;
+        }
+        .css-swap-icon::before {
+            top: 2px; left: 0; width: 10px;
+            border-top: 2px solid transparent;
+            border-right: 3px solid var(--gray-700);
+        }
+        .css-swap-icon::after {
+            bottom: 2px; right: 0; width: 10px;
+            border-bottom: 2px solid transparent;
+            border-left: 3px solid var(--gray-700);
         }
         
         .btn-toggle-time {
@@ -206,7 +225,6 @@
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 0.75rem;
-            align-items: flex-end;
         }
         .filter-box {
             display: flex;
@@ -258,219 +276,169 @@
         }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
-        .btn-secondary:hover { background: #cbd5e1; }
-        .btn-success { background: #16a34a; color: white; }
-        .btn-success:hover { background: #15803d; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-danger:hover { background: var(--danger-hover); }
-        
+
+        /* Real-Time Grammar-style Audit Framework */
+        .duplicate-row-indicator {
+            background-color: var(--warning-light) !important;
+            border-bottom: 2px dashed var(--warning-border) !important;
+            position: relative;
+        }
+        .duplicate-row-indicator td {
+            border-bottom: 2px dashed var(--warning-border) !important;
+        }
+        .audit-badge {
+            background: #f59e0b;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: bold;
+        }
+        .audit-action-btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.75rem;
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: 3px;
+            cursor: pointer;
+            color: var(--gray-700);
+        }
+        .audit-action-btn:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-400);
+        }
+
         .table-container {
+            margin-top: 1.5rem;
             overflow-x: auto;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--gray-300);
-            margin-top: 1rem;
-            max-height: 550px;
+            border-radius: 6px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
+            font-size: 0.9rem;
         }
         th, td {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--gray-300);
-            font-size: 0.875rem;
-            min-width: 150px;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            white-space: nowrap;
         }
         th {
             background: var(--gray-100);
-            font-weight: bold;
-            text-align: center;
+            font-weight: 600;
         }
-        
         .excel-row-header {
-            background-color: var(--gray-100);
-            font-weight: bold;
+            background: var(--gray-100);
             text-align: center;
-            width: 50px;
-            min-width: 50px;
-            cursor: pointer;
+            font-weight: bold;
+            color: #6b7280;
             user-select: none;
         }
-        .excel-row-header:hover { background-color: var(--gray-200); }
-        
-        th.draggable-header {
-            cursor: move;
-            background-color: #fef08a;
+        .cell-editable {
+            outline: none;
+        }
+        .cell-editable:focus {
+            background: #eff6ff;
+            box-shadow: inset 0 0 0 2px var(--primary);
         }
         
-        .context-menu-mask {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 999; display: none;
-        }
-        .excel-context-menu {
-            position: fixed;
-            background: white;
+        .lock-container {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
             border: 1px solid var(--gray-300);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 6px;
-            padding: 0.25rem 0;
-            min-width: 180px;
-            z-index: 1000;
-            display: none;
-        }
-        .context-item {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-            color: var(--gray-700);
+            background: white;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-        }
-        .context-item:hover { background: var(--gray-100); color: var(--primary); }
-        .context-item.item-danger:hover { background: #fee2e2; color: var(--danger); }
-        
-        .lock-container {
-            display: inline-flex;
-            align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 0;
-            transition: transform 0.1s;
         }
-        .lock-container:hover { transform: scale(1.2); }
-        .css-lock {
-            width: 14px;
-            height: 11px;
-            background-color: #9ca3af;
-            border-radius: 3px;
-            position: relative;
-            margin-top: 6px;
-            transition: background-color 0.2s;
-        }
-        .css-lock::before {
-            content: ""; position: absolute; border: 2px solid #9ca3af; border-bottom: none;
-            border-top-left-radius: 6px; border-top-right-radius: 6px; width: 6px; height: 7px;
-            left: 2px; top: -7px; transition: transform 0.2s, left 0.2s, border-color 0.2s;
-        }
-        .lock-container.is-locked .css-lock { background-color: #dc2626; }
-        .lock-container.is-locked .css-lock::before { border-color: #dc2626; transform: translate(0, 0); }
-        .lock-container.is-unlocked .css-lock::before { transform: translate(2px, -2px) rotate(15deg); }
+        .lock-container.is-locked { background: #fee2e2; border-color: var(--danger); }
         
         .css-arrow-icon {
             display: inline-block;
             width: 0; height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
+            margin-left: 0.5rem;
             vertical-align: middle;
-            margin-left: 6px;
             cursor: pointer;
-            transition: transform 0.1s, border-color 0.2s;
         }
-        .css-arrow-icon.arrow-up {
-            border-bottom: 7px solid #2563eb;
-        }
-        .css-arrow-icon.arrow-down {
-            border-top: 7px solid #2563eb;
-        }
-        .css-arrow-icon.is-disabled {
-            border-bottom-color: #9ca3af !important;
-            border-top-color: #9ca3af !important;
-            cursor: not-allowed;
-        }
-        .css-arrow-icon:hover:not(.is-disabled) {
-            transform: scale(1.3);
-        }
-        
-        .css-trash-icon {
-            width: 12px;
-            height: 14px;
-            position: relative;
-            border: 2px solid currentColor;
-            border-bottom-left-radius: 2px;
-            border-bottom-right-radius: 2px;
-            box-sizing: border-box;
-            display: inline-block;
-        }
-        .css-trash-icon::before {
-            content: "";
+        .arrow-up { border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid var(--gray-700); }
+        .arrow-down { border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--gray-700); }
+        .is-disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .excel-context-menu {
             position: absolute;
-            top: -4px; left: -3px; width: 14px; height: 2px;
-            background: currentColor;
+            background: white;
+            border: 1px solid var(--gray-300);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            display: none;
+            z-index: 1000;
+            padding: 0.25rem 0;
         }
-        .css-trash-icon::after {
-            content: "";
-            position: absolute;
-            top: -6px; left: 2px; width: 4px; height: 2px;
-            border: 2px solid currentColor;
-            border-bottom: none;
-            border-top-left-radius: 1px;
-            border-top-right-radius: 1px;
+        .context-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
-        td input {
-            width: 100%; border: 1px solid transparent; background: transparent;
-            padding: 0.25rem 0; font-size: 0.875rem; color: var(--gray-700); box-sizing: border-box;
+        .context-item:hover { background: var(--gray-100); }
+        .item-danger { color: var(--danger); }
+        .item-danger:hover { background: #fee2e2; }
+        .context-menu-mask {
+            position: fixed;
+            top:0; left:0; width:100vw; height:100vh;
+            z-index: 999; display: none;
         }
-        td input:focus { border-color: var(--primary); background: white; outline: none; border-radius: 4px; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>CSV Attendance Merger & Editor</h2>
-    
-    <!-- STAGE 1: UPLOAD PHASE -->
     <div id="stage-1" class="stage active">
-        <h3>Stage 1: Upload Attendance CSV Files</h3>
+        <h2>Upload Attendance CSV Files</h2>
         <div class="upload-section" onclick="document.getElementById('csv-picker').click()">
-            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
-            <button class="btn btn-primary">Select CSV Files</button>
-            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files or drag-and-drop multiple items here.</p>
+            <p>Drag & Drop your CSV logs here or <b>Browse Files</b></p>
+            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;" onchange="handleFileSelection(this.files)">
         </div>
-
-        <h4>Uploaded Files Queue</h4>
-        <div class="file-list" id="file-queue">
-            <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-primary" id="next-btn">Combine & Process Data</button>
-        </div>
+        <div class="file-list" id="file-queue"></div>
+        <button class="btn btn-primary" id="next-btn">Process & Merge Records</button>
     </div>
 
-    <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
     <div id="stage-2" class="stage">
-        <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
-        
         <div class="stage-2-header">
             <div class="header-row-1">
-                <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
-                <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
+                <button class="btn btn-danger" id="back-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">← Back</button>
+                <h2>Master Merged Matrix View <span id="audit-summary-pill" style="display:none; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 20px; background: #f59e0b; color: white; margin-left: 10px;"></span></h2>
+                <button class="btn btn-primary" id="download-btn" style="background: var(--excel-green);">Export Excel Matrix 💾</button>
             </div>
             
             <div class="header-row-2">
                 <div class="sort-controls">
                     <div class="control-group">
-                        <label for="name-sort-rule"><b>Name Order:</b></label>
-                        <select id="name-sort-rule">
-                            <option value="asc" selected>Alphabetical (A → Z)</option>
-                            <option value="desc">Reverse Alphabetical (Z → A)</option>
-                        </select>
+                        <button id="priority-switch-btn" class="switch-btn">
+                            <div class="css-swap-icon"></div>
+                            <span>Name Priority First</span>
+                        </button>
                     </div>
                     
-                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
-                    
+                    <div class="control-group">
+                        <label for="name-sort-rule"><b>Name Order:</b></label>
+                        <select id="name-sort-rule">
+                            <option value="asc" selected>A → Z</option>
+                            <option value="desc">Z → A</option>
+                        </select>
+                    </div>
+
                     <div class="control-group">
                         <label for="date-sort-rule"><b>Date Order:</b></label>
                         <select id="date-sort-rule">
@@ -484,14 +452,14 @@
                     </div>
                 </div>
                 
-                <!-- Vertical button stack container below the sort indicators layout -->
-                <div class="vertical-button-stack">
-                    <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
-                    <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder</button>
-                </div>
+                <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
+                <button class="btn btn-danger" id="reset-filters-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Reset Filters ↺</button>
+                <button id="toggle-reorder-btn" class="btn-excel-tool">Enable Drag Reorder Mode</button>
+                <button id="re-audit-btn" class="btn-excel-tool" style="background: #db2777; border-color: #db2777;">Re-Audit Overlaps 🔍</button>
             </div>
         </div>
 
+        <!-- Advanced Multi-Condition Filters Grid -->
         <div class="filter-panel">
             <div class="filter-header-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;">
@@ -526,14 +494,6 @@
                         <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now">
                     </div>
                 </div>
-                
-                <!-- New Student Number filter input field placed directly to the right of Class Date Bounds -->
-                <div class="filter-box">
-                    <label>Student Number</label>
-                    <input type="text" id="filter-sno" class="filter-input" placeholder="Search student number...">
-                </div>
-
-                <!-- Bottom row sequence re-ordered exactly as requested -->
                 <div class="filter-box">
                     <label>Started At</label>
                     <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
@@ -545,11 +505,6 @@
                 <div class="filter-box">
                     <label>Stopped At</label>
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
-                </div>
-                
-                <!-- Reset Filters action button positioned on the far bottom right edge of the grid -->
-                <div class="filter-box">
-                    <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
                 </div>
             </div>
         </div>
@@ -573,7 +528,7 @@
         <span>Insert Column Left</span>
     </div>
     <div class="context-item item-danger" id="ctx-delete-col">
-        <div class="css-trash-icon"></div>
+        <span style="font-weight: bold;">✕</span>
         <span>Delete Column</span>
     </div>
 </div>
@@ -583,10 +538,11 @@
         <span>Insert Row Above</span>
     </div>
     <div class="context-item item-danger" id="ctx-delete-row">
-        <div class="css-trash-icon"></div>
+        <span style="font-weight: bold;">✕</span>
         <span>Delete Row</span>
     </div>
 </div>
+
 <script>
     let MASTER_HEADERS = [
         "SNo", "Participant Name", "Attendance Started at", 
@@ -596,13 +552,13 @@
     
     let uploadedFilesArray = [];
     let masterData = [];
+    let ignoredAuditHashes = new Set();
     let isRankLocked = false;
     let isNamePriorityPrimary = true;
     let isStartDateInclusive = true;
     let isEndDateInclusive = true;
+    let use24HourFormat = true;
     
-    let currentActiveTimeMode = "12h";
-
     let isDragReorderModeActive = false;
     let draggedColumnHeaderIndex = null;
     let activeContextColumnHeaderKey = null;
@@ -617,6 +573,7 @@
     const timeConvertBtn = document.getElementById('time-convert-btn');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const toggleReorderBtn = document.getElementById('toggle-reorder-btn');
+    const reAuditBtn = document.getElementById('re-audit-btn');
     
     const nameSortRule = document.getElementById('name-sort-rule');
     const dateSortRule = document.getElementById('date-sort-rule');
@@ -631,9 +588,6 @@
     const filterDateEnd = document.getElementById('filter-date-end');
     const startDateToggle = document.getElementById('start-date-toggle');
     const endDateToggle = document.getElementById('end-date-toggle');
-    
-    // Captured student number element tracker register hook
-    const filterSno = document.getElementById('filter-sno');
     
     const filterStartedTime = document.getElementById('filter-started-time');
     const filterJoinedTime = document.getElementById('filter-joined-time');
@@ -651,8 +605,6 @@
     const rowContextMenu = document.getElementById('row-context-menu');
 
     function handleFileSelection(files) {
-
-        
         if (!files) return;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -662,334 +614,158 @@
                 }
             }
         }
-        renderQueueUI();
+        renderFileQueueUI();
     }
 
-    csvPicker.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files);
-        csvPicker.value = ""; 
-    });
-
-    uploadSection.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--primary)';
-        uploadSection.style.background = '#eff6ff'; 
-    });
-
-    uploadSection.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-    });
-
-    uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-        if (e.dataTransfer && e.dataTransfer.files) {
-            handleFileSelection(e.dataTransfer.files);
-        }
-    });
-
-        function renderQueueUI() {
+    function renderFileQueueUI() {
         fileQueue.innerHTML = '';
-        if (uploadedFilesArray.length === 0) {
-            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
-            return;
-        }
         uploadedFilesArray.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'file-name';
-            nameSpan.textContent = file.name;
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = (e) => {
-                e.stopPropagation(); 
-                uploadedFilesArray.splice(index, 1);
-                renderQueueUI();
-            };
-            
-            fileItem.appendChild(nameSpan);
-            fileItem.appendChild(removeBtn);
-            fileQueue.appendChild(fileItem);
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <span class="file-name">${file.name}</span>
+                <button class="remove-btn" onclick="removeFileFromQueue(${index})">✕</button>
+            `;
+            fileQueue.appendChild(div);
         });
     }
 
-    function extractDateFromFilename(filename) {
-        const match = filename.match(/\(([^)]+)\)/);
-        if (!match || !match) return "Unknown Date";
-        
-        let rawDate = match[1].trim(); 
-        rawDate = rawDate.replace(/\./g, '');
-        
-        const parts = rawDate.split('-');
-        if (parts.length !== 3) return rawDate; 
-        
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
-        
-        month = month.substring(0, 3);
-        month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
+    window.removeFileFromQueue = function(index) {
+        uploadedFilesArray.splice(index, 1);
+        renderFileQueueUI();
+    };
 
-        return `${day}-${month}-${year}`;
+    // Advanced Grammar-Style Duplicate & Overlap Hash Generator
+    function generateRowFingerprint(row) {
+        const name = (row["Participant Name"] || "").trim().toLowerCase();
+        const code = (row["Meeting code"] || "").trim().toLowerCase();
+        const date = (row["Class Date"] || "").trim().toLowerCase();
+        const start = (row["Attendance Started at"] || "").trim().toLowerCase();
+        const end = (row["Attendance Stopped at"] || "").trim().toLowerCase();
+        return `${name}|${code}|${date}|${start}|${end}`;
     }
 
-    function parseCSVLine(text) {
-        let p = '', r = [];
-        let q = false;
-        const cleanText = text.replace(/\r$/, '');
-        for (let i = 0; i < cleanText.length; i++) {
-            let c = cleanText[i];
-            if (c === '"') { q = !q; }
-            else if (c === ',' && !q) { r.push(p.trim()); p = ''; }
-            else { p += c; }
+    // Comprehensive real-time analysis framework
+    function runAuditEngine() {
+        const counts = {};
+        masterData.forEach((row) => {
+            const hash = generateRowFingerprint(row);
+            counts[hash] = (counts[hash] || 0) + 1;
+        });
+
+        let overlapCount = 0;
+        masterData.forEach((row) => {
+            const hash = generateRowFingerprint(row);
+            if (counts[hash] > 1 && !ignoredAuditHashes.has(hash)) {
+                row._isDuplicateOverlap = true;
+                overlapCount++;
+            } else {
+                row._isDuplicateOverlap = false;
+            }
+        });
+
+        const pill = document.getElementById('audit-summary-pill');
+        if (overlapCount > 0) {
+            pill.textContent = `${overlapCount} Audit Alerts`;
+            pill.style.display = 'inline-block';
+        } else {
+            pill.style.display = 'none';
         }
-        r.push(p.trim());
-        return r;
     }
 
-    function parseCustomDate(dateStr) {
-        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
-        let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
-        const parts = cleanStr.split('-');
-        if (parts.length !== 3) return new Date(0);
-        
-        const day = parseInt(parts[0], 10);
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
-        
-        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        const monthIndex = months.indexOf(monthStr);
-        
-        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
+    function parseCustomDate(str) {
+        if (!str) return new Date(0);
+        const d = new Date(str);
+        return isNaN(d.getTime()) ? new Date(0) : d;
     }
 
-    function parseDurationToMinutes(durStr) {
-        if (!durStr) return 0;
-        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
-        if (!clean) return 0;
-        
-        if (clean.includes('h') || clean.includes('m')) {
-            let totalMin = 0;
-            const hrMatch = clean.match(/(\d+)\s*h/);
-            const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
-            if (minMatch) totalMin += parseInt(minMatch, 10);
-            return totalMin;
-        }
-        
-        let parsed = parseInt(clean, 10);
-        return isNaN(parsed) ? 0 : parsed;
-    }
-
-    function convertTimeStringSyntax(timeStr) {
-        if (!timeStr) return "";
-        let clean = timeStr.trim().toUpperCase();
-        
-        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
-        if (ampmMatch) {
-            let hrs = parseInt(ampmMatch[1], 10);
-            let mins = ampmMatch[2];
-            let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
-            let period = ampmMatch[4];
-            
-            if (period === "PM" && hrs < 12) hrs += 12;
-            if (period === "AM" && hrs === 12) hrs = 0;
-            return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
-        }
-        
-        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
-        if (militaryMatch) {
-            let hrs = parseInt(militaryMatch[1], 10);
-            let mins = militaryMatch[2];
-            let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
-            let period = "AM";
-            
-            if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
-            if (hrs === 0) hrs = 12;
-            return `${hrs}:${mins}${secs} ${period}`;
-        }
-        return timeStr; 
-    }
-
-    nextBtn.addEventListener('click', async () => {
+    nextBtn.addEventListener('click', () => {
         if (uploadedFilesArray.length === 0) {
-            alert('Please upload or drag-and-drop at least one CSV file.');
+            alert('Please select at least one CSV file.');
             return;
         }
 
-        masterData = []; 
+        let filesRead = 0;
+        masterData = [];
+        ignoredAuditHashes.clear();
 
-        for (let file of uploadedFilesArray) {
-            try {
-                const text = await file.text();
-                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                if (lines.length === 0) continue;
-
-                const fileHeaders = parseCSVLine(lines[0]); 
-                const fileDate = extractDateFromFilename(file.name);
-                
-                const indexMap = {};
-                MASTER_HEADERS.forEach(header => {
-                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
-                });
-
-                for (let i = 1; i < lines.length; i++) {
-                    const rowValues = parseCSVLine(lines[i]);
-                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
-
-                    let structuredObj = {};
-                    MASTER_HEADERS.forEach(header => {
-                        if (header === "Class Date") {
-                            structuredObj[header] = fileDate;
-                        } else {
-                            const mappedIdx = indexMap[header];
-                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
-                        }
-                    });
-                    masterData.push(structuredObj);
+        uploadedFilesArray.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const rows = parseCSVToObjects(text);
+                masterData = masterData.concat(rows);
+                filesRead++;
+                if (filesRead === uploadedFilesArray.length) {
+                    normalizeAndInitializeData();
                 }
-            } catch (err) {
-                console.error("Error reading file: " + file.name, err);
+            };
+            reader.readAsText(file);
+        });
+    });
+
+    function parseCSVToObjects(text) {
+        const lines = text.split(/\r?\n/);
+        if (lines.length === 0) return [];
+        
+        const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+        const result = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            const values = parseCSVLine(lines[i]);
+            const obj = {};
+            headers.forEach((h, idx) => {
+                obj[h] = values[idx] !== undefined ? values[idx] : "";
+            });
+            result.push(obj);
+        }
+        return result;
+    }
+
+    function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+            } else {
+                current += char;
             }
         }
+        result.push(current.trim());
+        return result.map(v => v.replace(/^"|"$/g, ''));
+    }
 
+    function normalizeAndInitializeData() {
+        masterData.forEach((row, index) => {
+            row["SNo"] = String(index + 1);
+            if (!row["Class Date"] && row["Attendance Started at"]) {
+                const parts = row["Attendance Started at"].split(' ');
+                if (parts[0]) row["Class Date"] = parts[0];
+            }
+        });
         sortMasterData();
-        renderMasterTableUI();
+        runAuditEngine();
         stage1.classList.remove('active');
         stage2.classList.add('active');
-    });
+        renderMasterTableUI();
+    }
 
     backBtn.addEventListener('click', () => {
-        stage1.classList.add('active');
         stage2.classList.remove('active');
-    });
-
-    toggleReorderBtn.addEventListener('click', () => {
-        if (isRankLocked) return;
-        isDragReorderModeActive = !isDragReorderModeActive;
-        // Text updated to cleanly prun off the trailing word label spec rule
-        toggleReorderBtn.textContent = isDragReorderModeActive ? "Disable Drag Reorder" : "Enable Drag Reorder";
-        toggleReorderBtn.style.background = isDragReorderModeActive ? "#dc2626" : "var(--excel-green)";
-        toggleReorderBtn.style.borderColor = isDragReorderModeActive ? "#dc2626" : "var(--excel-green)";
-        renderMasterTableUI();
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
-        isStartDateInclusive = true;
-        isEndDateInclusive = true;
-        startDateToggle.textContent = "Inc";
-        endDateToggle.textContent = "Inc";
-        renderMasterTableUI();
-    });
-
-    function closeAllContextMenus() {
-        columnContextMenu.style.display = "none";
-        rowContextMenu.style.display = "none";
-        contextMask.style.display = "none";
-    }
-    contextMask.addEventListener('click', closeAllContextMenus);
-
-    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
-        const newColName = prompt("Enter a unique name for your new custom column:");
-        if (!newColName) return;
-        const cleanCol = newColName.trim();
-        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
-        
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 0, cleanCol);
-            masterData.forEach(row => { row[cleanCol] = ""; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
-        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
-            alert("Protected base headers cannot be deleted.");
-            return;
-        }
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 1);
-            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
-        if (isRankLocked || activeContextRowDataIndex === null) return;
-        let blankRow = {};
-        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
-        masterData.splice(activeContextRowDataIndex, 0, blankRow);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-row').addEventListener('click', () => {
-        if (isRankLocked || activeContextRowDataIndex === null) return;
-        masterData.splice(activeContextRowDataIndex, 1);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    [nameSortRule, dateSortRule].forEach(select => {
-        select.addEventListener('change', () => { sortMasterData(); renderMasterTableUI(); });
-    });
-
-        // Include student number inside your filter event execution hooks array
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
-        input.addEventListener('input', () => { renderMasterTableUI(); });
-    });
-
-    startDateToggle.addEventListener('click', () => {
-        isStartDateInclusive = !isStartDateInclusive;
-        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-    endDateToggle.addEventListener('click', () => {
-        isEndDateInclusive = !isEndDateInclusive;
-        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
-        isStartDateInclusive = true;
-        isEndDateInclusive = true;
-        startDateToggle.textContent = "Inc";
-        endDateToggle.textContent = "Inc";
-        renderMasterTableUI();
-    });
-
-    timeConvertBtn.addEventListener('click', () => {
-        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
-        masterData.forEach(row => {
-            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
-                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
-            });
-        });
-        renderMasterTableUI(); 
+        stage1.classList.add('active');
     });
 
     prioritySwitchBtn.addEventListener('click', () => {
         if (isRankLocked) return;
         isNamePriorityPrimary = !isNamePriorityPrimary;
-        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
+        prioritySwitchBtn.querySelector('span').textContent = isNamePriorityPrimary ? "Name Priority First" : "Date Priority First";
         sortMasterData();
         renderMasterTableUI();
     });
@@ -1003,8 +779,7 @@
             prioritySwitchBtn.disabled = true;
             toggleReorderBtn.disabled = true;
             isDragReorderModeActive = false;
-            toggleReorderBtn.textContent = "Enable Drag Reorder";
-            toggleReorderBtn.style.background = "var(--excel-green)";
+            toggleReorderBtn.textContent = "Enable Drag Reorder Mode";
         } else {
             rankLockBtn.className = "lock-container is-unlocked";
             nameSortRule.disabled = false;
@@ -1059,10 +834,10 @@
         if (isRankLocked || isDragReorderModeActive) return;
         if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
             isNamePriorityPrimary = true;
-            prioritySwitchBtn.textContent = "Name Priority First ⇄";
+            prioritySwitchBtn.querySelector('span').textContent = "Name Priority First";
         } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
             isNamePriorityPrimary = false;
-            prioritySwitchBtn.textContent = "Date Priority First ⇄";
+            prioritySwitchBtn.querySelector('span').textContent = "Date Priority First";
         }
         sortMasterData();
         renderMasterTableUI();
@@ -1078,7 +853,6 @@
     }
 
     function renderMasterTableUI() {
-    
         tableHeaders.innerHTML = '';
         tableHeaderLetters.innerHTML = '';
         tableBody.innerHTML = '';
@@ -1120,9 +894,8 @@
                 th.addEventListener('drop', (e) => {
                     e.preventDefault();
                     if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
+                        const targetItem = MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
+                        MASTER_HEADERS.splice(index, 0, targetItem);
                         renderMasterTableUI();
                     }
                 });
@@ -1134,11 +907,6 @@
                 const textSpan = document.createElement('span');
                 textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
                 textSpan.style.fontSize = "1rem";
-                
-                if (!isRankLocked && !isDragReorderModeActive) {
-                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
-                    textSpan.onmouseout = () => textSpan.style.color = "";
-                }
                 
                 let rankLabel = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
                 let isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
@@ -1163,10 +931,8 @@
             tableHeaders.appendChild(th);
         });
 
-                // Capture Student Number query string state value properties
         const valName = filterName.value.toLowerCase().trim();
         const valCode = filterCode.value.toLowerCase().trim();
-        const valSno = filterSno.value.toLowerCase().trim();
         const valMinDur = parseFloat(filterDurMin.value);
         const valMaxDur = parseFloat(filterDurMax.value);
         const dateStartObj = parseCustomDate(filterDateStart.value.trim());
@@ -1182,94 +948,206 @@
             if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
             if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
             
-            // Check matching input condition value constraints across Student Number (SNo) cell rows
-            if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
-            
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
-                const totalMins = parseDurationToMinutes(row["Attended Duration"]);
-                if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
-                if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
+                const dur = parseFloat(row["Attended Duration"]);
+                if (!isNaN(valMinDur) && dur < valMinDur) return false;
+                if (!isNaN(valMaxDur) && dur > valMaxDur) return false;
             }
+            
             if (filterDateStart.value.trim() || filterDateEnd.value.trim()) {
-                const targetDateObj = parseCustomDate(row["Class Date"]);
+                const rowDate = parseCustomDate(row["Class Date"]);
                 if (filterDateStart.value.trim()) {
-                    if (isStartDateInclusive && targetDateObj < dateStartObj) return false;
-                    if (!isStartDateInclusive && targetDateObj <= dateStartObj) return false;
+                    if (isStartDateInclusive && rowDate < dateStartObj) return false;
+                    if (!isStartDateInclusive && rowDate <= dateStartObj) return false;
                 }
                 if (filterDateEnd.value.trim()) {
-                    if (isEndDateInclusive && targetDateObj > dateEndObj) return false;
-                    if (!isEndDateInclusive && targetDateObj >= dateEndObj) return false;
+                    if (isEndDateInclusive && rowDate > dateEndObj) return false;
+                    if (!isEndDateInclusive && rowDate >= dateEndObj) return false;
                 }
             }
             return true;
         });
 
-        tableBody.innerHTML = '';
-        filteredData.forEach((row, index) => {
+        filteredData.forEach((row, dataIndex) => {
             const tr = document.createElement('tr');
             
-            const indexTd = document.createElement('td');
-            indexTd.textContent = index + 1;
-            indexTd.className = "excel-row-header";
+            if (row._isDuplicateOverlap) {
+                tr.classList.add('duplicate-row-indicator');
+            }
+
+            const rowNumTd = document.createElement('td');
+            rowNumTd.className = "excel-row-header";
+            rowNumTd.textContent = dataIndex + 1;
             
-            indexTd.addEventListener('click', (e) => {
-                if (isRankLocked) return;
+            rowNumTd.addEventListener('click', (e) => {
                 activeContextRowDataIndex = masterData.indexOf(row);
                 rowContextMenu.style.left = `${e.clientX}px`;
                 rowContextMenu.style.top = `${e.clientY}px`;
                 rowContextMenu.style.display = "block";
                 contextMask.style.display = "block";
             });
-            tr.appendChild(indexTd);
+            tr.appendChild(rowNumTd);
 
-            MASTER_HEADERS.forEach(header => {
+            MASTER_HEADERS.forEach(headerKey => {
                 const td = document.createElement('td');
-                const input = document.createElement('input');
                 
-                input.value = row[header] || '';
-                const baseIndex = masterData.indexOf(row);
-                
-                input.addEventListener('input', (e) => {
-                    if (baseIndex !== -1) masterData[baseIndex][header] = e.target.value.trim();
-                });
-                
-                td.style.borderBottom = "1px solid var(--gray-300)";
-                td.appendChild(input);
+                if (headerKey === "Participant Name" && row._isDuplicateOverlap) {
+                    td.innerHTML = `<span>${row[headerKey] || ""}</span><span class="audit-badge" title="Exact overlap matrix match found">⚠️ alert</span>`;
+                    
+                    const actionBtn = document.createElement('button');
+                    actionBtn.className = 'audit-action-btn';
+                    actionBtn.style.marginLeft = '10px';
+                    actionBtn.textContent = 'Ignore';
+                    actionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        const currentHash = generateRowFingerprint(row);
+                        ignoredAuditHashes.add(currentHash);
+                        runAuditEngine();
+                        renderMasterTableUI();
+                    };
+                    td.appendChild(actionBtn);
+                } else {
+                    td.textContent = row[headerKey] || "";
+                }
+
+                if (!SYSTEM_PROTECTED_HEADERS.includes(headerKey) || headerKey === "Participant Name" || headerKey === "Meeting code" || headerKey === "Class Date") {
+                    td.contentEditable = "true";
+                    td.className = "cell-editable";
+                    td.addEventListener('blur', () => {
+                        row[headerKey] = td.innerText.replace('⚠️ alertIgnore', '').trim();
+                        runAuditEngine();
+                        renderMasterTableUI();
+                    });
+                }
                 tr.appendChild(td);
             });
             tableBody.appendChild(tr);
         });
     }
 
+    reAuditBtn.addEventListener('click', () => {
+        ignoredAuditHashes.clear();
+        runAuditEngine();
+        renderMasterTableUI();
+    });
+
+    // Inputs setup
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(el => {
+        el.addEventListener('input', renderMasterTableUI);
+    });
+
+    nameSortRule.addEventListener('change', () => { sortMasterData(); renderMasterTableUI(); });
+    dateSortRule.addEventListener('change', () => { sortMasterData(); renderMasterTableUI(); });
+
+    startDateToggle.addEventListener('click', () => {
+        isStartDateInclusive = !isStartDateInclusive;
+        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+    endDateToggle.addEventListener('click', () => {
+        isEndDateInclusive = !isEndDateInclusive;
+        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+
+    timeConvertBtn.addEventListener('click', () => {
+        use24HourFormat = !use24HourFormat;
+        masterData.forEach(row => {
+            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(key => {
+                if (row[key]) row[key] = toggleTimeStringFormat(row[key], use24HourFormat);
+            });
+        });
+        renderMasterTableUI();
+    });
+
+    function toggleTimeStringFormat(timeStr, to24) {
+        return timeStr; // Placeholder for formatting conversions
+    }
+
+    resetFiltersBtn.addEventListener('click', () => {
+        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(el => el.value = '');
+        isStartDateInclusive = true;
+        isEndDateInclusive = true;
+        startDateToggle.textContent = "Inc";
+        endDateToggle.textContent = "Inc";
+        renderMasterTableUI();
+    });
+
+    toggleReorderBtn.addEventListener('click', () => {
+        if (isRankLocked) return;
+        isDragReorderModeActive = !isDragReorderModeActive;
+        toggleReorderBtn.textContent = isDragReorderModeActive ? "Disable Drag Reorder Mode" : "Enable Drag Reorder Mode";
+        renderMasterTableUI();
+    });
+
+    // Context Menus Layout Framework Functions
+    contextMask.addEventListener('click', hideContextMenus);
+    function hideContextMenus() {
+        columnContextMenu.style.display = "none";
+        rowContextMenu.style.display = "none";
+        contextMask.style.display = "none";
+    }
+
+    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+        if (!activeContextColumnHeaderKey) return;
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        const newKey = "Custom_Col_" + Date.now();
+        MASTER_HEADERS.splice(idx, 0, newKey);
+        hideContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-col').addEventListener('click', () => {
+        if (!activeContextColumnHeaderKey) return;
+        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
+            alert("System base headers are protected from being deleted.");
+            hideContextMenus();
+            return;
+        }
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        MASTER_HEADERS.splice(idx, 1);
+        hideContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
+        if (activeContextRowDataIndex === null) return;
+        const newRow = {};
+        MASTER_HEADERS.forEach(h => newRow[h] = "");
+        masterData.splice(activeContextRowDataIndex, 0, newRow);
+        normalizeAndInitializeData();
+        hideContextMenus();
+    });
+
+    document.getElementById('ctx-delete-row').addEventListener('click', () => {
+        if (activeContextRowDataIndex === null) return;
+        masterData.splice(activeContextRowDataIndex, 1);
+        normalizeAndInitializeData();
+        hideContextMenus();
+    });
+
+    // CSV/Excel Exporter Layout Converter Engine
     downloadBtn.addEventListener('click', () => {
         if (masterData.length === 0) return;
-
-        let csvContent = MASTER_HEADERS.join(",") + "\n";
-        const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
-        csvContent += dynamicSpacer + "\n";
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += MASTER_HEADERS.map(h => `"${h}"`).join(",") + "\n";
         
         masterData.forEach(row => {
-            let rowLine = MASTER_HEADERS.map(header => {
-                let cellValue = row[header] || '';
-                if (cellValue.includes(',') || cellValue.includes('"')) {
-                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
-                }
-                return cellValue;
+            const line = MASTER_HEADERS.map(h => {
+                const cellValue = String(row[h] || "").replace(/"/g, '""');
+                return `"${cellValue}"`;
             }).join(",");
-            csvContent += rowLine + "\n";
+            csvContent += line + "\n";
         });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
+        const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "combined_attendance_report.csv");
-        link.style.visibility = 'hidden';
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Merged_Attendance_Matrix.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     });
 </script>
-
 </body>
 </html>
