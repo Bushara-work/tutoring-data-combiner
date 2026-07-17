@@ -279,7 +279,6 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-danger:hover { background: var(--danger-hover); }
 
-        /* Real-Time Grammar-style Audit Framework */
         .duplicate-row-indicator {
             background-color: var(--warning-light) !important;
             border-bottom: 2px dashed var(--warning-border) !important;
@@ -459,7 +458,6 @@
             </div>
         </div>
 
-        <!-- Advanced Multi-Condition Filters Grid -->
         <div class="filter-panel">
             <div class="filter-header-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;">
@@ -635,7 +633,6 @@
         renderFileQueueUI();
     };
 
-    // Advanced Grammar-Style Duplicate & Overlap Hash Generator
     function generateRowFingerprint(row) {
         const name = (row["Participant Name"] || "").trim().toLowerCase();
         const code = (row["Meeting code"] || "").trim().toLowerCase();
@@ -645,7 +642,6 @@
         return `${name}|${code}|${date}|${start}|${end}`;
     }
 
-    // Comprehensive real-time analysis framework
     function runAuditEngine() {
         const counts = {};
         masterData.forEach((row) => {
@@ -706,7 +702,7 @@
 
     function parseCSVToObjects(text) {
         const lines = text.split(/\r?\n/);
-        if (lines.length === 0) return [];
+        if (lines.length === 0 || !lines[0].trim()) return [];
         
         const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
         const result = [];
@@ -747,7 +743,7 @@
             row["SNo"] = String(index + 1);
             if (!row["Class Date"] && row["Attendance Started at"]) {
                 const parts = row["Attendance Started at"].split(' ');
-                if (parts[0]) row["Class Date"] = parts[0];
+                if (parts && parts[0]) row["Class Date"] = parts[0];
             }
         });
         sortMasterData();
@@ -1031,7 +1027,6 @@
         renderMasterTableUI();
     });
 
-    // Inputs setup
     [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(el => {
         el.addEventListener('input', renderMasterTableUI);
     });
@@ -1061,7 +1056,7 @@
     });
 
     function toggleTimeStringFormat(timeStr, to24) {
-        return timeStr; // Placeholder for formatting conversions
+        return timeStr;
     }
 
     resetFiltersBtn.addEventListener('click', () => {
@@ -1080,7 +1075,6 @@
         renderMasterTableUI();
     });
 
-    // Context Menus Layout Framework Functions
     contextMask.addEventListener('click', hideContextMenus);
     function hideContextMenus() {
         columnContextMenu.style.display = "none";
@@ -1126,7 +1120,6 @@
         hideContextMenus();
     });
 
-    // CSV/Excel Exporter Layout Converter Engine
     downloadBtn.addEventListener('click', () => {
         if (masterData.length === 0) return;
         let csvContent = "data:text/csv;charset=utf-8,";
