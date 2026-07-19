@@ -600,13 +600,13 @@
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files) {
+        if (e.dataTransfer && e.dataTransfer.files) {
             handleFileSelection(e.dataTransfer.files);
         }
     });
 
     csvPicker.addEventListener('change', (e) => {
-        if (e.target.files) {
+        if (e.target && e.target.files) {
             handleFileSelection(e.target.files);
         }
     });
@@ -773,6 +773,7 @@
         stage2.classList.add('active');
         renderMasterTableUI();
     }
+
 
     backBtn.addEventListener('click', () => {
         stage2.classList.remove('active');
