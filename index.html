@@ -13,6 +13,7 @@
             --gray-100: #f3f4f6;
             --gray-300: #d1d5db;
             --gray-700: #374151;
+            --excel-green: #107c41;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -81,6 +82,30 @@
             gap: 1rem;
             align-items: center;
         }
+        
+        .stage-2-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .header-row-1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-row-2 {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .vertical-button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
         .sort-controls {
             background: #ffffff;
             border: 1px solid var(--gray-300);
@@ -105,34 +130,109 @@
             color: var(--gray-700);
             font-weight: 500;
         }
-        .sort-controls select:disabled {
-            background-color: #e2e8f0;
-            color: #94a3b8;
-            cursor: not-allowed;
+        
+        /* Lock States Overlays */
+        .sort-disabled-state {
+            opacity: 0.4 !important;
+            pointer-events: none !important;
+            background-color: #f1f5f9 !important;
+            cursor: not-allowed !important;
         }
-        .search-dashboard {
-            background: #ffffff;
+        
+        .switch-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--gray-100);
             border: 1px solid var(--gray-300);
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-            display: flex;
-            gap: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-700);
+            display: inline-flex;
             align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+        .switch-btn:hover:not(.sort-disabled-state) {
+            background: #e5e7eb;
+        }
+
+        /* Thinned Compact Module Styles */
+        .compact-organize-panel {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: white;
+            border: 1px solid var(--gray-300);
+            padding: 0.25rem;
+            border-radius: 6px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .search-input {
-            flex: 1;
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
+        .btn-organize-toggle {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: var(--gray-100);
             border: 1px solid var(--gray-300);
-            font-size: 0.9rem;
+            color: var(--gray-700);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+        .btn-organize-toggle.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
         }
+        .btn-orientation-switch {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-orientation-switch.active-mode {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        .btn-toggle-time {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            color: var(--gray-700);
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-toggle-time:hover { border-color: var(--primary); color: var(--primary); }
+
+        .filter-panel {
+            background: #ffffff;
+            border: 1px solid var(--gray-300);
+            padding: 1.25rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .filter-header-title { font-weight: bold; color: var(--gray-700); }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.75rem; }
+        .filter-box { display: flex; flex-direction: column; gap: 0.35rem; }
+        .filter-box label { font-size: 0.85rem; font-weight: 600; color: var(--gray-700); }
+        .filter-input { padding: 0.45rem 0.6rem; border-radius: 4px; border: 1px solid var(--gray-300); font-size: 0.875rem; box-sizing: border-box; width: 100%; }
+        .range-inputs { display: flex; gap: 0.5rem; }
+        .range-inputs input { width: 50%; }
+
         button.btn {
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
@@ -147,6 +247,7 @@
         .btn-secondary:hover { background: #cbd5e1; }
         .btn-success { background: #16a34a; color: white; }
         .btn-success:hover { background: #15803d; }
+        
         .table-container {
             overflow-x: auto;
             background: white;
@@ -180,7 +281,13 @@
         th.sortable:hover {
             background: #e5e7eb;
         }
+        .excel-row-header { background-color: #f8fafc; text-align: center; font-weight: bold; color: #64748b; border-right: 1px solid var(--gray-200); cursor: pointer; min-width: 45px; width: 45px; }
         
+        /* Drag Overlay Feedback Highlights */
+        .draggable-active { opacity: 0.4; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important; background-color: #eff6ff !important; }
+        .drag-hover-zone { border-left: 3px dashed #3b82f6 !important; background-color: #f0fdf4 !important; }
+        tr.drag-hover-zone td { border-top: 2px dashed #3b82f6 !important; background-color: #f0fdf4 !important; }
+
         /* Custom CSS Layout drawn Padlocks */
         .lock-container {
             display: inline-flex;
@@ -200,7 +307,7 @@
         .css-lock {
             width: 14px;
             height: 11px;
-            background-color: #9ca3af;
+            background-color: #16a34a;
             border-radius: 3px;
             position: relative;
             margin-top: 6px;
@@ -209,7 +316,7 @@
         .css-lock::before {
             content: "";
             position: absolute;
-            border: 2px solid #9ca3af;
+            border: 2px solid #16a34a;
             border-bottom: none;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
@@ -227,16 +334,23 @@
             transform: translate(0, 0);
         }
         .lock-container.is-unlocked .css-lock::before {
-            transform: translate(2px, -2px) rotate(15deg);
+            transform: translate(3px, -2px) rotate(20deg);
         }
-        .lock-container:hover .css-lock {
-            background-color: #4b5563;
+        
+        .css-arrow-icon {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #2563eb;
+            transition: transform 0.1s, color 0.2s;
         }
-        .lock-container.is-locked:hover .css-lock {
-            background-color: #b91c1c;
-        }
-        .lock-container.is-locked:hover .css-lock::before {
-            border-color: #b91c1c;
+        .css-arrow-icon.is-disabled {
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            opacity: 0.4;
         }
         
         td input {
@@ -253,12 +367,17 @@
             outline: none;
             border-radius: 4px;
         }
+
+        .context-menu { position: absolute; display: none; background: white; border: 1px solid var(--gray-300); box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 4px; z-index: 1000; width: 180px; }
+        .context-menu-item { padding: 0.5rem 1rem; cursor: pointer; font-size: 0.85rem; color: var(--gray-700); }
+        .context-menu-item:hover { background: var(--gray-100); }
+        .context-mask { position: fixed; top:0; left:0; width:100vw; height:100vh; z-index:999; display:none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>CSV Attendance Merger & Editor</h2>
+    <h2>CSV Attendance Merger & Editor Workspace</h2>
     
     <!-- STAGE 1: UPLOAD PHASE -->
     <div id="stage-1" class="stage active">
@@ -268,97 +387,167 @@
             <button class="btn btn-primary">Select CSV Files</button>
             <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files or drag-and-drop multiple items here.</p>
         </div>
-
         <h4>Uploaded Files Queue</h4>
         <div class="file-list" id="file-queue">
             <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>
         </div>
-
         <div class="actions">
             <button class="btn btn-primary" id="next-btn">Combine & Process Data</button>
         </div>
     </div>
 
-    <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE -->
+    <!-- STAGE 2: VERIFY, EDIT & EXPORT PHASE -->
     <div id="stage-2" class="stage">
         <h3>Stage 2: Verify, Edit & Export Combined Master File</h3>
         
-        <div class="actions">
-            <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
+        <div class="stage-2-header">
+            <div class="header-row-1">
+                <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button>
+                <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
+            </div>
             
-            <div class="sort-controls">
-                <div class="control-group">
-                    <label for="primary-sort"><b>Primary Sort:</b></label>
-                    <select id="primary-sort">
-                        <option value="name-asc" selected>Name (A → Z)</option>
-                        <option value="name-desc">Name (Z → A)</option>
-                        <option value="date-desc">Date (Newest → Oldest)</option>
-                        <option value="date-asc">Date (Oldest → Newest)</option>
-                    </select>
+            <div class="header-row-2">
+                <div class="sort-controls">
+                    <div class="control-group">
+                        <label for="name-sort-rule"><b>Primary Sort:</b></label>
+                        <select id="name-sort-rule">
+                            <option value="asc" selected>Alphabetical (A → Z)</option>
+                            <option value="desc">Reverse Alphabetical (Z → A)</option>
+                        </select>
+                    </div>
+                    
+                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button>
+                    
+                    <div class="control-group">
+                        <label for="date-sort-rule"><b>Secondary Sort:</b></label>
+                        <select id="date-sort-rule">
+                            <option value="desc" selected>Newest → Oldest</option>
+                            <option value="asc">Oldest → Newest</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group" style="border-left: 1px solid var(--gray-300); padding-left: 0.5rem;">
+                        <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sorting System Configuration"></button>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label for="secondary-sort"><b>Secondary Sort:</b></label>
-                    <select id="secondary-sort">
-                        <option value="date-desc" selected>Date (Newest → Oldest)</option>
-                        <option value="date-asc">Date (Oldest → Newest)</option>
-                        <option value="name-asc">Name (A → Z)</option>
-                        <option value="name-desc">Name (Z → A)</option>
-                    </select>
+                
+                <!-- Dynamic Compact Switches panel -->
+                <div class="compact-organize-panel">
+                    <button id="toggle-organize-btn" class="btn-organize-toggle">Organize: OFF</button>
+                    <button id="orientation-axis-btn" class="btn-orientation-switch">|| Columns</button>
                 </div>
-                <!-- Lock button next to selectors -->
-                <div class="control-group">
-                    <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Priority Configurations"></button>
+
+                <div class="vertical-button-stack">
+                    <button id="time-convert-btn" class="btn-toggle-time">Time Format (12h ⇄ 24h)</button>
                 </div>
             </div>
-
-            <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
         </div>
 
-        <!-- Live Search Field Dashboard Panel -->
-        <div class="search-dashboard">
-            <label for="universal-search">🔍 <b>Filter Table:</b></label>
-            <input type="text" id="universal-search" class="search-input" placeholder="Type to search names, class dates, durations, codes, or timestamps...">
+        <!-- Filter Area Panel Grid -->
+        <div class="filter-panel">
+            <div class="filter-header-title">📋 Condition Workspace Filters Matrix</div>
+            <div class="filter-grid">
+                <div class="filter-box">
+                    <label>Participant Name</label>
+                    <input type="text" id="filter-name" class="filter-input" placeholder="Search name...">
+                </div>
+                <div class="filter-box">
+                    <label>Student Number (SNo)</label>
+                    <input type="text" id="filter-sno" class="filter-input" placeholder="Search SNo...">
+                </div>
+                <div class="filter-box">
+                    <label>Meeting Code</label>
+                    <input type="text" id="filter-code" class="filter-input" placeholder="Search code...">
+                </div>
+                <div class="filter-box">
+                    <label>Duration Threshold (Minutes)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min">
+                        <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 0.75rem; text-align: right;">
+                <button id="reset-filters-btn" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Clear Active Filters</button>
+            </div>
         </div>
 
+        <!-- Spreadsheet Grid View -->
         <div class="table-container">
             <table id="master-table">
                 <thead>
-                    <tr id="table-headers"></tr>
+                    <tr id="table-letters-row"></tr>
+                    <tr id="table-headers-row"></tr>
                 </thead>
-                <tbody id="table-body"></tbody>
+                <tbody id="table-body-container"></tbody>
             </table>
         </div>
     </div>
 </div>
 
+<!-- Context Option Popups -->
+<div class="context-mask" id="context-mask"></div>
+<div class="context-menu" id="column-context-menu">
+    <div class="context-menu-item" id="ctx-insert-col-left">⬅ Insert Column Left</div>
+    <div class="context-menu-item" id="ctx-insert-col-right">➡ Insert Column Right</div>
+    <div class="context-menu-item" id="ctx-delete-col" style="color: var(--danger);">❌ Delete Column</div>
+</div>
+<div class="context-menu" id="row-context-menu">
+    <div class="context-menu-item" id="ctx-delete-row" style="color: var(--danger);">❌ Delete Row Record</div>
+</div>
+
 <script>
-    const MASTER_HEADERS = [
-        "SNo", "Participant Name", "Attendance Started at", 
-        "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
-    ];
-    
+    // State Tracking Databases
     let uploadedFilesArray = [];
     let masterData = [];
+    let MASTER_HEADERS = ["Participant Name", "SNo", "Meeting code", "Attendance Started at", "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Class Date"];
+    
+    // Feature Configuration States
     let isRankLocked = false;
-    let currentSearchTerm = "";
+    let isOrganizeModeActive = false;
+    let organizeOrientationAxis = "columns"; // "columns" || "rows"
+    let isNamePriorityPrimary = true;
 
-    const csvPicker = document.getElementById('csv-picker');
+    // Cache Registers
+    let draggedColumnHeaderIndex = null;
+    let draggedRowSourceIndex = null;
+    let activeContextColumnHeaderKey = null;
+    let activeContextRowDataIndex = null;
+
+    // Selector Element Maps
+    const stage1 = document.getElementById('stage-1');
+    const stage2 = document.getElementById('stage-2');
     const uploadSection = document.querySelector('.upload-section');
+    const csvPicker = document.getElementById('csv-picker');
     const fileQueue = document.getElementById('file-queue');
     const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
     const downloadBtn = document.getElementById('download-btn');
     
-    const primarySortSelect = document.getElementById('primary-sort');
-    const secondarySortSelect = document.getElementById('secondary-sort');
+    const nameSortRule = document.getElementById('name-sort-rule');
+    const dateSortRule = document.getElementById('date-sort-rule');
+    const prioritySwitchBtn = document.getElementById('priority-switch-btn');
     const rankLockBtn = document.getElementById('rank-lock-btn');
-    const universalSearch = document.getElementById('universal-search');
     
-    const stage1 = document.getElementById('stage-1');
-    const stage2 = document.getElementById('stage-2');
+    const toggleOrganizeBtn = document.getElementById('toggle-organize-btn');
+    const orientationAxisBtn = document.getElementById('orientation-axis-btn');
+    const timeConvertBtn = document.getElementById('time-convert-btn');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
     
-    const tableHeaders = document.getElementById('table-headers');
-    const tableBody = document.getElementById('table-body');
+    const tableHeaderLetters = document.getElementById('table-letters-row');
+    const tableHeaders = document.getElementById('table-headers-row');
+    const tableBody = document.getElementById('table-body-container');
+    
+    const contextMask = document.getElementById('context-mask');
+    const columnContextMenu = document.getElementById('column-context-menu');
+    const rowContextMenu = document.getElementById('row-context-menu');
+
+    // Filter selectors
+    const filterName = document.getElementById('filter-name');
+    const filterSno = document.getElementById('filter-sno');
+    const filterCode = document.getElementById('filter-code');
+    const filterDurMin = document.getElementById('filter-dur-min');
+    const filterDurMax = document.getElementById('filter-dur-max');
 
     // Create the custom lock internal elements dynamically
     const lockBodyElement = document.createElement('div');
@@ -378,45 +567,20 @@
         renderQueueUI();
     }
 
-    csvPicker.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files);
-        csvPicker.value = ""; 
-    });
-
-    uploadSection.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--primary)';
-        uploadSection.style.background = '#eff6ff'; 
-    });
-
-    uploadSection.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-    });
-
-    uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-        if (e.dataTransfer && e.dataTransfer.files) {
-            handleFileSelection(e.dataTransfer.files);
-        }
-    });
+    csvPicker.addEventListener('change', (e) => { handleFileSelection(e.target.files); csvPicker.value = ""; });
+    uploadSection.addEventListener('dragover', (e) => { e.preventDefault(); uploadSection.style.borderColor = 'var(--primary)'; });
+    uploadSection.addEventListener('dragleave', () => { uploadSection.style.borderColor = 'var(--gray-300)'; });
+    uploadSection.addEventListener('drop', (e) => { e.preventDefault(); uploadSection.style.borderColor = 'var(--gray-300)'; if (e.dataTransfer && e.dataTransfer.files) handleFileSelection(e.dataTransfer.files); });
 
     function renderQueueUI() {
         fileQueue.innerHTML = '';
-                if (uploadedFilesArray.length === 0) {
+        if (uploadedFilesArray.length === 0) {
             fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
             return;
         }
         uploadedFilesArray.forEach((file, index) => {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
-            
             const nameSpan = document.createElement('span');
             nameSpan.className = 'file-name';
             nameSpan.textContent = file.name;
@@ -424,41 +588,28 @@
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
             removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = (e) => {
-                e.stopPropagation(); 
-                uploadedFilesArray.splice(index, 1);
-                renderQueueUI();
-            };
-            
-            fileItem.appendChild(nameSpan);
-            fileItem.appendChild(removeBtn);
-            fileQueue.appendChild(fileItem);
+            removeBtn.onclick = (e) => { e.stopPropagation(); uploadedFilesArray.splice(index, 1); renderQueueUI(); };
+            fileItem.appendChild(nameSpan); fileItem.appendChild(removeBtn); fileQueue.appendChild(fileItem);
         });
     }
 
     function extractDateFromFilename(filename) {
         const match = filename.match(/\(([^)]+)\)/);
-        if (!match || !match[1]) return "Unknown Date";
-        
-        let rawDate = match[1].trim(); 
-        rawDate = rawDate.replace(/\./g, '');
-        
+        if (!match || !match) return "Unknown Date";
+        let rawDate = match[1].trim().replace(/\./g, '');
         const parts = rawDate.split('-');
-        if (parts.length !== 3) return rawDate; 
+        if (parts.length !== 3) return rawDate;
         
         let day = parts[0].trim();
         let month = parts[1].trim();
         let year = parts[2].trim();
-        
         month = month.substring(0, 3);
         month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-
         return `${day}-${month}-${year}`;
     }
 
     function parseCSVLine(text) {
-        let p = '', r = [];
-        let q = false;
+        let p = '', r = []; let q = false;
         for (let i = 0; i < text.length; i++) {
             let c = text[i];
             if (c === '"') { q = !q; }
@@ -481,230 +632,188 @@
         
         const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         const monthIndex = months.indexOf(monthStr);
-        
         return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
 
-        nextBtn.addEventListener('click', async () => {
-        if (uploadedFilesArray.length === 0) {
-            alert('Please upload or drag-and-drop at least one CSV file.');
-            return;
+    function parseDurationToMinutes(durStr) {
+        if (!durStr) return 0;
+        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
+        if (clean.includes('h') || clean.includes('m')) {
+            let totalMin = 0;
+            const hrMatch = clean.match(/(\d+)\s*h/);
+            const minMatch = clean.match(/(\d+)\s*m/);
+            if (hrMatch) totalMin += parseInt(hrMatch, 10) * 60;
+            if (minMatch) totalMin += parseInt(minMatch, 10);
+            return totalMin;
         }
+        let parsed = parseInt(clean, 10); return isNaN(parsed) ? 0 : parsed;
+    }
 
-        masterData = []; 
-
-        for (let file of uploadedFilesArray) {
-            try {
-                const text = await file.text();
-                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                if (lines.length === 0) continue;
-
-                const fileHeaders = parseCSVLine(lines[0]); 
-                const fileDate = extractDateFromFilename(file.name);
-                
-                const indexMap = {};
-                MASTER_HEADERS.forEach(header => {
-                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
-                });
-
-                for (let i = 1; i < lines.length; i++) {
-                    const rowValues = parseCSVLine(lines[i]);
-                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
-
-                    let structuredObj = {};
-                    MASTER_HEADERS.forEach(header => {
-                        if (header === "Class Date") {
-                            structuredObj[header] = fileDate;
-                        } else {
-                            const mappedIdx = indexMap[header];
-                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
-                        }
-                    });
-                    masterData.push(structuredObj);
-                }
-            } catch (err) {
-                console.error("Error reading file: " + file.name, err);
-            }
+    function convertTimeStringSyntax(timeStr) {
+        if (!timeStr) return "";
+        let clean = timeStr.trim().toUpperCase();
+        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
+        if (ampmMatch) {
+            let hrs = parseInt(ampmMatch[1], 10);
+            let mins = ampmMatch[2];
+            let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
+            let period = ampmMatch[4];
+            if (period === "PM" && hrs < 12) hrs += 12;
+            if (period === "AM" && hrs === 12) hrs = 0;
+            return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
         }
-
-        sortMasterData();
-        renderMasterTableUI();
-        stage1.classList.remove('active');
-        stage2.classList.add('active');
-    });
-
-    backBtn.addEventListener('click', () => {
-        stage1.classList.add('active');
-        stage2.classList.remove('active');
-    });
-
-    primarySortSelect.addEventListener('change', () => {
-        sortMasterData();
-        renderMasterTableUI();
-    });
-    secondarySortSelect.addEventListener('change', () => {
-        sortMasterData();
-        renderMasterTableUI();
-    });
-
-    // Real-time keyword filter event listener hook
-    universalSearch.addEventListener('input', (e) => {
-        currentSearchTerm = e.target.value.toLowerCase().trim();
-        renderMasterTableUI(); 
-    });
-
-    // Safety lock toggle mechanism execution block
-    rankLockBtn.addEventListener('click', () => {
-        isRankLocked = !isRankLocked;
-        
-        if (isRankLocked) {
-            rankLockBtn.className = "lock-container is-locked";
-            primarySortSelect.disabled = true;
-            secondarySortSelect.disabled = true;
-        } else {
-            rankLockBtn.className = "lock-container is-unlocked";
-            primarySortSelect.disabled = false;
-            secondarySortSelect.disabled = false;
+        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+        if (militaryMatch) {
+            let hrs = parseInt(militaryMatch[1], 10);
+            let mins = militaryMatch[2];
+            let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
+            let period = hrs >= 12 ? "PM" : "AM";
+            if (hrs > 12) hrs -= 12; if (hrs === 0) hrs = 12;
+            return `${hrs}:${mins}${secs} ${period}`;
         }
-        renderMasterTableUI();
-    });
+        return timeStr; 
+    }
 
+    // Core Hierarchical Sorting Algorithm
     function sortMasterData() {
-        const primaryRule = primarySortSelect.value;
-        const secondaryRule = secondarySortSelect.value;
-
-        function executeEvaluation(rule, a, b) {
-            if (rule.startsWith('name')) {
-                const nameA = (a["Participant Name"] || "").toLowerCase();
-                const nameB = (b["Participant Name"] || "").toLowerCase();
-                const comparison = nameA.localeCompare(nameB);
-                return rule === "name-asc" ? comparison : -comparison;
-            } else if (rule.startsWith('date')) {
-                const dateA = parseCustomDate(a["Class Date"]);
-                const dateB = parseCustomDate(b["Class Date"]);
-                const comparison = dateA - dateB;
-                return rule === "date-asc" ? comparison : -comparison;
-            }
-            return 0;
-        }
-
+        const orderName = nameSortRule.value === 'asc' ? 1 : -1;
+        const orderDate = dateSortRule.value === 'asc' ? 1 : -1;
         masterData.sort((a, b) => {
-            const primaryResult = executeEvaluation(primaryRule, a, b);
-            if (primaryResult !== 0) return primaryResult;
-            return executeEvaluation(secondaryRule, a, b);
+            let pRes = 0; let sRes = 0;
+            if (isNamePriorityPrimary) {
+                pRes = String(a["Participant Name"] || "").localeCompare(String(b["Participant Name"] || "")) * orderName;
+                sRes = (parseCustomDate(a["Class Date"]) - parseCustomDate(b["Class Date"])) * orderDate;
+            } else {
+                pRes = (parseCustomDate(a["Class Date"]) - parseCustomDate(b["Class Date"])) * orderDate;
+                sRes = String(a["Participant Name"] || "").localeCompare(String(b["Participant Name"] || "")) * orderName;
+            }
+            if (pRes !== 0) return pRes; if (sRes !== 0) return sRes;
+            
+            // Enforced Absolute Tier 3 Autumn Fallback Rule: Joined at(beta) log
+            return String(a["Joined at(beta)"] || "").localeCompare(String(b["Joined at(beta)"] || "")); 
         });
     }
 
-    // Direction arrow helper toggler function (Isolates direction from priority selection)
+    rankLockBtn.addEventListener('click', () => {
+        isRankLocked = !isRankLocked;
+        rankLockBtn.className = isRankLocked ? "lock-container is-locked" : "lock-container is-unlocked";
+        nameSortRule.classList.toggle('sort-disabled-state', isRankLocked);
+        dateSortRule.classList.toggle('sort-disabled-state', isRankLocked);
+        prioritySwitchBtn.classList.toggle('sort-disabled-state', isRankLocked);
+        renderMasterTableUI();
+    });
+
+    prioritySwitchBtn.addEventListener('click', () => {
+        if (isRankLocked) return;
+        isNamePriorityPrimary = !isNamePriorityPrimary;
+        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
+        sortMasterData(); renderMasterTableUI();
+    });
+
+    [nameSortRule, dateSortRule].forEach(sel => sel.addEventListener('change', () => { if(!isRankLocked) { sortMasterData(); renderMasterTableUI(); } }));
+
+    function setPrimaryRankFromHeaderClick(columnKey) {
+        if (isRankLocked || isOrganizeModeActive) return;
+        isNamePriorityPrimary = (columnKey === "Participant Name");
+        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
+        sortMasterData(); renderMasterTableUI();
+    }
+
     function flipDirectionOnly(columnKey) {
-        if (columnKey === "Participant Name") {
-            primarySortSelect.value = (primarySortSelect.value === "name-asc") ? "name-desc" : "name-asc";
-            // Ensure corresponding matching layers sync inside secondary containers too
-            if (secondarySortSelect.value.startsWith('name')) {
-                secondarySortSelect.value = (secondarySortSelect.value === "name-asc") ? "name-desc" : "name-asc";
-            }
-        } else if (columnKey === "Class Date") {
-            primarySortSelect.value = (primarySortSelect.value === "date-desc") ? "date-asc" : "date-desc";
-            if (secondarySortSelect.value.startsWith('date')) {
-                secondarySortSelect.value = (secondarySortSelect.value === "date-desc") ? "date-asc" : "date-desc";
-            }
-        }
-        sortMasterData();
-        renderMasterTableUI();
+        if (isRankLocked || isOrganizeModeActive) return;
+        if (columnKey === "Participant Name") nameSortRule.value = nameSortRule.value === 'asc' ? 'desc' : 'asc';
+        if (columnKey === "Class Date") dateSortRule.value = dateSortRule.value === 'asc' ? 'desc' : 'asc';
+        sortMasterData(); renderMasterTableUI();
     }
 
-    // Rank selector priority re-assignment helper function
-    function setPrimaryRankColumn(columnKey) {
-        if (isRankLocked) return; // Completely blocked if the global layout is locked
-        
-        const currentPrimary = primarySortSelect.value;
-        if (columnKey === "Participant Name" && !currentPrimary.startsWith('name')) {
-            const oldPrimary = primarySortSelect.value;
-            primarySortSelect.value = secondarySortSelect.value.startsWith('name') ? secondarySortSelect.value : "name-asc";
-            secondarySortSelect.value = oldPrimary;
-        } else if (columnKey === "Class Date" && !currentPrimary.startsWith('date')) {
-            const oldPrimary = primarySortSelect.value;
-            primarySortSelect.value = secondarySortSelect.value.startsWith('date') ? secondarySortSelect.value : "date-desc";
-            secondarySortSelect.value = oldPrimary;
-        }
-        sortMasterData();
+    toggleOrganizeBtn.addEventListener('click', () => {
+        isOrganizeModeActive = !isOrganizeModeActive;
+        toggleOrganizeBtn.textContent = isOrganizeModeActive ? "Organize: ON" : "Organize: OFF";
+        toggleOrganizeBtn.classList.toggle('active', isOrganizeModeActive);
         renderMasterTableUI();
+    });
+
+    orientationAxisBtn.addEventListener('click', () => {
+        organizeOrientationAxis = organizeOrientationAxis === "columns" ? "rows" : "columns";
+        orientationAxisBtn.textContent = organizeOrientationAxis === "columns" ? "|| Columns" : "☰ Rows";
+        orientationAxisBtn.classList.toggle('active-mode', organizeOrientationAxis === "rows");
+        if (isOrganizeModeActive) renderMasterTableUI();
+    });
+
+    timeConvertBtn.addEventListener('click', () => {
+        masterData.forEach(row => {
+            if (row["Attendance Started at"]) row["Attendance Started at"] = convertTimeStringSyntax(row["Attendance Started at"]);
+            if (row["Joined at(beta)"]) row["Joined at(beta)"] = convertTimeStringSyntax(row["Joined at(beta)"]);
+            if (row["Attendance Stopped at"]) row["Attendance Stopped at"] = convertTimeStringSyntax(row["Attendance Stopped at"]);
+        });
+        renderMasterTableUI();
+    });
+
+    function getExcelColumnLetterLabel(index) {
+        let label = '';
+        while (index >= 0) { label = String.fromCharCode((index % 26) + 65) + label; index = Math.floor(index / 26) - 1; }
+        return label;
     }
 
-        function renderMasterTableUI() {
-        tableHeaders.innerHTML = '';
-        tableBody.innerHTML = '';
+    function renderMasterTableUI() {
+        tableHeaders.innerHTML = ''; tableHeaderLetters.innerHTML = ''; tableBody.innerHTML = '';
+        const cornerEmptyLetter = document.createElement('th'); cornerEmptyLetter.style.width = "45px"; tableHeaderLetters.appendChild(cornerEmptyLetter);
 
-        const currentPrimary = primarySortSelect.value;
-        const currentSecondary = secondarySortSelect.value;
+        MASTER_HEADERS.forEach((h, idx) => {
+            const letterTh = document.createElement('th'); letterTh.textContent = getExcelColumnLetterLabel(idx); letterTh.className = "excel-row-header";
+            letterTh.addEventListener('click', (e) => {
+                if (isRankLocked) return; activeContextColumnHeaderKey = h;
+                columnContextMenu.style.left = `${e.clientX}px`; columnContextMenu.style.top = `${e.clientY}px`; columnContextMenu.style.display = "block"; contextMask.style.display = "block";
+            });
+            tableHeaderLetters.appendChild(letterTh);
+        });
 
-        MASTER_HEADERS.forEach(h => {
-            const th = document.createElement('th');
-            
+        const cornerTh = document.createElement('th'); cornerTh.className = "excel-row-header"; tableHeaders.appendChild(cornerTh);
+
+        MASTER_HEADERS.forEach((h, index) => {
+            const th = document.createElement('th'); th.style.verticalAlign = "middle";
+            if (isOrganizeModeActive && organizeOrientationAxis === "columns") {
+                th.setAttribute('draggable', 'true'); th.style.cursor = "move";
+                th.addEventListener('dragstart', () => { draggedColumnHeaderIndex = index; th.classList.add('draggable-active'); });
+                th.addEventListener('dragover', (e) => { e.preventDefault(); th.classList.add('drag-hover-zone'); });
+                th.addEventListener('dragleave', () => th.classList.remove('drag-hover-zone'));
+                th.addEventListener('drop', (e) => {
+                    e.preventDefault(); th.classList.remove('drag-hover-zone');
+                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
+                        const target = MASTER_HEADERS[draggedColumnHeaderIndex];
+                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1); MASTER_HEADERS.splice(index, 0, target); renderMasterTableUI();
+                    }
+                });
+                th.addEventListener('dragend', () => th.classList.remove('draggable-active'));
+            }
+
             if (h === "Participant Name" || h === "Class Date") {
-                th.style.verticalAlign = "middle";
-                
-                const textSpan = document.createElement('span');
-                textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
-                textSpan.style.fontSize = "1rem"; 
-                textSpan.style.transition = "color 0.2s";
-                
-                if (!isRankLocked) {
-                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
-                    textSpan.onmouseout = () => textSpan.style.color = "";
-                }
-                
-                let rankLabel = "";
-                let isActiveRule = "";
-                
-                if (h === "Participant Name") {
-                    if (currentPrimary.startsWith('name')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
-                    else if (currentSecondary.startsWith('name')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
-                } else if (h === "Class Date") {
-                    if (currentPrimary.startsWith('date')) { rankLabel = " (Primary)"; isActiveRule = currentPrimary; }
-                    else if (currentSecondary.startsWith('date')) { rankLabel = " (Secondary)"; isActiveRule = currentSecondary; }
-                }
-                
-                textSpan.textContent = h + rankLabel;
-                
-                // Clicking text name ONLY toggles ranking priorities
-                textSpan.onclick = (e) => {
-                    e.stopPropagation();
-                    setPrimaryRankColumn(h);
-                };
-                th.appendChild(textSpan);
+                const span = document.createElement('span'); span.style.cursor = (isRankLocked || isOrganizeModeActive) ? "not-allowed" : "pointer";
+                let suffix = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
+                let dir = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
+                span.textContent = h + suffix; span.onclick = (e) => { e.stopPropagation(); if(!isOrganizeModeActive) setPrimaryRankFromHeaderClick(h); }; th.appendChild(span);
 
-                // Disengaged arrow directional flip button element structure
-                if (isActiveRule) {
-                    const arrowBtn = document.createElement('button');
-                    arrowBtn.style.background = "none";
-                    arrowBtn.style.border = "none";
-                    arrowBtn.style.cursor = "pointer";
-                    arrowBtn.style.padding = "0 8px";
-                    arrowBtn.style.fontSize = "1.3rem"; // Scaled target click target layout
+                const arrowBtn = document.createElement('div'); 
+                arrowBtn.className = `css-arrow-icon ${isRankLocked || isOrganizeModeActive ? 'is-disabled' : ''}`;
+                arrowBtn.textContent = dir === 'asc' ? ' ▲' : ' ▼';
+                
+                arrowBtn.onmouseover = () => {
+                    if (!isRankLocked && !isOrganizeModeActive) {
+                        arrowBtn.style.color = "var(--primary-hover)";
+                        arrowBtn.style.transform = "scale(1.2)";
+                    }
+                };
+                arrowBtn.onmouseout = () => {
                     arrowBtn.style.color = "#2563eb";
-                    arrowBtn.style.fontWeight = "bold";
-                    arrowBtn.style.transition = "transform 0.1s, color 0.2s";
-                    arrowBtn.style.verticalAlign = "middle";
-                    
-                    arrowBtn.innerHTML = (isActiveRule.endsWith('asc')) ? "▲" : "▼";
-                    
-                    arrowBtn.onmouseover = () => {
-                        arrowBtn.style.color = "#1d4ed8";
-                        arrowBtn.style.transform = "scale(1.3)";
-                    };
-                    arrowBtn.onmouseout = () => {
-                        arrowBtn.style.color = "#2563eb";
-                        arrowBtn.style.transform = "scale(1)";
-                    };
-                    
-                    // Arrow clicks change direction ONLY without altering priority rankings
-                    arrowBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        flipDirectionOnly(h);
-                    };
-                    th.appendChild(arrowBtn);
-                }
+                    arrowBtn.style.transform = "scale(1)";
+                };
+                
+                // Arrow clicks change direction ONLY without altering priority rankings
+                arrowBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    flipDirectionOnly(h);
+                };
+                th.appendChild(arrowBtn);
             } else {
                 th.textContent = h;
             }
@@ -713,20 +822,61 @@
 
         // Filter the dataset rows using the search query string before displaying them
         const filteredData = masterData.filter(row => {
-            if (!currentSearchTerm) return true;
-            return MASTER_HEADERS.some(header => {
-                const cellValue = String(row[header] || "").toLowerCase();
-                return cellValue.includes(currentSearchTerm);
-            });
+            const valName = filterName.value.toLowerCase().trim();
+            const valSno = filterSno.value.toLowerCase().trim();
+            const valCode = filterCode.value.toLowerCase().trim();
+            const valMinDur = parseFloat(filterDurMin.value);
+            const valMaxDur = parseFloat(filterDurMax.value);
+
+            if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
+            if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
+            if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
+            if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
+                const totalMins = parseDurationToMinutes(row["Attended Duration"]);
+                if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
+                if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
+            }
+            return true;
         });
 
         // Loop rows into live UI input elements
         filteredData.forEach((row, index) => {
             const tr = document.createElement('tr');
+            
+            // Retain row headers index numbers
+            const indexTd = document.createElement('td');
+            indexTd.textContent = index + 1;
+            indexTd.className = "excel-row-header";
+            indexTd.addEventListener('contextmenu', (e) => {
+                e.preventDefault(); activeContextRowDataIndex = masterData.indexOf(row);
+                rowContextMenu.style.left = `${e.clientX}px`; rowContextMenu.style.top = `${e.clientY}px`; rowContextMenu.style.display = "block"; contextMask.style.display = "block";
+            });
+            tr.appendChild(indexTd);
+
+            // Mount Row Reordering Mechanics if activated
+            if (isOrganizeModeActive && organizeOrientationAxis === "rows") {
+                tr.setAttribute('draggable', 'true');
+                tr.style.cursor = "move";
+                tr.addEventListener('dragstart', () => { draggedRowSourceIndex = masterData.indexOf(row); tr.classList.add('draggable-active'); });
+                tr.addEventListener('dragover', (e) => { e.preventDefault(); tr.classList.add('drag-hover-zone'); });
+                tr.addEventListener('dragleave', () => tr.classList.remove('drag-hover-zone'));
+                tr.addEventListener('drop', (e) => {
+                    e.preventDefault(); tr.classList.remove('drag-hover-zone');
+                    const targetIdx = masterData.indexOf(row);
+                    if (draggedRowSourceIndex !== null && draggedRowSourceIndex !== targetIdx) {
+                        const targetItem = masterData[draggedRowSourceIndex];
+                        masterData.splice(draggedRowSourceIndex, 1);
+                        masterData.splice(targetIdx, 0, targetItem);
+                        renderMasterTableUI();
+                    }
+                });
+                tr.addEventListener('dragend', () => tr.classList.remove('draggable-active'));
+            }
+
             MASTER_HEADERS.forEach(header => {
                 const td = document.createElement('td');
                 const input = document.createElement('input');
-                input.value = row[header];
+                input.value = row[header] || '';
                 
                 // Find index match location relative to base global memory array references
                 const baseIndex = masterData.indexOf(row);
@@ -743,6 +893,65 @@
             tableBody.appendChild(tr);
         });
     }
+
+    function closeAllMenus() { columnContextMenu.style.display = "none"; rowContextMenu.style.display = "none"; contextMask.style.display = "none"; }
+    contextMask.addEventListener('click', closeAllMenus);
+
+    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        const name = prompt("Enter new column name:"); if (!name || MASTER_HEADERS.includes(name.trim())) return;
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) { MASTER_HEADERS.splice(idx, 0, name.trim()); masterData.forEach(r => r[name.trim()] = ""); renderMasterTableUI(); }
+        closeAllMenus();
+    });
+
+    document.getElementById('ctx-insert-col-right').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        const name = prompt("Enter new column name:"); if (!name || MASTER_HEADERS.includes(name.trim())) return;
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) { MASTER_HEADERS.splice(idx, 0, name.trim()); masterData.forEach(r => r[name.trim()] = ""); renderMasterTableUI(); }
+        closeAllMenus();
+    });
+
+    document.getElementById('ctx-insert-col-right').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        const name = prompt("Enter new column name:"); if (!name || MASTER_HEADERS.includes(name.trim())) return;
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) { MASTER_HEADERS.splice(idx + 1, 0, name.trim()); masterData.forEach(r => r[name.trim()] = ""); renderMasterTableUI(); }
+        closeAllMenus();
+    });
+
+    document.getElementById('ctx-delete-col').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        if (confirm(`Delete column "${activeContextColumnHeaderKey}"?`)) { MASTER_HEADERS = MASTER_HEADERS.filter(h => h !== activeContextColumnHeaderKey); masterData.forEach(r => delete r[activeContextColumnHeaderKey]); renderMasterTableUI(); }
+        closeAllMenus();
+    });
+
+    document.getElementById('ctx-delete-row').addEventListener('click', () => { if (activeContextRowDataIndex !== null) { masterData.splice(activeContextRowDataIndex, 1); renderMasterTableUI(); } closeAllMenus(); });
+
+    [filterName, filterSno, filterCode, filterDurMin, filterDurMax].forEach(f => f.addEventListener('input', renderMasterTableUI));
+    resetFiltersBtn.addEventListener('click', () => { [filterName, filterSno, filterCode, filterDurMin, filterDurMax].forEach(f => f.value = ""); renderMasterTableUI(); });
+
+    nextBtn.addEventListener('click', async () => {
+        if (uploadedFilesArray.length === 0) { alert('Please upload files first.'); return; }
+        masterData = [];
+        for (let file of uploadedFilesArray) {
+            try {
+                const text = await file.text(); const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0); if (lines.length === 0) continue;
+                const fileHeaders = parseCSVLine(lines); const fileDate = extractDateFromFilename(file.name);
+                const indexMap = {}; MASTER_HEADERS.forEach(h => { indexMap[h] = fileHeaders.findIndex(fh => fh.toLowerCase() === h.toLowerCase()); });
+
+                for (let i = 1; i < lines.length; i++) {
+                    const rowValues = parseCSVLine(lines[i]); if (rowValues.length === 0 || rowValues.every(v => v === '')) continue;
+                    let obj = {}; MASTER_HEADERS.forEach(h => { if (h === "Class Date") obj[h] = fileDate; else { const mIdx = indexMap[h]; obj[h] = (mIdx !== -1 && mIdx < rowValues.length) ? rowValues[mIdx] : ''; } });
+                    masterData.push(obj);
+                }
+            } catch (err) { console.error(err); }
+        }
+        sortMasterData(); renderMasterTableUI(); stage1.classList.remove('active'); stage2.classList.add('active');
+    });
+
+    backBtn.addEventListener('click', () => { stage1.classList.add('active'); stage2.classList.remove('active'); });
 
     downloadBtn.addEventListener('click', () => {
         if (masterData.length === 0) return;
