@@ -594,6 +594,11 @@
                         <div class="filter-box"> 
                             <label>Duration Threshold (Minutes)</label> 
                             <div class="range-inputs"> 
+
+
+
+                                
+
                                 <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min (e.g. 45)"> 
                         <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max"> 
                     </div> 
@@ -605,13 +610,13 @@
                         <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now"> 
                     </div> 
                 </div>
-                <!-- New Student Number filter input field placed directly to the right of Class Date Bounds -->
+                <!-- Student Number Filter Box -->
                 <div class="filter-box">
                     <label>Student Number</label>
                     <input type="text" id="filter-sno" class="filter-input" placeholder="Search student number...">
                 </div>
 
-                <!-- Bottom row sequence re-ordered exactly as requested -->
+                <!-- Bottom row sequence re-ordered -->
                 <div class="filter-box">
                     <label>Started At</label>
                     <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
@@ -625,14 +630,14 @@
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
                 </div>
                 
-                <!-- Reset Filters action button positioned on the far bottom right edge of the grid -->
+                <!-- Reset Filters Button -->
                 <div class="filter-box">
                     <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
                 </div>
             </div>
         </div>
 
-        <div class="table-container">
+        <div class="table-container" style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--gray-300); margin-top: 1rem;">
             <table id="master-table">
                 <thead>
                     <tr id="table-header-letters"></tr>
@@ -674,8 +679,6 @@
     
     let uploadedFilesArray = [];
     let masterData = [];
-    let isPrimarySortLocked = false;
-    let isSecondarySortLocked = false;
     let isRankLocked = false; 
     let isNamePriorityPrimary = true;
     let isStartDateInclusive = true;
@@ -684,7 +687,7 @@
     let currentActiveTimeMode = "12h";
 
     let isDragReorderModeActive = false;
-    let currentDragOrientation = "vertical"; // "vertical" = columns, "horizontal" = rows
+    let currentDragOrientation = "vertical"; 
     let draggedColumnHeaderIndex = null;
     let draggedRowDataIndex = null;
     let activeContextColumnHeaderKey = null;
@@ -704,8 +707,6 @@
     const nameSortRule = document.getElementById('name-sort-rule');
     const dateSortRule = document.getElementById('date-sort-rule');
     const prioritySwitchBtn = document.getElementById('priority-switch-btn');
-    const primaryLockBtn = document.getElementById('primary-lock-btn');
-    const secondaryLockBtn = document.getElementById('secondary-lock-btn');
     const rankLockBtn = document.getElementById('rank-lock-btn');
     
     const filterName = document.getElementById('filter-name');
@@ -733,6 +734,74 @@
     const contextMask = document.getElementById('context-mask');
     const columnContextMenu = document.getElementById('column-context-menu');
     const rowContextMenu = document.getElementById('row-context-menu');
+
+    // Setup configurations for unified layout lock state triggers
+    // Rewriting selector mappings to hook onto the single lock placement architecture
+    document.addEventListener("DOMContentLoaded", () => {
+        const controlsContainer = document.querySelector(".sort-controls");
+        if (controlsContainer) {
+            // Clear prior separated buttons and introduce cleanly spaced single anchor element
+            controlsContainer.innerHTML = `
+                <div class="control-group"> 
+                    <label for="name-sort-rule"><b>Name Order:</b></label> 
+                    <select id="name-sort-rule"> 
+                        <option value="asc" selected>Alphabetical (A → Z)</option> 
+                        <option value="desc">Reverse Alphabetical (Z → A)</option> 
+                    </select> 
+                </div> 
+                <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button> 
+                <div class="control-group"> 
+                    <label for="date-sort-rule"><b>Date Order:</b></label> 
+                    <select id="date-sort-rule"> 
+                        <option value="desc" selected>Newest → Oldest</option> 
+                        <option value="asc">Oldest → Newest</option> 
+                    </select> 
+                </div>
+                <div class="control-group" style="margin-left: 12px;">
+                    <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts">
+                        <div class="css-lock"></div>
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Re-bind elements to dynamically structured template output layout values
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        const prioritySwitchBtn = document.getElementById('priority-switch-btn');
+        const rankLockBtn = document.getElementById('rank-lock-btn');
+
+        nameSortRule.addEventListener('change', () => { if (!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
+        dateSortRule.addEventListener('change', () => { if (!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
+        
+        prioritySwitchBtn.addEventListener('click', () => {
+            if (isRankLocked) return;
+            isNamePriorityPrimary = !isNamePriorityPrimary;
+            prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
+            sortMasterData();
+            renderMasterTableUI();
+        });
+
+        rankLockBtn.addEventListener('click', () => {
+            isRankLocked = !isRankLocked;
+            if (isRankLocked) {
+                rankLockBtn.className = "lock-container is-locked";
+                nameSortRule.disabled = true;
+                dateSortRule.disabled = true;
+                prioritySwitchBtn.disabled = true;
+                prioritySwitchBtn.style.opacity = "0.5";
+                prioritySwitchBtn.style.cursor = "not-allowed";
+            } else {
+                rankLockBtn.className = "lock-container is-unlocked";
+                nameSortRule.disabled = false;
+                dateSortRule.disabled = false;
+                prioritySwitchBtn.disabled = false;
+                prioritySwitchBtn.style.opacity = "1";
+                prioritySwitchBtn.style.cursor = "pointer";
+            }
+            renderMasterTableUI();
+        });
+    });
 
     function handleFileSelection(files) {
         if (!files) return;
@@ -959,12 +1028,7 @@
     toggleReorderBtn.addEventListener('click', () => {
         isDragReorderModeActive = !isDragReorderModeActive;
         toggleReorderBtn.textContent = isDragReorderModeActive ? "Organize: On" : "Organize: Off";
-        
-        if (isDragReorderModeActive) {
-            toggleLinesBtn.disabled = false;
-        } else {
-            toggleLinesBtn.disabled = true;
-        }
+        toggleLinesBtn.disabled = !isDragReorderModeActive;
         renderMasterTableUI();
     });
 
@@ -988,7 +1052,7 @@
     contextMask.addEventListener('click', closeAllContextMenus);
 
     document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if ((isNamePriorityPrimary && isPrimarySortLocked) || (!isNamePriorityPrimary && isSecondarySortLocked) || !activeContextColumnHeaderKey) return;
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
         const newColName = prompt("Enter a unique name for your new custom column:");
         if (!newColName) return;
         const cleanCol = newColName.trim();
@@ -1004,7 +1068,7 @@
     });
 
     document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if ((isNamePriorityPrimary && isPrimarySortLocked) || (!isNamePriorityPrimary && isSecondarySortLocked) || !activeContextColumnHeaderKey) return;
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
         if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
             alert("Protected base headers cannot be deleted.");
             return;
@@ -1033,9 +1097,6 @@
         closeAllContextMenus();
         renderMasterTableUI();
     });
-
-    nameSortRule.addEventListener('change', () => { if (!isPrimarySortLocked) { sortMasterData(); renderMasterTableUI(); } });
-    dateSortRule.addEventListener('change', () => { if (!isSecondarySortLocked) { sortMasterData(); renderMasterTableUI(); } });
 
     [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
         input.addEventListener('input', () => { renderMasterTableUI(); });
@@ -1071,39 +1132,12 @@
         renderMasterTableUI(); 
     });
 
-    prioritySwitchBtn.addEventListener('click', () => {
-        isNamePriorityPrimary = !isNamePriorityPrimary;
-        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
-        sortMasterData();
-        renderMasterTableUI();
-    });
-
-    primaryLockBtn.addEventListener('click', () => {
-        isPrimarySortLocked = !isPrimarySortLocked;
-        if (isPrimarySortLocked) {
-            primaryLockBtn.className = "lock-container is-locked";
-            nameSortRule.disabled = true;
-        } else {
-            primaryLockBtn.className = "lock-container is-unlocked";
-            nameSortRule.disabled = false;
-        }
-        renderMasterTableUI();
-    });
-
-    secondaryLockBtn.addEventListener('click', () => {
-        isSecondarySortLocked = !isSecondarySortLocked;
-        if (isSecondarySortLocked) {
-            secondaryLockBtn.className = "lock-container is-locked";
-            dateSortRule.disabled = true;
-        } else {
-            secondaryLockBtn.className = "lock-container is-unlocked";
-            dateSortRule.disabled = false;
-        }
-        renderMasterTableUI();
-    });
-
     function sortMasterData() {
-        if (isPrimarySortLocked && isSecondarySortLocked) return;
+        if (isRankLocked) return;
+
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        if (!nameSortRule || !dateSortRule) return;
 
         const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
         const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
@@ -1134,11 +1168,15 @@
     }
 
     function flipDirectionOnly(columnKey) {
-        if (columnKey === "Participant Name" && !isPrimarySortLocked) {
+        if (isRankLocked) return;
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        
+        if (columnKey === "Participant Name" && nameSortRule) {
             nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
             sortMasterData();
             renderMasterTableUI();
-        } else if (columnKey === "Class Date" && !isSecondarySortLocked) {
+        } else if (columnKey === "Class Date" && dateSortRule) {
             dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
             sortMasterData();
             renderMasterTableUI();
@@ -1146,15 +1184,17 @@
     }
 
     function setPrimaryRankFromHeaderClick(columnKey) {
-        if (isDragReorderModeActive) return;
-        if (columnKey === "Participant Name" && !isNamePriorityPrimary && !isPrimarySortLocked) {
+        if (isDragReorderModeActive || isRankLocked) return;
+        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
             isNamePriorityPrimary = true;
-            prioritySwitchBtn.textContent = "Name Priority First ⇄";
+            const btn = document.getElementById('priority-switch-btn');
+            if (btn) btn.textContent = "Name Priority First ⇄";
             sortMasterData();
             renderMasterTableUI();
-        } else if (columnKey === "Class Date" && isNamePriorityPrimary && !isSecondarySortLocked) {
+        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
             isNamePriorityPrimary = false;
-            prioritySwitchBtn.textContent = "Date Priority First ⇄";
+            const btn = document.getElementById('priority-switch-btn');
+            if (btn) btn.textContent = "Date Priority First ⇄";
             sortMasterData();
             renderMasterTableUI();
         }
@@ -1170,6 +1210,9 @@
     }
 
     function renderMasterTableUI() {
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        
         tableHeaders.innerHTML = '';
         tableHeaderLetters.innerHTML = '';
         tableBody.innerHTML = '';
@@ -1201,8 +1244,6 @@
             const th = document.createElement('th');
             th.style.verticalAlign = "middle";
             
-            const isColumnTargetLocked = (h === "Participant Name" && isPrimarySortLocked) || (h === "Class Date" && isSecondarySortLocked);
-
             if (isDragReorderModeActive && currentDragOrientation === "vertical") {
                 th.className = "sortable draggable-header";
                 th.setAttribute('draggable', 'true');
@@ -1213,26 +1254,277 @@
                 });
                 th.addEventListener('dragend', () => {
                     th.classList.remove('header-dragging');
+                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2})`)).forEach(cell => {
+                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                    });
                     renderMasterTableUI();
                 });
                 th.addEventListener('dragover', (e) => { 
                     e.preventDefault(); 
                     const rect = th.getBoundingClientRect();
                     const midpoint = rect.left + rect.width / 2;
-                    if (e.clientX < midpoint) {
-                        th.classList.add('header-drag-over-left');
-                        th.classList.remove('header-drag-over-right');
-                    } else {
-                        th.classList.add('header-drag-over-right');
-                        th.classList.remove('header-drag-over-left');
-                    }
+                    
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => {
+                        if (e.clientX < midpoint) {
+                            cell.classList.add('header-drag-over-left');
+                            cell.classList.remove('header-drag-over-right');
+                        } else {
+                            cell.classList.add('header-drag-over-right');
+                            cell.classList.remove('header-drag-over-left');
+                        }
+                    });
                 });
                 th.addEventListener('dragleave', () => {
-                    th.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
                 });
                 th.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    th.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
+                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
+                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
+                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
+                        renderMasterTableUI();
+    });
+
+    function closeAllContextMenus() {
+        columnContextMenu.style.display = "none";
+        rowContextMenu.style.display = "none";
+        contextMask.style.display = "none";
+    }
+    contextMask.addEventListener('click', closeAllContextMenus);
+
+    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        const newColName = prompt("Enter a unique name for your new custom column:");
+        if (!newColName) return;
+        const cleanCol = newColName.trim();
+        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
+        
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) {
+            MASTER_HEADERS.splice(idx, 0, cleanCol);
+            masterData.forEach(row => { row[cleanCol] = ""; });
+        }
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-col').addEventListener('click', () => {
+        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
+            alert("Protected base headers cannot be deleted.");
+            return;
+        }
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) {
+            MASTER_HEADERS.splice(idx, 1);
+            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
+        }
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
+        if (activeContextRowDataIndex === null) return;
+        let blankRow = {};
+        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
+        masterData.splice(activeContextRowDataIndex, 0, blankRow);
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-row').addEventListener('click', () => {
+        if (activeContextRowDataIndex === null) return;
+        masterData.splice(activeContextRowDataIndex, 1);
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
+        input.addEventListener('input', () => { renderMasterTableUI(); });
+    });
+
+    startDateToggle.addEventListener('click', () => {
+        isStartDateInclusive = !isStartDateInclusive;
+        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+    endDateToggle.addEventListener('click', () => {
+        isEndDateInclusive = !isEndDateInclusive;
+        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
+        isStartDateInclusive = true;
+        isEndDateInclusive = true;
+        startDateToggle.textContent = "Inc";
+        endDateToggle.textContent = "Inc";
+        renderMasterTableUI();
+    });
+
+    timeConvertBtn.addEventListener('click', () => {
+        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
+        masterData.forEach(row => {
+            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
+                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
+            });
+        });
+        renderMasterTableUI(); 
+    });
+
+    function sortMasterData() {
+        if (isRankLocked) return;
+
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        if (!nameSortRule || !dateSortRule) return;
+
+        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
+        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
+
+        function checkNameLayer(a, b) {
+            const nameA = (a["Participant Name"] || "").toLowerCase();
+            const nameB = (b["Participant Name"] || "").toLowerCase();
+            return nameA.localeCompare(nameB) * nameDirection;
+        }
+
+        function checkDateLayer(a, b) {
+            const dateA = parseCustomDate(a["Class Date"]);
+            const dateB = parseCustomDate(b["Class Date"]);
+            return (dateA - dateB) * dateDirection;
+        }
+
+        masterData.sort((a, b) => {
+            if (isNamePriorityPrimary) {
+                const res = checkNameLayer(a, b);
+                if (res !== 0) return res;
+                return checkDateLayer(a, b);
+            } else {
+                const res = checkDateLayer(a, b);
+                if (res !== 0) return res;
+                return checkNameLayer(a, b);
+            }
+        });
+    }
+
+    function flipDirectionOnly(columnKey) {
+        if (isRankLocked) return;
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        
+        if (columnKey === "Participant Name" && nameSortRule) {
+            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
+            sortMasterData();
+            renderMasterTableUI();
+        } else if (columnKey === "Class Date" && dateSortRule) {
+            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
+            sortMasterData();
+            renderMasterTableUI();
+        }
+    }
+
+    function setPrimaryRankFromHeaderClick(columnKey) {
+        if (isDragReorderModeActive || isRankLocked) return;
+        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
+            isNamePriorityPrimary = true;
+            const btn = document.getElementById('priority-switch-btn');
+            if (btn) btn.textContent = "Name Priority First ⇄";
+            sortMasterData();
+            renderMasterTableUI();
+        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
+            isNamePriorityPrimary = false;
+            const btn = document.getElementById('priority-switch-btn');
+            if (btn) btn.textContent = "Date Priority First ⇄";
+            sortMasterData();
+            renderMasterTableUI();
+        }
+    }
+
+    function getExcelColumnLetterLabel(index) {
+        let label = '';
+        while (index >= 0) {
+            label = String.fromCharCode((index % 26) + 65) + label;
+            index = Math.floor(index / 26) - 1;
+        }
+        return label;
+    }
+
+    function renderMasterTableUI() {
+        const nameSortRule = document.getElementById('name-sort-rule');
+        const dateSortRule = document.getElementById('date-sort-rule');
+        
+        tableHeaders.innerHTML = '';
+        tableHeaderLetters.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        const emptyTh = document.createElement('th');
+        emptyTh.style.width = "50px";
+        tableHeaderLetters.appendChild(emptyTh);
+
+        MASTER_HEADERS.forEach((h, index) => {
+            const letterTh = document.createElement('th');
+            letterTh.textContent = getExcelColumnLetterLabel(index);
+            letterTh.className = "excel-row-header";
+            
+            letterTh.addEventListener('click', (e) => {
+                activeContextColumnHeaderKey = h;
+                columnContextMenu.style.left = `${e.clientX}px`;
+                columnContextMenu.style.top = `${e.clientY}px`;
+                columnContextMenu.style.display = "block";
+                contextMask.style.display = "block";
+            });
+            tableHeaderLetters.appendChild(letterTh);
+        });
+
+        const cornerTh = document.createElement('th');
+        cornerTh.className = "excel-row-header";
+        tableHeaders.appendChild(cornerTh);
+
+        MASTER_HEADERS.forEach((h, index) => {
+            const th = document.createElement('th');
+            th.style.verticalAlign = "middle";
+            
+            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
+                th.className = "sortable draggable-header";
+                th.setAttribute('draggable', 'true');
+                
+                th.addEventListener('dragstart', (e) => { 
+                    draggedColumnHeaderIndex = index; 
+                    th.classList.add('header-dragging');
+                });
+                th.addEventListener('dragend', () => {
+                    th.classList.remove('header-dragging');
+                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2})`)).forEach(cell => {
+                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                    });
+                    renderMasterTableUI();
+                });
+                th.addEventListener('dragover', (e) => { 
+                    e.preventDefault(); 
+                    const rect = th.getBoundingClientRect();
+                    const midpoint = rect.left + rect.width / 2;
+                    
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => {
+                        if (e.clientX < midpoint) {
+                            cell.classList.add('header-drag-over-left');
+                            cell.classList.remove('header-drag-over-right');
+                        } else {
+                            cell.classList.add('header-drag-over-right');
+                            cell.classList.remove('header-drag-over-left');
+                        }
+                    });
+                });
+                th.addEventListener('dragleave', () => {
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
+                });
+                th.addEventListener('drop', (e) => {
+                    e.preventDefault();
                     if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
                         const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
                         MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
@@ -1246,19 +1538,22 @@
                 if (!isDragReorderModeActive) th.className = "sortable";
                 
                 const textSpan = document.createElement('span');
-                textSpan.style.cursor = isColumnTargetLocked ? "not-allowed" : "pointer";
+                textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
                 textSpan.style.fontSize = "1rem";
-                if (isColumnTargetLocked) {
+                if (isRankLocked) {
                     textSpan.style.color = "#94a3b8";
                 }
                 
-                if (!isColumnTargetLocked && !isDragReorderModeActive) {
+                if (!isRankLocked && !isDragReorderModeActive) {
                     textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
                     textSpan.onmouseout = () => textSpan.style.color = "";
                 }
                 
                 let rankLabel = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
-                let isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
+                let isActiveDirection = "desc";
+                if (nameSortRule && dateSortRule) {
+                    isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
+                }
                 
                 textSpan.textContent = h + rankLabel;
                 textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
@@ -1266,16 +1561,16 @@
 
                 const arrowIndicator = document.createElement('div');
                 arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
-                if (isColumnTargetLocked) arrowIndicator.classList.add('is-disabled');
+                if (isRankLocked) arrowIndicator.classList.add('is-disabled');
                 
                 arrowIndicator.onclick = (e) => { 
                     e.stopPropagation(); 
-                    if (!isColumnTargetLocked) flipDirectionOnly(h); 
+                    if (!isRankLocked) flipDirectionOnly(h); 
                 };
                 th.appendChild(arrowIndicator);
             } else {
                 th.textContent = h;
-                if (isColumnTargetLocked) th.style.color = "#94a3b8";
+                if (isRankLocked) th.style.color = "#94a3b8";
             }
             th.style.borderBottom = "1px solid var(--gray-300)";
             tableHeaders.appendChild(th);
@@ -1298,7 +1593,6 @@
             if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
             if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
             if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
-            
             if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
             
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
@@ -1323,47 +1617,7 @@
         tableBody.innerHTML = '';
         filteredData.forEach((row, index) => {
             const tr = document.createElement('tr');
-            
             const baseIndex = masterData.indexOf(row);
-            
-            if (isDragReorderModeActive && currentDragOrientation === "horizontal") {
-                tr.className = "draggable-row";
-                tr.setAttribute('draggable', 'true');
-                
-                tr.addEventListener('dragstart', (e) => {
-                    draggedRowDataIndex = baseIndex;
-                    tr.classList.add('row-dragging');
-                });
-                tr.addEventListener('dragend', () => {
-                    tr.classList.remove('row-dragging');
-                    renderMasterTableUI();
-                });
-                tr.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const rect = tr.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
-                    if (e.clientY < midpoint) {
-                        tr.classList.add('row-drag-over-top');
-                        tr.classList.remove('row-drag-over-bottom');
-                    } else {
-                        tr.classList.add('row-drag-over-bottom');
-                        tr.classList.remove('row-drag-over-top');
-                    }
-                });
-                tr.addEventListener('dragleave', () => {
-                    tr.classList.remove('row-drag-over-top', 'row-drag-over-bottom');
-                });
-                tr.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    tr.classList.remove('row-drag-over-top', 'row-drag-over-bottom');
-                    if (draggedRowDataIndex !== null && draggedRowDataIndex !== baseIndex) {
-                        const tempRow = masterData[draggedRowDataIndex];
-                        masterData.splice(draggedRowDataIndex, 1);
-                        masterData.splice(baseIndex, 0, tempRow);
-                        renderMasterTableUI();
-                    }
-                });
-            }
             
             const indexTd = document.createElement('td');
             indexTd.textContent = index + 1;
@@ -1378,12 +1632,51 @@
             });
             tr.appendChild(indexTd);
 
+            if (isDragReorderModeActive && currentDragOrientation === "horizontal") {
+                tr.setAttribute('draggable', 'true');
+                
+                tr.addEventListener('dragstart', (e) => {
+                    draggedRowDataIndex = baseIndex;
+                    tr.classList.add('row-dragging');
+                });
+                tr.addEventListener('dragend', () => {
+                    tr.classList.remove('row-dragging');
+                    renderMasterTableUI();
+                });
+                tr.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const rect = tr.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    
+                    Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
+                        if (e.clientY < midpoint) {
+                            cell.className = "row-drag-over-top";
+                        } else {
+                            cell.className = "row-drag-over-bottom";
+                        }
+                    });
+                });
+                tr.addEventListener('dragleave', () => {
+                    Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
+                        cell.className = "";
+                    });
+                });
+                tr.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedRowDataIndex !== null && draggedRowDataIndex !== baseIndex) {
+                        const tempRow = masterData[draggedRowDataIndex];
+                        masterData.splice(draggedRowDataIndex, 1);
+                        masterData.splice(baseIndex, 0, tempRow);
+                        renderMasterTableUI();
+                    }
+                });
+            }
+
             MASTER_HEADERS.forEach(header => {
                 const td = document.createElement('td');
                 const input = document.createElement('input');
                 
                 input.value = row[header] || '';
-                
                 input.addEventListener('input', (e) => {
                     if (baseIndex !== -1) masterData[baseIndex][header] = e.target.value.trim();
                 });
@@ -1410,7 +1703,7 @@
                     cellValue = `"${cellValue.replace(/"/g, '""')}"`;
                 }
                 return cellValue;
-            }).join(",");
+            }).join(","); 
             csvContent += rowLine + "\n";
         });
 
@@ -1428,5 +1721,3 @@
 
 </body>
 </html>
-
-
