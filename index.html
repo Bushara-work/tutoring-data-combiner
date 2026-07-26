@@ -106,7 +106,7 @@
             padding: 0.75rem 1rem;
             border-radius: 6px;
             display: flex;
-            gap: 1.25rem;
+            gap: 1rem;
             align-items: center;
             font-size: 0.9rem;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -164,53 +164,6 @@
         .btn-toggle-time:hover {
             border-color: var(--primary);
             color: var(--primary);
-        }
-        .organize-btn-group {
-            display: flex;
-            gap: 0.25rem;
-        }
-        .btn-organize-mode {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: white;
-            border: 1px solid var(--gray-300);
-            border-radius: 4px 0 0 4px;
-            color: var(--gray-700);
-            cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-        }
-        .btn-organize-mode:hover:not(:disabled) {
-            background: var(--gray-100);
-            border-color: var(--gray-400);
-        }
-        .btn-organize-mode.active-on {
-            background: var(--gray-200);
-            border-color: var(--gray-400);
-            font-weight: 700;
-        }
-        .btn-organize-lines {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: white;
-            border: 1px solid var(--gray-300);
-            border-left: none;
-            border-radius: 0 4px 4px 0;
-            color: var(--gray-700);
-            cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-        }
-        .btn-organize-lines:hover:not(:disabled) {
-            background: var(--gray-100);
-        }
-        .btn-organize-lines:disabled {
-            background: #f1f5f9;
-            color: #cbd5e1;
-            cursor: not-allowed;
-            border-color: var(--gray-200);
         }
         .filter-panel {
             background: #ffffff;
@@ -283,47 +236,42 @@
             cursor: pointer;
             font-size: 1rem;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
-        .btn-secondary:hover { background: #cbd5e1; }
-        .btn-success { background: #16a34a; color: white; }
-        .btn-success:hover { background: #15803d; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-danger:hover { background: var(--danger-hover); }
-        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-secondary {
+            background: var(--gray-300);
+            color: var(--gray-700);
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
         .table-container {
             overflow-x: auto;
             background: white;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--gray-300);
-            margin-top: 1.5rem;
+            margin-top: 1rem;
         }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            font-size: 0.875rem;
-        }
-        th, td {
-            border: 1px solid var(--gray-200);
-            padding: 0.5rem;
-            text-align: left;
-        }
-        th {
-            background-color: #f8fafc;
-            font-weight: 600;
-            position: relative;
-        }
-        .excel-row-header {
-            background-color: #f1f5f9;
-            color: #64748b;
-            text-align: center;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-        }
-             
         .lock-container {
             cursor: pointer;
             background: transparent;
@@ -334,58 +282,58 @@
             justify-content: center;
             transition: transform 0.1s ease;
         }
-        .lock-container:hover { 
-            transform: scale(1.2); 
-        } 
-        .css-lock { 
-            width: 14px; 
-            height: 11px; 
-            background-color: #9ca3af; 
-            border-radius: 3px; 
-            position: relative; 
-            margin-top: 6px; 
-            transition: background-color 0.2s; 
-        } 
-        .css-lock::before { 
-            content: ""; 
-            position: absolute; 
-            border: 2px solid #9ca3af; 
-            border-bottom: none; 
-            border-top-left-radius: 6px; 
-            border-top-right-radius: 6px; 
-            width: 6px; 
-            height: 7px; 
-            left: 2px; 
-            top: -7px; 
-            transition: transform 0.2s, left 0.2s, border-color 0.2s; 
-        } 
-        .lock-container.is-locked .css-lock { 
-            background-color: #dc2626; 
-        } 
-        .lock-container.is-locked .css-lock::before { 
-            border-color: #dc2626; 
-            transform: translate(0, 0); 
-        } 
-        .lock-container.is-unlocked .css-lock::before { 
-            transform: translate(2px, -2px) rotate(15deg); 
-        } 
-        .css-arrow-icon { 
-            display: inline-block; 
-            width: 0; 
-            height: 0; 
-            border-left: 5px solid transparent; 
-            border-right: 5px solid transparent; 
-            vertical-align: middle; 
-            margin-left: 6px; 
-            cursor: pointer; 
-            transition: transform 0.1s, border-color 0.2s; 
-        } 
-        .css-arrow-icon.arrow-up { 
-            border-bottom: 7px solid #2563eb; 
-        } 
-        .css-arrow-icon.arrow-down { 
-            border-top: 7px solid #2563eb; 
-        } 
+        .lock-container:hover {
+            transform: scale(1.2);
+        }
+        .css-lock {
+            width: 14px;
+            height: 11px;
+            background-color: #9ca3af;
+            border-radius: 3px;
+            position: relative;
+            margin-top: 6px;
+            transition: background-color 0.2s;
+        }
+        .css-lock::before {
+            content: "";
+            position: absolute;
+            border: 2px solid #9ca3af;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            width: 6px;
+            height: 7px;
+            left: 2px;
+            top: -7px;
+            transition: transform 0.2s, left 0.2s, border-color 0.2s;
+        }
+        .lock-container.is-locked .css-lock {
+            background-color: #dc2626;
+        }
+        .lock-container.is-locked .css-lock::before {
+            border-color: #dc2626;
+            transform: translate(0, 0);
+        }
+        .lock-container.is-unlocked .css-lock::before {
+            transform: translate(2px, -2px) rotate(15deg);
+        }
+        .css-arrow-icon {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            vertical-align: middle;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+        .css-arrow-icon.arrow-up {
+            border-bottom: 7px solid #2563eb;
+        }
+        .css-arrow-icon.arrow-down {
+            border-top: 7px solid #2563eb;
+        }
         .css-arrow-icon.is-disabled { 
             border-bottom-color: #9ca3af !important; 
             border-top-color: #9ca3af !important; 
@@ -441,7 +389,7 @@
             border-radius: 4px; 
         }
         
-        /* Custom Context Menu Layouts */
+        /* Context Menus */
         .context-menu-mask {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -460,7 +408,7 @@
         .context-item.item-danger { color: var(--danger); }
         .context-item.item-danger:hover { background: #fef2f2; }
         
-        /* Interactive Drop Zones & Drag Styling Hooks */
+        /* Drag and Drop Structural Indicators */
         .draggable-header, .draggable-row {
             cursor: grab !important;
         }
@@ -548,9 +496,6 @@
                                     <option value="asc" selected>Alphabetical (A → Z)</option> 
                                     <option value="desc">Reverse Alphabetical (Z → A)</option> 
                                 </select> 
-                                <button id="primary-lock-btn" class="lock-container is-unlocked" title="Lock Primary Sort Option Layouts">
-                                    <div class="css-lock"></div>
-                                </button>
                             </div> 
                             <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button> 
                             <div class="control-group"> 
@@ -559,19 +504,17 @@
                                     <option value="desc" selected>Newest → Oldest</option> 
                                     <option value="asc">Oldest → Newest</option> 
                                 </select> 
-                                <button id="secondary-lock-btn" class="lock-container is-unlocked" title="Lock Secondary Sort Option Layouts">
-                                    <div class="css-lock"></div>
-                                </button>
                             </div> 
-                            <div class="control-group" style="border-left: 1px solid var(--gray-300); padding-left: 0.5rem; display:none;"> 
-                                <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts"></button> 
+                            <div class="control-group" style="margin-left: 12px;"> 
+                                <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts">
+                                    <div class="css-lock"></div>
+                                </button> 
                             </div> 
                         </div> 
-                        <!-- Button structures optimized to include inline interactive state updates --> 
                         <div class="vertical-button-stack" style="flex-direction: row; align-items: center;"> 
                             <button id="time-convert-btn" class="btn-toggle-time" style="margin-right: 0.5rem;">Time Format (12h ⇄ 24h)</button> 
                             <button id="toggle-reorder-btn" class="switch-btn" style="font-weight:600; margin-right: 0.5rem;">Organize: Off</button> 
-                            <button id="toggle-lines-btn" class="switch-btn" style="font-weight:600;" disabled>Lines: Vertical ‖</button>
+                            <button id="toggle-lines-btn" class="switch-btn" style="font-weight:600;" disabled>Lines: Vertical ‖</button> 
                         </div> 
                     </div> 
                 </div> 
@@ -594,1129 +537,840 @@
                         <div class="filter-box"> 
                             <label>Duration Threshold (Minutes)</label> 
                             <div class="range-inputs"> 
-
-
-
-                                
-
                                 <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min (e.g. 45)"> 
-                        <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max"> 
-                    </div> 
-                </div> 
-                <div class="filter-box"> 
-                    <label> Class Date Bounds <span id="start-date-toggle" class="toggle-link">Inc</span> <span id="end-date-toggle" class="toggle-link">Inc</span> </label> 
-                    <div class="range-inputs"> 
-                        <input type="text" id="filter-date-start" class="filter-input" placeholder="Start Date"> 
-                        <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now"> 
-                    </div> 
+                                <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max"> 
+                            </div> 
+                        </div> 
+                        <div class="filter-box"> 
+                            <label> Class Date Bounds <span id="start-date-toggle" class="toggle-link">Inc</span> <span id="end-date-toggle" class="toggle-link">Inc</span> </label> 
+                            <div class="range-inputs"> 
+                                <input type="text" id="filter-date-start" class="filter-input" placeholder="Start Date"> 
+                                <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now"> 
+                            </div> 
+                        </div> 
+                        <div class="filter-box">
+                            <label>Student Number</label>
+                            <input type="text" id="filter-sno" class="filter-input" placeholder="Search student number...">
+                        </div>
+                        <div class="filter-box">
+                            <label>Started At</label>
+                            <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
+                        </div>
+                        <div class="filter-box">
+                            <label>Joined At (beta)</label>
+                            <input type="text" id="filter-joined-time" class="filter-input" placeholder="Search beta timestamp...">
+                        </div>
+                        <div class="filter-box">
+                            <label>Stopped At</label>
+                            <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
+                        </div>
+                        <div class="filter-box">
+                            <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
+                        </div>
+                    </div>
                 </div>
-                <!-- Student Number Filter Box -->
-                <div class="filter-box">
-                    <label>Student Number</label>
-                    <input type="text" id="filter-sno" class="filter-input" placeholder="Search student number...">
-                </div>
-
-                <!-- Bottom row sequence re-ordered -->
-                <div class="filter-box">
-                    <label>Started At</label>
-                    <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
-                </div>
-                <div class="filter-box">
-                    <label>Joined At (beta)</label>
-                    <input type="text" id="filter-joined-time" class="filter-input" placeholder="Search beta timestamp...">
-                </div>
-                <div class="filter-box">
-                    <label>Stopped At</label>
-                    <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
-                </div>
-                
-                <!-- Reset Filters Button -->
-                <div class="filter-box">
-                    <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
+        
+                <div class="table-container" style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--gray-300); margin-top: 1rem;">
+                    <table id="master-table">
+                        <thead>
+                            <tr id="table-header-letters"></tr>
+                            <tr id="table-headers"></tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-
-        <div class="table-container" style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--gray-300); margin-top: 1rem;">
-            <table id="master-table">
-                <thead>
-                    <tr id="table-header-letters"></tr>
-                    <tr id="table-headers"></tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
+        
+        <div id="context-mask" class="context-menu-mask"></div>
+        <div id="column-context-menu" class="excel-context-menu">
+            <div class="context-item" id="ctx-insert-col-left">
+                <span style="font-weight: bold; color: var(--primary);">+</span>
+                <span>Insert Column Left</span>
+            </div>
+            <div class="context-item item-danger" id="ctx-delete-col">
+                <div class="css-trash-icon"></div>
+                <span>Delete Column</span>
+            </div>
         </div>
-    </div>
-</div>
-
-<div id="context-mask" class="context-menu-mask"></div>
-<div id="column-context-menu" class="excel-context-menu">
-    <div class="context-item" id="ctx-insert-col-left">
-        <span style="font-weight: bold; color: var(--primary);">+</span>
-        <span>Insert Column Left</span>
-    </div>
-    <div class="context-item item-danger" id="ctx-delete-col">
-        <div class="css-trash-icon"></div>
-        <span>Delete Column</span>
-    </div>
-</div>
-<div id="row-context-menu" class="excel-context-menu">
-    <div class="context-item" id="ctx-insert-row-above">
-        <span style="font-weight: bold; color: var(--primary);">+</span>
-        <span>Insert Row Above</span>
-    </div>
-    <div class="context-item item-danger" id="ctx-delete-row">
-        <div class="css-trash-icon"></div>
-        <span>Delete Row</span>
-    </div>
-</div>
-<script>
-    let MASTER_HEADERS = [
-        "SNo", "Participant Name", "Attendance Started at", 
-        "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
-    ];
-    const SYSTEM_PROTECTED_HEADERS = [...MASTER_HEADERS];
-    
-    let uploadedFilesArray = [];
-    let masterData = [];
-    let isRankLocked = false; 
-    let isNamePriorityPrimary = true;
-    let isStartDateInclusive = true;
-    let isEndDateInclusive = true;
-    
-    let currentActiveTimeMode = "12h";
-
-    let isDragReorderModeActive = false;
-    let currentDragOrientation = "vertical"; 
-    let draggedColumnHeaderIndex = null;
-    let draggedRowDataIndex = null;
-    let activeContextColumnHeaderKey = null;
-    let activeContextRowDataIndex = null;
-
-    const csvPicker = document.getElementById('csv-picker');
-    const uploadSection = document.querySelector('.upload-section');
-    const fileQueue = document.getElementById('file-queue');
-    const nextBtn = document.getElementById('next-btn');
-    const backBtn = document.getElementById('back-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const timeConvertBtn = document.getElementById('time-convert-btn');
-    const resetFiltersBtn = document.getElementById('reset-filters-btn');
-    const toggleReorderBtn = document.getElementById('toggle-reorder-btn');
-    const toggleLinesBtn = document.getElementById('toggle-lines-btn');
-    
-    const nameSortRule = document.getElementById('name-sort-rule');
-    const dateSortRule = document.getElementById('date-sort-rule');
-    const prioritySwitchBtn = document.getElementById('priority-switch-btn');
-    const rankLockBtn = document.getElementById('rank-lock-btn');
-    
-    const filterName = document.getElementById('filter-name');
-    const filterCode = document.getElementById('filter-code');
-    const filterDurMin = document.getElementById('filter-dur-min');
-    const filterDurMax = document.getElementById('filter-dur-max');
-    const filterDateStart = document.getElementById('filter-date-start');
-    const filterDateEnd = document.getElementById('filter-date-end');
-    const startDateToggle = document.getElementById('start-date-toggle');
-    const endDateToggle = document.getElementById('end-date-toggle');
-    
-    const filterSno = document.getElementById('filter-sno');
-    
-    const filterStartedTime = document.getElementById('filter-started-time');
-    const filterJoinedTime = document.getElementById('filter-joined-time');
-    const filterStoppedTime = document.getElementById('filter-stopped-time');
-    
-    const stage1 = document.getElementById('stage-1');
-    const stage2 = document.getElementById('stage-2');
-    
-    const tableHeaders = document.getElementById('table-headers');
-    const tableHeaderLetters = document.getElementById('table-header-letters');
-    const tableBody = document.getElementById('table-body');
-    
-    const contextMask = document.getElementById('context-mask');
-    const columnContextMenu = document.getElementById('column-context-menu');
-    const rowContextMenu = document.getElementById('row-context-menu');
-
-    // Setup configurations for unified layout lock state triggers
-    // Rewriting selector mappings to hook onto the single lock placement architecture
-    document.addEventListener("DOMContentLoaded", () => {
-        const controlsContainer = document.querySelector(".sort-controls");
-        if (controlsContainer) {
-            // Clear prior separated buttons and introduce cleanly spaced single anchor element
-            controlsContainer.innerHTML = `
-                <div class="control-group"> 
-                    <label for="name-sort-rule"><b>Name Order:</b></label> 
-                    <select id="name-sort-rule"> 
-                        <option value="asc" selected>Alphabetical (A → Z)</option> 
-                        <option value="desc">Reverse Alphabetical (Z → A)</option> 
-                    </select> 
-                </div> 
-                <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button> 
-                <div class="control-group"> 
-                    <label for="date-sort-rule"><b>Date Order:</b></label> 
-                    <select id="date-sort-rule"> 
-                        <option value="desc" selected>Newest → Oldest</option> 
-                        <option value="asc">Oldest → Newest</option> 
-                    </select> 
-                </div>
-                <div class="control-group" style="margin-left: 12px;">
-                    <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts">
-                        <div class="css-lock"></div>
-                    </button>
-                </div>
-            `;
-        }
+        <div id="row-context-menu" class="excel-context-menu">
+            <div class="context-item" id="ctx-insert-row-above">
+                <span style="font-weight: bold; color: var(--primary);">+</span>
+                <span>Insert Row Above</span>
+            </div>
+            <div class="context-item item-danger" id="ctx-delete-row">
+                <div class="css-trash-icon"></div>
+                <span>Delete Row</span>
+            </div>
+        </div>
+        <script>
+            let MASTER_HEADERS = [
+                "SNo", "Participant Name", "Attendance Started at", 
+                "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
+            ];
+            const SYSTEM_PROTECTED_HEADERS = [...MASTER_HEADERS];
+            
+            let uploadedFilesArray = [];
+            let masterData = [];
+            let isRankLocked = false; 
+            let isNamePriorityPrimary = true;
+            let isStartDateInclusive = true;
+            let isEndDateInclusive = true;
+            
+            let currentActiveTimeMode = "12h";
         
-        // Re-bind elements to dynamically structured template output layout values
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
-        const prioritySwitchBtn = document.getElementById('priority-switch-btn');
-        const rankLockBtn = document.getElementById('rank-lock-btn');
-
-        nameSortRule.addEventListener('change', () => { if (!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
-        dateSortRule.addEventListener('change', () => { if (!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
+            let isDragReorderModeActive = false;
+            let currentDragOrientation = "vertical"; 
+            let draggedColumnHeaderIndex = null;
+            let draggedRowDataIndex = null;
+            let activeContextColumnHeaderKey = null;
+            let activeContextRowDataIndex = null;
         
-        prioritySwitchBtn.addEventListener('click', () => {
-            if (isRankLocked) return;
-            isNamePriorityPrimary = !isNamePriorityPrimary;
-            prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        });
-
-        rankLockBtn.addEventListener('click', () => {
-            isRankLocked = !isRankLocked;
-            if (isRankLocked) {
-                rankLockBtn.className = "lock-container is-locked";
-                nameSortRule.disabled = true;
-                dateSortRule.disabled = true;
-                prioritySwitchBtn.disabled = true;
-                prioritySwitchBtn.style.opacity = "0.5";
-                prioritySwitchBtn.style.cursor = "not-allowed";
-            } else {
-                rankLockBtn.className = "lock-container is-unlocked";
-                nameSortRule.disabled = false;
-                dateSortRule.disabled = false;
-                prioritySwitchBtn.disabled = false;
-                prioritySwitchBtn.style.opacity = "1";
-                prioritySwitchBtn.style.cursor = "pointer";
-            }
-            renderMasterTableUI();
-        });
-    });
-
-    function handleFileSelection(files) {
-        if (!files) return;
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.name.toLowerCase().endsWith('.csv')) {
-                if (!uploadedFilesArray.some(f => f.name === file.name)) {
-                    uploadedFilesArray.push(file);
+            const csvPicker = document.getElementById('csv-picker');
+            const uploadSection = document.querySelector('.upload-section');
+            const fileQueue = document.getElementById('file-queue');
+            const nextBtn = document.getElementById('next-btn');
+            const backBtn = document.getElementById('back-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const timeConvertBtn = document.getElementById('time-convert-btn');
+            const resetFiltersBtn = document.getElementById('reset-filters-btn');
+            const toggleReorderBtn = document.getElementById('toggle-reorder-btn');
+            const toggleLinesBtn = document.getElementById('toggle-lines-btn');
+            
+            const nameSortRule = document.getElementById('name-sort-rule');
+            const dateSortRule = document.getElementById('date-sort-rule');
+            const prioritySwitchBtn = document.getElementById('priority-switch-btn');
+            const rankLockBtn = document.getElementById('rank-lock-btn');
+            
+            const filterName = document.getElementById('filter-name');
+            const filterCode = document.getElementById('filter-code');
+            const filterDurMin = document.getElementById('filter-dur-min');
+            const filterDurMax = document.getElementById('filter-dur-max');
+            const filterDateStart = document.getElementById('filter-date-start');
+            const filterDateEnd = document.getElementById('filter-date-end');
+            const startDateToggle = document.getElementById('start-date-toggle');
+            const endDateToggle = document.getElementById('end-date-toggle');
+            
+            const filterSno = document.getElementById('filter-sno');
+            
+            const filterStartedTime = document.getElementById('filter-started-time');
+            const filterJoinedTime = document.getElementById('filter-joined-time');
+            const filterStoppedTime = document.getElementById('filter-stopped-time');
+            
+            const stage1 = document.getElementById('stage-1');
+            const stage2 = document.getElementById('stage-2');
+            
+            const tableHeaders = document.getElementById('table-headers');
+            const tableHeaderLetters = document.getElementById('table-header-letters');
+            const tableBody = document.getElementById('table-body');
+            
+            const contextMask = document.getElementById('context-mask');
+            const columnContextMenu = document.getElementById('column-context-menu');
+            const rowContextMenu = document.getElementById('row-context-menu');
+        
+            function handleFileSelection(files) {
+                if (!files) return;
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.name.toLowerCase().endsWith('.csv')) {
+                        if (!uploadedFilesArray.some(f => f.name === file.name)) {
+                            uploadedFilesArray.push(file);
+                        }
+                    }
                 }
-            }
-        }
-        renderQueueUI();
-    }
-
-    csvPicker.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files);
-        csvPicker.value = ""; 
-    });
-
-    uploadSection.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--primary)';
-        uploadSection.style.background = '#eff6ff'; 
-    });
-
-    uploadSection.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-    });
-
-    uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-        if (e.dataTransfer && e.dataTransfer.files) {
-            handleFileSelection(e.dataTransfer.files);
-        }
-    });
-
-    function renderQueueUI() {
-        fileQueue.innerHTML = '';
-        if (uploadedFilesArray.length === 0) {
-            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
-            return;
-        }
-        uploadedFilesArray.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'file-name';
-            nameSpan.textContent = file.name;
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = (e) => {
-                e.stopPropagation(); 
-                uploadedFilesArray.splice(index, 1);
                 renderQueueUI();
-            };
-            
-            fileItem.appendChild(nameSpan);
-            fileItem.appendChild(removeBtn);
-            fileQueue.appendChild(fileItem);
-        });
-    }
-
-    function extractDateFromFilename(filename) {
-        const match = filename.match(/\(([^)]+)\)/);
-        if (!match) return "Unknown Date";
+            }
         
-        let rawDate = match[1].trim(); 
-        rawDate = rawDate.replace(/\./g, '');
+            csvPicker.addEventListener('change', (e) => {
+                handleFileSelection(e.target.files);
+                csvPicker.value = ""; 
+            });
         
-        const parts = rawDate.split('-');
-        if (parts.length !== 3) return rawDate; 
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadSection.style.borderColor = 'var(--primary)';
+                uploadSection.style.background = '#eff6ff'; 
+            });
         
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
+            uploadSection.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadSection.style.borderColor = 'var(--gray-300)';
+                uploadSection.style.background = 'white';
+            });
         
-        month = month.substring(0, 3);
-        month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-
-        return `${day}-${month}-${year}`;
-    }
-
-    function parseCSVLine(text) {
-        let p = '', r = [];
-        let q = false;
-        const cleanText = text.replace(/\r$/, '');
-        for (let i = 0; i < cleanText.length; i++) {
-            let c = cleanText[i];
-            if (c === '"') { q = !q; }
-            else if (c === ',' && !q) { r.push(p.trim()); p = ''; }
-            else { p += c; }
-        }
-        r.push(p.trim());
-        return r;
-    }
-
-    function parseCustomDate(dateStr) {
-        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
-        let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
-        const parts = cleanStr.split('-');
-        if (parts.length !== 3) return new Date(0);
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadSection.style.borderColor = 'var(--gray-300)';
+                uploadSection.style.background = 'white';
+                if (e.dataTransfer && e.dataTransfer.files) {
+                    handleFileSelection(e.dataTransfer.files);
+                }
+            });
         
-        const day = parseInt(parts[0], 10);
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
-        
-        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        const monthIndex = months.indexOf(monthStr);
-        
-        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
-    }
-
-    function parseDurationToMinutes(durStr) {
-        if (!durStr) return 0;
-        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
-        if (!clean) return 0;
-        
-        if (clean.includes('h') || clean.includes('m')) {
-            let totalMin = 0;
-            const hrMatch = clean.match(/(\d+)\s*h/);
-            const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
-            if (minMatch) totalMin += parseInt(minMatch, 10);
-            return totalMin;
-        }
-        
-        let parsed = parseInt(clean, 10);
-        return isNaN(parsed) ? 0 : parsed;
-    }
-
-    function convertTimeStringSyntax(timeStr) {
-        if (!timeStr) return "";
-        let clean = timeStr.trim().toUpperCase();
-        
-        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
-        if (ampmMatch) {
-            let hrs = parseInt(ampmMatch[1], 10);
-            let mins = ampmMatch[2];
-            let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
-            let period = ampmMatch[4];
-            
-            if (period === "PM" && hrs < 12) hrs += 12;
-            if (period === "AM" && hrs === 12) hrs = 0;
-            return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
-        }
-        
-        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
-        if (militaryMatch) {
-            let hrs = parseInt(militaryMatch[1], 10);
-            let mins = militaryMatch[2];
-            let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
-            let period = "AM";
-            
-            if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
-            if (hrs === 0) hrs = 12;
-            return `${hrs}:${mins}${secs} ${period}`;
-        }
-        return timeStr; 
-    }
-        nextBtn.addEventListener('click', async () => {
-        if (uploadedFilesArray.length === 0) {
-            alert('Please upload or drag-and-drop at least one CSV file.');
-            return;
-        }
-
-        masterData = []; 
-
-        for (let file of uploadedFilesArray) {
-            try {
-                const text = await file.text();
-                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                if (lines.length === 0) continue;
-
-                const fileHeaders = parseCSVLine(lines[0]); 
-                const fileDate = extractDateFromFilename(file.name);
-                
-                const indexMap = {};
-                MASTER_HEADERS.forEach(header => {
-                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
+            function renderQueueUI() {
+                fileQueue.innerHTML = '';
+                if (uploadedFilesArray.length === 0) {
+                    fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
+                    return;
+                }
+                uploadedFilesArray.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'file-name';
+                    nameSpan.textContent = file.name;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation(); 
+                        uploadedFilesArray.splice(index, 1);
+                        renderQueueUI();
+                    };
+                    
+                    fileItem.appendChild(nameSpan);
+                    fileItem.appendChild(removeBtn);
+                    fileQueue.appendChild(fileItem);
                 });
+            }
+        
+            function extractDateFromFilename(filename) {
+                const match = filename.match(/\(([^)]+)\)/);
+                if (!match) return "Unknown Date";
+                
+                let rawDate = match[1].trim(); 
+                rawDate = rawDate.replace(/\./g, '');
+                
+                const parts = rawDate.split('-');
+                if (parts.length !== 3) return rawDate; 
+                
+                let day = parts[0].trim();
+                let month = parts[1].trim();
+                let year = parts[2].trim();
+                
+                month = month.substring(0, 3);
+                month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
+        
+                return `${day}-${month}-${year}`;
+            }
+        
+            function parseCSVLine(text) {
+                let p = '', r = [];
+                let q = false;
+                const cleanText = text.replace(/\r$/, '');
+                for (let i = 0; i < cleanText.length; i++) {
+                    let c = cleanText[i];
+                    if (c === '"') { q = !q; }
+                    else if (c === ',' && !q) { r.push(p.trim()); p = ''; }
+                    else { p += c; }
+                }
+                r.push(p.trim());
+                return r;
+            }
+        
+            function parseCustomDate(dateStr) {
+                if (!dateStr || dateStr === "Unknown Date") return new Date(0);
+                let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
+                const parts = cleanStr.split('-');
+                if (parts.length !== 3) return new Date(0);
+                
+                const day = parseInt(parts[0], 10);
+                const monthStr = parts[1].substring(0, 3);
+                const year = parseInt(parts[2], 10);
+                
+                const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+                const monthIndex = months.indexOf(monthStr);
+                
+                return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
+            }
+        
+            function parseDurationToMinutes(durStr) {
+                if (!durStr) return 0;
+                let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
+                if (!clean) return 0;
+                
+                if (clean.includes('h') || clean.includes('m')) {
+                    let totalMin = 0;
+                    const hrMatch = clean.match(/(\d+)\s*h/);
+                    const minMatch = clean.match(/(\d+)\s*m/);
+                    if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
+                    if (minMatch) totalMin += parseInt(minMatch, 10);
+                    return totalMin;
+                }
+                
+                let parsed = parseInt(clean, 10);
+                return isNaN(parsed) ? 0 : parsed;
+            }
+        
+            function convertTimeStringSyntax(timeStr) {
+                if (!timeStr) return "";
+                let clean = timeStr.trim().toUpperCase();
+                
+                const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
+                if (ampmMatch) {
+                    let hrs = parseInt(ampmMatch[1], 10);
+                    let mins = ampmMatch[2];
+                    let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
+                    let period = ampmMatch[4];
+                    
+                    if (period === "PM" && hrs < 12) hrs += 12;
+                    if (period === "AM" && hrs === 12) hrs = 0;
+                    return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
+                }
+                
+                const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+                if (militaryMatch) {
+                    let hrs = parseInt(militaryMatch[1], 10);
+                    let mins = militaryMatch[2];
+                    let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
+                    let period = "AM";
+                    
+                    if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
+                    if (hrs === 0) hrs = 12;
+                    return `${hrs}:${mins}${secs} ${period}`;
+                }
+                return timeStr; 
+            }
+        
+            nextBtn.addEventListener('click', async () => {
+                if (uploadedFilesArray.length === 0) {
+                    alert('Please upload or drag-and-drop at least one CSV file.');
+                    return;
+                }
+        
+                masterData = []; 
+        
+                for (let file of uploadedFilesArray) {
+                    try {
+                        const text = await file.text();
+                        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                        if (lines.length === 0) continue;
+        
+                        const fileHeaders = parseCSVLine(lines[0]); 
+                        const fileDate = extractDateFromFilename(file.name);
+                        
+                        const indexMap = {};
+                        MASTER_HEADERS.forEach(header => {
+                            indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
+                        });
+        
+                        for (let i = 1; i < lines.length; i++) {
+                            const rowValues = parseCSVLine(lines[i]);
+                            if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
+        
+                            let structuredObj = {};
+                            MASTER_HEADERS.forEach(header => {
+                                if (header === "Class Date") {
+                                    structuredObj[header] = fileDate;
+                                } else {
+                                    const mappedIdx = indexMap[header];
+                                    structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
+                                }
+                            });
+                            masterData.push(structuredObj);
+                        }
+                    } catch (err) {
+                        console.error("Error reading file: " + file.name, err);
+                    }
+                }
+        
+                sortMasterData();
+                renderMasterTableUI();
+                stage1.classList.remove('active');
+                stage2.classList.add('active');
+            });
+        
+            backBtn.addEventListener('click', () => {
+                stage1.classList.add('active');
+                stage2.classList.remove('active');
+            });
+        
+            toggleReorderBtn.addEventListener('click', () => {
+                isDragReorderModeActive = !isDragReorderModeActive;
+                toggleReorderBtn.textContent = isDragReorderModeActive ? "Organize: On" : "Organize: Off";
+                toggleLinesBtn.disabled = !isDragReorderModeActive;
+                renderMasterTableUI();
+            });
+        
+            toggleLinesBtn.addEventListener('click', () => {
+                if (!isDragReorderModeActive) return;
+                if (currentDragOrientation === "vertical") {
+                    currentDragOrientation = "horizontal";
+                    toggleLinesBtn.textContent = "Lines: Horizontal ═";
+                } else {
+                    currentDragOrientation = "vertical";
+                    toggleLinesBtn.textContent = "Lines: Vertical ‖";
+                }
+                renderMasterTableUI();
+            });
+        
+            function closeAllContextMenus() {
+                columnContextMenu.style.display = "none";
+                rowContextMenu.style.display = "none";
+                contextMask.style.display = "none";
+            }
+            contextMask.addEventListener('click', closeAllContextMenus);
+        
+            document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+                if (isRankLocked || !activeContextColumnHeaderKey) return;
+                const newColName = prompt("Enter a unique name for your new custom column:");
+                if (!newColName) return;
+                const cleanCol = newColName.trim();
+                if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
+                
+                const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+                if (idx !== -1) {
+                    MASTER_HEADERS.splice(idx, 0, cleanCol);
+                    masterData.forEach(row => { row[cleanCol] = ""; });
+                }
+                closeAllContextMenus();
+                renderMasterTableUI();
+            });
 
-                for (let i = 1; i < lines.length; i++) {
-                    const rowValues = parseCSVLine(lines[i]);
-                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
 
-                    let structuredObj = {};
+
+
+
+
+
+
+
+
+            function closeAllContextMenus() {
+                columnContextMenu.style.display = "none";
+                rowContextMenu.style.display = "none";
+                contextMask.style.display = "none";
+            }
+            contextMask.addEventListener('click', closeAllContextMenus);
+        
+            document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+                if (isRankLocked || !activeContextColumnHeaderKey) return;
+                const newColName = prompt("Enter a unique name for your new custom column:");
+                if (!newColName) return;
+                const cleanCol = newColName.trim();
+                if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
+                
+                const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+                if (idx !== -1) {
+                    MASTER_HEADERS.splice(idx, 0, cleanCol);
+                    masterData.forEach(row => { row[cleanCol] = ""; });
+                }
+                closeAllContextMenus();
+                renderMasterTableUI();
+            });
+        
+            document.getElementById('ctx-delete-col').addEventListener('click', () => {
+                if (isRankLocked || !activeContextColumnHeaderKey) return;
+                if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
+                    alert("Protected base headers cannot be deleted.");
+                    return;
+                }
+                const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+                if (idx !== -1) {
+                    MASTER_HEADERS.splice(idx, 1);
+                    masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
+                }
+                closeAllContextMenus();
+                renderMasterTableUI();
+            });
+        
+            document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
+                if (activeContextRowDataIndex === null) return;
+                let blankRow = {};
+                MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
+                masterData.splice(activeContextRowDataIndex, 0, blankRow);
+                closeAllContextMenus();
+                renderMasterTableUI();
+            });
+        
+            document.getElementById('ctx-delete-row').addEventListener('click', () => {
+                if (activeContextRowDataIndex === null) return;
+                masterData.splice(activeContextRowDataIndex, 1);
+                closeAllContextMenus();
+                renderMasterTableUI();
+            });
+        
+            [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
+                input.addEventListener('input', () => { renderMasterTableUI(); });
+            });
+        
+            startDateToggle.addEventListener('click', () => {
+                isStartDateInclusive = !isStartDateInclusive;
+                startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
+                renderMasterTableUI();
+            });
+            endDateToggle.addEventListener('click', () => {
+                isEndDateInclusive = !isEndDateInclusive;
+                endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+                renderMasterTableUI();
+            });
+        
+            resetFiltersBtn.addEventListener('click', () => {
+                [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
+                isStartDateInclusive = true;
+                isEndDateInclusive = true;
+                startDateToggle.textContent = "Inc";
+                endDateToggle.textContent = "Inc";
+                renderMasterTableUI();
+            });
+        
+            timeConvertBtn.addEventListener('click', () => {
+                currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
+                masterData.forEach(row => {
+                    ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
+                        if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
+                    });
+                });
+                renderMasterTableUI(); 
+            });
+        
+            function sortMasterData() {
+                if (isRankLocked) return;
+        
+                const nameSortRule = document.getElementById('name-sort-rule');
+                const dateSortRule = document.getElementById('date-sort-rule');
+                if (!nameSortRule || !dateSortRule) return;
+        
+                const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
+                const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
+        
+                function checkNameLayer(a, b) {
+                    const nameA = (a["Participant Name"] || "").toLowerCase();
+                    const nameB = (b["Participant Name"] || "").toLowerCase();
+                    return nameA.localeCompare(nameB) * nameDirection;
+                }
+        
+                function checkDateLayer(a, b) {
+                    const dateA = parseCustomDate(a["Class Date"]);
+                    const dateB = parseCustomDate(b["Class Date"]);
+                    return (dateA - dateB) * dateDirection;
+                }
+        
+                masterData.sort((a, b) => {
+                    if (isNamePriorityPrimary) {
+                        const res = checkNameLayer(a, b);
+                        if (res !== 0) return res;
+                        return checkDateLayer(a, b);
+                    } else {
+                        const res = checkDateLayer(a, b);
+                        if (res !== 0) return res;
+                        return checkNameLayer(a, b);
+                    }
+                });
+            }
+        
+            function flipDirectionOnly(columnKey) {
+                if (isRankLocked) return;
+                const nameSortRule = document.getElementById('name-sort-rule');
+                const dateSortRule = document.getElementById('date-sort-rule');
+                
+                if (columnKey === "Participant Name" && nameSortRule) {
+                    nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
+                    sortMasterData();
+                    renderMasterTableUI();
+                } else if (columnKey === "Class Date" && dateSortRule) {
+                    dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
+                    sortMasterData();
+                    renderMasterTableUI();
+                }
+            }
+        
+            function setPrimaryRankFromHeaderClick(columnKey) {
+                if (isDragReorderModeActive || isRankLocked) return;
+                if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
+                    isNamePriorityPrimary = true;
+                    const btn = document.getElementById('priority-switch-btn');
+                    if (btn) btn.textContent = "Name Priority First ⇄";
+                    sortMasterData();
+                    renderMasterTableUI();
+                } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
+                    isNamePriorityPrimary = false;
+                    const btn = document.getElementById('priority-switch-btn');
+                    if (btn) btn.textContent = "Date Priority First ⇄";
+                    sortMasterData();
+                    renderMasterTableUI();
+                }
+            }
+        
+            function getExcelColumnLetterLabel(index) {
+                let label = '';
+                while (index >= 0) {
+                    label = String.fromCharCode((index % 26) + 65) + label;
+                    index = Math.floor(index / 26) - 1;
+                }
+                return label;
+            }
+        
+            function renderMasterTableUI() {
+                const nameSortRule = document.getElementById('name-sort-rule');
+                const dateSortRule = document.getElementById('date-sort-rule');
+                
+                tableHeaders.innerHTML = '';
+                tableHeaderLetters.innerHTML = '';
+                tableBody.innerHTML = '';
+        
+                const emptyTh = document.createElement('th');
+                emptyTh.style.width = "50px";
+                tableHeaderLetters.appendChild(emptyTh);
+        
+                MASTER_HEADERS.forEach((h, index) => {
+                    const letterTh = document.createElement('th');
+                    letterTh.textContent = getExcelColumnLetterLabel(index);
+                    letterTh.className = "excel-row-header";
+                    
+                    letterTh.addEventListener('click', (e) => {
+                        activeContextColumnHeaderKey = h;
+                        columnContextMenu.style.left = `${e.clientX}px`;
+                        columnContextMenu.style.top = `${e.clientY}px`;
+                        columnContextMenu.style.display = "block";
+                        contextMask.style.display = "block";
+                    });
+                    tableHeaderLetters.appendChild(letterTh);
+                });
+        
+                const cornerTh = document.createElement('th');
+                cornerTh.className = "excel-row-header";
+                tableHeaders.appendChild(cornerTh);
+        
+                MASTER_HEADERS.forEach((h, index) => {
+                    const th = document.createElement('th');
+                    th.style.verticalAlign = "middle";
+                    
+                    if (isDragReorderModeActive && currentDragOrientation === "vertical") {
+                        th.className = "sortable draggable-header";
+                        th.setAttribute('draggable', 'true');
+                        
+                        th.addEventListener('dragstart', (e) => { 
+                            draggedColumnHeaderIndex = index; 
+                            th.classList.add('header-dragging');
+                        });
+                        th.addEventListener('dragend', () => {
+                            th.classList.remove('header-dragging');
+                            Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2})`)).forEach(cell => {
+                                cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                            });
+                            renderMasterTableUI();
+                        });
+                        th.addEventListener('dragover', (e) => { 
+                            e.preventDefault(); 
+                            const rect = th.getBoundingClientRect();
+                            const midpoint = rect.left + rect.width / 2;
+                            
+                            const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                            cellCollection.forEach(cell => {
+                                if (e.clientX < midpoint) {
+                                    cell.classList.add('header-drag-over-left');
+                                    cell.classList.remove('header-drag-over-right');
+                                } else {
+                                    cell.classList.add('header-drag-over-right');
+                                    cell.classList.remove('header-drag-over-left');
+                                }
+                            });
+                        });
+                        th.addEventListener('dragleave', () => {
+                            const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                            cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
+                        });
+                        th.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
+                                const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
+                                MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
+                                MASTER_HEADERS.splice(index, 0, tempTargetItem);
+                                renderMasterTableUI();
+                            }
+                        });
+                    }
+        
+                    if (h === "Participant Name" || h === "Class Date") {
+                        if (!isDragReorderModeActive) th.className = "sortable";
+                        
+                        const textSpan = document.createElement('span');
+                        textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
+                        textSpan.style.fontSize = "1rem";
+                        if (isRankLocked) {
+                            textSpan.style.color = "#94a3b8";
+                        }
+                        
+                        if (!isRankLocked && !isDragReorderModeActive) {
+                            textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
+                            textSpan.onmouseout = () => textSpan.style.color = "";
+                        }
+                        
+                        let rankLabel = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
+                        let isActiveDirection = "desc";
+                        if (nameSortRule && dateSortRule) {
+                            isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
+                        }
+                        
+                        textSpan.textContent = h + rankLabel;
+                        textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
+                        th.appendChild(textSpan);
+        
+                        const arrowIndicator = document.createElement('div');
+                        arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
+                        if (isRankLocked) arrowIndicator.classList.add('is-disabled');
+                        
+                        arrowIndicator.onclick = (e) => { 
+                            e.stopPropagation(); 
+                            if (!isRankLocked) flipDirectionOnly(h); 
+                        };
+                        th.appendChild(arrowIndicator);
+                    } else {
+                        th.textContent = h;
+                        if (isRankLocked) th.style.color = "#94a3b8";
+                    }
+                    th.style.borderBottom = "1px solid var(--gray-300)";
+                    tableHeaders.appendChild(th);
+                });
+        
+                const valName = filterName.value.toLowerCase().trim();
+                const valCode = filterCode.value.toLowerCase().trim();
+                const valSno = filterSno.value.toLowerCase().trim();
+                const valMinDur = parseFloat(filterDurMin.value);
+                const valMaxDur = parseFloat(filterDurMax.value);
+                const dateStartObj = parseCustomDate(filterDateStart.value.trim());
+                const dateEndObj = parseCustomDate(filterDateEnd.value.trim());
+                const valStarted = filterStartedTime.value.toLowerCase().trim();
+                const valJoined = filterJoinedTime.value.toLowerCase().trim();
+                const valStopped = filterStoppedTime.value.toLowerCase().trim();
+        
+                const filteredData = masterData.filter(row => {
+                    if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
+                    if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
+                    if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
+                    if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
+                    if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
+                    if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
+                    
+                    if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
+                        const totalMins = parseDurationToMinutes(row["Attended Duration"]);
+                        if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
+                        if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
+                    }
+                    if (filterDateStart.value.trim() || filterDateEnd.value.trim()) {
+                        const targetDateObj = parseCustomDate(row["Class Date"]);
+                        if (filterDateStart.value.trim()) {
+                            if (isStartDateInclusive && targetDateObj < dateStartObj) return false;
+                            if (!isStartDateInclusive && targetDateObj <= dateStartObj) return false;
+                        }
+                        if (filterDateEnd.value.trim()) {
+                            if (isEndDateInclusive && targetDateObj > dateEndObj) return false;
+                            if (!isEndDateInclusive && targetDateObj >= dateEndObj) return false;
+                        }
+                    }
+                    return true;
+                });
+        
+                tableBody.innerHTML = '';
+                filteredData.forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    const baseIndex = masterData.indexOf(row);
+                    
+                    const indexTd = document.createElement('td');
+                    indexTd.textContent = index + 1;
+                    indexTd.className = "excel-row-header";
+                    
+                    indexTd.addEventListener('click', (e) => {
+                        activeContextRowDataIndex = baseIndex;
+                        rowContextMenu.style.left = `${e.clientX}px`;
+                        rowContextMenu.style.top = `${e.clientY}px`;
+                        rowContextMenu.style.display = "block";
+                        contextMask.style.display = "block";
+                    });
+                    tr.appendChild(indexTd);
+        
+                    if (isDragReorderModeActive && currentDragOrientation === "horizontal") {
+                        tr.setAttribute('draggable', 'true');
+                        
+                        tr.addEventListener('dragstart', (e) => {
+                            draggedRowDataIndex = baseIndex;
+                            tr.classList.add('row-dragging');
+                        });
+                        tr.addEventListener('dragend', () => {
+                            tr.classList.remove('row-dragging');
+                            renderMasterTableUI();
+                        });
+                        tr.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            const rect = tr.getBoundingClientRect();
+                            const midpoint = rect.top + rect.height / 2;
+                            
+                            Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
+                                if (e.clientY < midpoint) {
+                                    cell.className = "row-drag-over-top";
+                                } else {
+                                    cell.className = "row-drag-over-bottom";
+                                }
+                            });
+                        });
+                        tr.addEventListener('dragleave', () => {
+                            Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
+                                cell.className = "";
+                            });
+                        });
+                        tr.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            if (draggedRowDataIndex !== null && draggedRowDataIndex !== baseIndex) {
+                                const tempRow = masterData[draggedRowDataIndex];
+                                masterData.splice(draggedRowDataIndex, 1);
+                                masterData.splice(baseIndex, 0, tempRow);
+                                renderMasterTableUI();
+                            }
+                        });
+                    }
+        
                     MASTER_HEADERS.forEach(header => {
-                        if (header === "Class Date") {
-                            structuredObj[header] = fileDate;
-                        } else {
-                            const mappedIdx = indexMap[header];
-                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
+                        const td = document.createElement('td');
+                        const input = document.createElement('input');
+                        
+                        input.value = row[header] || '';
+                        input.addEventListener('input', (e) => {
+                            if (baseIndex !== -1) masterData[baseIndex][header] = e.target.value.trim();
+                        });
+                        
+                        td.style.borderBottom = "1px solid var(--gray-300)";
+                        td.appendChild(input);
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            }
+        
+            downloadBtn.addEventListener('click', () => {
+                if (masterData.length === 0) return;
+        
+                let csvContent = MASTER_HEADERS.join(",") + "\n";
+                const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
+                csvContent += dynamicSpacer + "\n";
+                     
+                masterData.forEach(row => {
+                    let rowLine = MASTER_HEADERS.map(header => {
+                        let cellValue = row[header] || '';
+                        if (cellValue.includes(',') || cellValue.includes('"')) {
+                            cellValue = `"${cellValue.replace(/"/g, '""')}"`;
                         }
-                    });
-                    masterData.push(structuredObj);
-                }
-            } catch (err) {
-                console.error("Error reading file: " + file.name, err);
-            }
-        }
-
-        sortMasterData();
-        renderMasterTableUI();
-        stage1.classList.remove('active');
-        stage2.classList.add('active');
-    });
-
-    backBtn.addEventListener('click', () => {
-        stage1.classList.add('active');
-        stage2.classList.remove('active');
-    });
-
-    toggleReorderBtn.addEventListener('click', () => {
-        isDragReorderModeActive = !isDragReorderModeActive;
-        toggleReorderBtn.textContent = isDragReorderModeActive ? "Organize: On" : "Organize: Off";
-        toggleLinesBtn.disabled = !isDragReorderModeActive;
-        renderMasterTableUI();
-    });
-
-    toggleLinesBtn.addEventListener('click', () => {
-        if (!isDragReorderModeActive) return;
-        if (currentDragOrientation === "vertical") {
-            currentDragOrientation = "horizontal";
-            toggleLinesBtn.textContent = "Lines: Horizontal ═";
-        } else {
-            currentDragOrientation = "vertical";
-            toggleLinesBtn.textContent = "Lines: Vertical ‖";
-        }
-        renderMasterTableUI();
-    });
-
-    function closeAllContextMenus() {
-        columnContextMenu.style.display = "none";
-        rowContextMenu.style.display = "none";
-        contextMask.style.display = "none";
-    }
-    contextMask.addEventListener('click', closeAllContextMenus);
-
-    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
-        const newColName = prompt("Enter a unique name for your new custom column:");
-        if (!newColName) return;
-        const cleanCol = newColName.trim();
-        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
+                        return cellValue;
+                    }).join(",");
+                    csvContent += rowLine + "\n";
+                });
         
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 0, cleanCol);
-            masterData.forEach(row => { row[cleanCol] = ""; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
-        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
-            alert("Protected base headers cannot be deleted.");
-            return;
-        }
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 1);
-            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        let blankRow = {};
-        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
-        masterData.splice(activeContextRowDataIndex, 0, blankRow);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-row').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        masterData.splice(activeContextRowDataIndex, 1);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
-        input.addEventListener('input', () => { renderMasterTableUI(); });
-    });
-
-    startDateToggle.addEventListener('click', () => {
-        isStartDateInclusive = !isStartDateInclusive;
-        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-    endDateToggle.addEventListener('click', () => {
-        isEndDateInclusive = !isEndDateInclusive;
-        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
-        isStartDateInclusive = true;
-        isEndDateInclusive = true;
-        startDateToggle.textContent = "Inc";
-        endDateToggle.textContent = "Inc";
-        renderMasterTableUI();
-    });
-
-    timeConvertBtn.addEventListener('click', () => {
-        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
-        masterData.forEach(row => {
-            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
-                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", "combined_attendance_report.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             });
-        });
-        renderMasterTableUI(); 
-    });
-    
-    function sortMasterData() {
-        if (isRankLocked) return;
-
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
-        if (!nameSortRule || !dateSortRule) return;
-
-        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
-        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
-
-        function checkNameLayer(a, b) {
-            const nameA = (a["Participant Name"] || "").toLowerCase();
-            const nameB = (b["Participant Name"] || "").toLowerCase();
-            return nameA.localeCompare(nameB) * nameDirection;
-        }
-
-        function checkDateLayer(a, b) {
-            const dateA = parseCustomDate(a["Class Date"]);
-            const dateB = parseCustomDate(b["Class Date"]);
-            return (dateA - dateB) * dateDirection;
-        }
-
-        masterData.sort((a, b) => {
-            if (isNamePriorityPrimary) {
-                const res = checkNameLayer(a, b);
-                if (res !== 0) return res;
-                return checkDateLayer(a, b);
-            } else {
-                const res = checkDateLayer(a, b);
-                if (res !== 0) return res;
-                return checkNameLayer(a, b);
-            }
-        });
-    }
-
-    function flipDirectionOnly(columnKey) {
-        if (isRankLocked) return;
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
+        </script>
         
-        if (columnKey === "Participant Name" && nameSortRule) {
-            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date" && dateSortRule) {
-            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function setPrimaryRankFromHeaderClick(columnKey) {
-        if (isDragReorderModeActive || isRankLocked) return;
-        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
-            isNamePriorityPrimary = true;
-            const btn = document.getElementById('priority-switch-btn');
-            if (btn) btn.textContent = "Name Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
-            isNamePriorityPrimary = false;
-            const btn = document.getElementById('priority-switch-btn');
-            if (btn) btn.textContent = "Date Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function getExcelColumnLetterLabel(index) {
-        let label = '';
-        while (index >= 0) {
-            label = String.fromCharCode((index % 26) + 65) + label;
-            index = Math.floor(index / 26) - 1;
-        }
-        return label;
-    }
-
-    function renderMasterTableUI() {
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
-        
-        tableHeaders.innerHTML = '';
-        tableHeaderLetters.innerHTML = '';
-        tableBody.innerHTML = '';
-
-        const emptyTh = document.createElement('th');
-        emptyTh.style.width = "50px";
-        tableHeaderLetters.appendChild(emptyTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const letterTh = document.createElement('th');
-            letterTh.textContent = getExcelColumnLetterLabel(index);
-            letterTh.className = "excel-row-header";
-            
-            letterTh.addEventListener('click', (e) => {
-                activeContextColumnHeaderKey = h;
-                columnContextMenu.style.left = `${e.clientX}px`;
-                columnContextMenu.style.top = `${e.clientY}px`;
-                columnContextMenu.style.display = "block";
-                contextMask.style.display = "block";
-            });
-            tableHeaderLetters.appendChild(letterTh);
-        });
-
-        const cornerTh = document.createElement('th');
-        cornerTh.className = "excel-row-header";
-        tableHeaders.appendChild(cornerTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const th = document.createElement('th');
-            th.style.verticalAlign = "middle";
-            
-            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
-                th.className = "sortable draggable-header";
-                th.setAttribute('draggable', 'true');
-                
-                th.addEventListener('dragstart', (e) => { 
-                    draggedColumnHeaderIndex = index; 
-                    th.classList.add('header-dragging');
-                });
-                th.addEventListener('dragend', () => {
-                    th.classList.remove('header-dragging');
-                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2})`)).forEach(cell => {
-                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
-                    });
-                    renderMasterTableUI();
-                });
-                th.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    const rect = th.getBoundingClientRect();
-                    const midpoint = rect.left + rect.width / 2;
-                    
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => {
-                        if (e.clientX < midpoint) {
-                            cell.classList.add('header-drag-over-left');
-                            cell.classList.remove('header-drag-over-right');
-                        } else {
-                            cell.classList.add('header-drag-over-right');
-                            cell.classList.remove('header-drag-over-left');
-                        }
-                    });
-                });
-                th.addEventListener('dragleave', () => {
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
-                });
-                th.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
-                        renderMasterTableUI();
-    });
-
-    function closeAllContextMenus() {
-        columnContextMenu.style.display = "none";
-        rowContextMenu.style.display = "none";
-        contextMask.style.display = "none";
-    }
-    contextMask.addEventListener('click', closeAllContextMenus);
-
-    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
-        const newColName = prompt("Enter a unique name for your new custom column:");
-        if (!newColName) return;
-        const cleanCol = newColName.trim();
-        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
-        
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 0, cleanCol);
-            masterData.forEach(row => { row[cleanCol] = ""; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
-        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
-            alert("Protected base headers cannot be deleted.");
-            return;
-        }
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 1);
-            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        let blankRow = {};
-        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
-        masterData.splice(activeContextRowDataIndex, 0, blankRow);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-row').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        masterData.splice(activeContextRowDataIndex, 1);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
-        input.addEventListener('input', () => { renderMasterTableUI(); });
-    });
-
-    startDateToggle.addEventListener('click', () => {
-        isStartDateInclusive = !isStartDateInclusive;
-        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-    endDateToggle.addEventListener('click', () => {
-        isEndDateInclusive = !isEndDateInclusive;
-        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
-        isStartDateInclusive = true;
-        isEndDateInclusive = true;
-        startDateToggle.textContent = "Inc";
-        endDateToggle.textContent = "Inc";
-        renderMasterTableUI();
-    });
-
-    timeConvertBtn.addEventListener('click', () => {
-        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
-        masterData.forEach(row => {
-            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
-                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
-            });
-        });
-        renderMasterTableUI(); 
-    });
-
-    function sortMasterData() {
-        if (isRankLocked) return;
-
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
-        if (!nameSortRule || !dateSortRule) return;
-
-        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
-        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
-
-        function checkNameLayer(a, b) {
-            const nameA = (a["Participant Name"] || "").toLowerCase();
-            const nameB = (b["Participant Name"] || "").toLowerCase();
-            return nameA.localeCompare(nameB) * nameDirection;
-        }
-
-        function checkDateLayer(a, b) {
-            const dateA = parseCustomDate(a["Class Date"]);
-            const dateB = parseCustomDate(b["Class Date"]);
-            return (dateA - dateB) * dateDirection;
-        }
-
-        masterData.sort((a, b) => {
-            if (isNamePriorityPrimary) {
-                const res = checkNameLayer(a, b);
-                if (res !== 0) return res;
-                return checkDateLayer(a, b);
-            } else {
-                const res = checkDateLayer(a, b);
-                if (res !== 0) return res;
-                return checkNameLayer(a, b);
-            }
-        });
-    }
-
-    function flipDirectionOnly(columnKey) {
-        if (isRankLocked) return;
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
-        
-        if (columnKey === "Participant Name" && nameSortRule) {
-            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date" && dateSortRule) {
-            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function setPrimaryRankFromHeaderClick(columnKey) {
-        if (isDragReorderModeActive || isRankLocked) return;
-        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
-            isNamePriorityPrimary = true;
-            const btn = document.getElementById('priority-switch-btn');
-            if (btn) btn.textContent = "Name Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
-            isNamePriorityPrimary = false;
-            const btn = document.getElementById('priority-switch-btn');
-            if (btn) btn.textContent = "Date Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function getExcelColumnLetterLabel(index) {
-        let label = '';
-        while (index >= 0) {
-            label = String.fromCharCode((index % 26) + 65) + label;
-            index = Math.floor(index / 26) - 1;
-        }
-        return label;
-    }
-
-    function renderMasterTableUI() {
-        const nameSortRule = document.getElementById('name-sort-rule');
-        const dateSortRule = document.getElementById('date-sort-rule');
-        
-        tableHeaders.innerHTML = '';
-        tableHeaderLetters.innerHTML = '';
-        tableBody.innerHTML = '';
-
-        const emptyTh = document.createElement('th');
-        emptyTh.style.width = "50px";
-        tableHeaderLetters.appendChild(emptyTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const letterTh = document.createElement('th');
-            letterTh.textContent = getExcelColumnLetterLabel(index);
-            letterTh.className = "excel-row-header";
-            
-            letterTh.addEventListener('click', (e) => {
-                activeContextColumnHeaderKey = h;
-                columnContextMenu.style.left = `${e.clientX}px`;
-                columnContextMenu.style.top = `${e.clientY}px`;
-                columnContextMenu.style.display = "block";
-                contextMask.style.display = "block";
-            });
-            tableHeaderLetters.appendChild(letterTh);
-        });
-
-        const cornerTh = document.createElement('th');
-        cornerTh.className = "excel-row-header";
-        tableHeaders.appendChild(cornerTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const th = document.createElement('th');
-            th.style.verticalAlign = "middle";
-            
-            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
-                th.className = "sortable draggable-header";
-                th.setAttribute('draggable', 'true');
-                
-                th.addEventListener('dragstart', (e) => { 
-                    draggedColumnHeaderIndex = index; 
-                    th.classList.add('header-dragging');
-                });
-                th.addEventListener('dragend', () => {
-                    th.classList.remove('header-dragging');
-                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2})`)).forEach(cell => {
-                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
-                    });
-                    renderMasterTableUI();
-                });
-                th.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    const rect = th.getBoundingClientRect();
-                    const midpoint = rect.left + rect.width / 2;
-                    
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => {
-                        if (e.clientX < midpoint) {
-                            cell.classList.add('header-drag-over-left');
-                            cell.classList.remove('header-drag-over-right');
-                        } else {
-                            cell.classList.add('header-drag-over-right');
-                            cell.classList.remove('header-drag-over-left');
-                        }
-                    });
-                });
-                th.addEventListener('dragleave', () => {
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
-                });
-                th.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
-                        renderMasterTableUI();
-                    }
-                });
-            }
-
-            if (h === "Participant Name" || h === "Class Date") {
-                if (!isDragReorderModeActive) th.className = "sortable";
-                
-                const textSpan = document.createElement('span');
-                textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
-                textSpan.style.fontSize = "1rem";
-                if (isRankLocked) {
-                    textSpan.style.color = "#94a3b8";
-                }
-                
-                if (!isRankLocked && !isDragReorderModeActive) {
-                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
-                    textSpan.onmouseout = () => textSpan.style.color = "";
-                }
-                
-                let rankLabel = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
-                let isActiveDirection = "desc";
-                if (nameSortRule && dateSortRule) {
-                    isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
-                }
-                
-                textSpan.textContent = h + rankLabel;
-                textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
-                th.appendChild(textSpan);
-
-                const arrowIndicator = document.createElement('div');
-                arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
-                if (isRankLocked) arrowIndicator.classList.add('is-disabled');
-                
-                arrowIndicator.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    if (!isRankLocked) flipDirectionOnly(h); 
-                };
-                th.appendChild(arrowIndicator);
-            } else {
-                th.textContent = h;
-                if (isRankLocked) th.style.color = "#94a3b8";
-            }
-            th.style.borderBottom = "1px solid var(--gray-300)";
-            tableHeaders.appendChild(th);
-        });
-
-        const valName = filterName.value.toLowerCase().trim();
-        const valCode = filterCode.value.toLowerCase().trim();
-        const valSno = filterSno.value.toLowerCase().trim();
-        const valMinDur = parseFloat(filterDurMin.value);
-        const valMaxDur = parseFloat(filterDurMax.value);
-        const dateStartObj = parseCustomDate(filterDateStart.value.trim());
-        const dateEndObj = parseCustomDate(filterDateEnd.value.trim());
-        const valStarted = filterStartedTime.value.toLowerCase().trim();
-        const valJoined = filterJoinedTime.value.toLowerCase().trim();
-        const valStopped = filterStoppedTime.value.toLowerCase().trim();
-
-        const filteredData = masterData.filter(row => {
-            if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
-            if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
-            if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
-            if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
-            if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
-            if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
-            
-            if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
-                const totalMins = parseDurationToMinutes(row["Attended Duration"]);
-                if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
-                if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
-            }
-            if (filterDateStart.value.trim() || filterDateEnd.value.trim()) {
-                const targetDateObj = parseCustomDate(row["Class Date"]);
-                if (filterDateStart.value.trim()) {
-                    if (isStartDateInclusive && targetDateObj < dateStartObj) return false;
-                    if (!isStartDateInclusive && targetDateObj <= dateStartObj) return false;
-                }
-                if (filterDateEnd.value.trim()) {
-                    if (isEndDateInclusive && targetDateObj > dateEndObj) return false;
-                    if (!isEndDateInclusive && targetDateObj >= dateEndObj) return false;
-                }
-            }
-            return true;
-        });
-
-        tableBody.innerHTML = '';
-        filteredData.forEach((row, index) => {
-            const tr = document.createElement('tr');
-            const baseIndex = masterData.indexOf(row);
-            
-            const indexTd = document.createElement('td');
-            indexTd.textContent = index + 1;
-            indexTd.className = "excel-row-header";
-            
-            indexTd.addEventListener('click', (e) => {
-                activeContextRowDataIndex = baseIndex;
-                rowContextMenu.style.left = `${e.clientX}px`;
-                rowContextMenu.style.top = `${e.clientY}px`;
-                rowContextMenu.style.display = "block";
-                contextMask.style.display = "block";
-            });
-            tr.appendChild(indexTd);
-
-            if (isDragReorderModeActive && currentDragOrientation === "horizontal") {
-                tr.setAttribute('draggable', 'true');
-                
-                tr.addEventListener('dragstart', (e) => {
-                    draggedRowDataIndex = baseIndex;
-                    tr.classList.add('row-dragging');
-                });
-                tr.addEventListener('dragend', () => {
-                    tr.classList.remove('row-dragging');
-                    renderMasterTableUI();
-                });
-                tr.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const rect = tr.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
-                    
-                    Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
-                        if (e.clientY < midpoint) {
-                            cell.className = "row-drag-over-top";
-                        } else {
-                            cell.className = "row-drag-over-bottom";
-                        }
-                    });
-                });
-                tr.addEventListener('dragleave', () => {
-                    Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
-                        cell.className = "";
-                    });
-                });
-                tr.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedRowDataIndex !== null && draggedRowDataIndex !== baseIndex) {
-                        const tempRow = masterData[draggedRowDataIndex];
-                        masterData.splice(draggedRowDataIndex, 1);
-                        masterData.splice(baseIndex, 0, tempRow);
-                        renderMasterTableUI();
-                    }
-                });
-            }
-
-            MASTER_HEADERS.forEach(header => {
-                const td = document.createElement('td');
-                const input = document.createElement('input');
-                
-                input.value = row[header] || '';
-                input.addEventListener('input', (e) => {
-                    if (baseIndex !== -1) masterData[baseIndex][header] = e.target.value.trim();
-                });
-                
-                td.style.borderBottom = "1px solid var(--gray-300)";
-                td.appendChild(input);
-                tr.appendChild(td);
-            });
-            tableBody.appendChild(tr);
-        });
-    }
-
-    downloadBtn.addEventListener('click', () => {
-        if (masterData.length === 0) return;
-
-        let csvContent = MASTER_HEADERS.join(",") + "\n";
-        const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
-        csvContent += dynamicSpacer + "\n";
-        
-        masterData.forEach(row => {
-            let rowLine = MASTER_HEADERS.map(header => {
-                let cellValue = row[header] || '';
-                if (cellValue.includes(',') || cellValue.includes('"')) {
-                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
-                }
-                return cellValue;
-            }).join(","); 
-            csvContent += rowLine + "\n";
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "combined_attendance_report.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-</script>
-
-</body>
-</html>
+        </body>
+        </html>
