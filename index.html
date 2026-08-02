@@ -960,9 +960,9 @@
         contextMask.style.display = "none";
     }
     contextMask.addEventListener('click', closeAllContextMenus);
-
+    
     document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        if (!activeContextColumnHeaderKey) return; // Removed isRankLocked blocker constraint check cleanly
         const newColName = prompt("Enter a unique name for your new custom column:");
         if (!newColName) return;
         const cleanCol = newColName.trim();
@@ -978,7 +978,7 @@
     });
 
     document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (isRankLocked || !activeContextColumnHeaderKey) return;
+        if (!activeContextColumnHeaderKey) return; // Removed isRankLocked blocker constraint check cleanly
         if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
             alert("Protected base headers cannot be deleted.");
             return;
@@ -991,6 +991,7 @@
         closeAllContextMenus();
         renderMasterTableUI();
     });
+
 
     document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
         if (activeContextRowDataIndex === null) return;
