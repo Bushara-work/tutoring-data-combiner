@@ -1125,7 +1125,66 @@
             letterTh.textContent = getExcelColumnLetterLabel(index);
             letterTh.className = "excel-row-header";
             
-            letterTh.addEventListener('click', (e) => {
+            // Allow column reordering only by dragging from the Excel letter headers
+            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
+                letterTh.className = "excel-row-header draggable-header";
+                letterTh.setAttribute('draggable', 'true');
+                
+                letterTh.addEventListener('dragstart', (e) => { 
+                    draggedColumnHeaderIndex = index; 
+                    letterTh.classList.add('header-dragging');
+                    
+                    // Highlight the entire vertical column instantly during the drag
+                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`)).forEach(cell => {
+                        cell.classList.add('header-dragging');
+                    });
+                });
+                
+                letterTh.addEventListener('dragend', () => {
+                    letterTh.classList.remove('header-dragging');
+                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
+                        cell.classList.remove('header-dragging', 'header-drag-over-left', 'header-drag-over-right');
+                    });
+                    renderMasterTableUI();
+                });
+                
+                letterTh.addEventListener('dragover', (e) => { 
+                    e.preventDefault(); 
+                    const rect = letterTh.getBoundingClientRect();
+                    const midpoint = rect.left + rect.width / 2;
+                    
+                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
+                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                    });
+
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => {
+                        if (e.clientX < midpoint) {
+                            cell.classList.add('header-drag-over-left');
+                        } else {
+                            cell.classList.add('header-drag-over-right');
+                        }
+                    });
+                });
+                
+                letterTh.addEventListener('dragleave', () => {
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
+                });
+                
+                letterTh.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
+                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
+                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
+                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
+                        renderMasterTableUI();
+                    }
+                });
+            }
+            
+            letterTh.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
                 activeContextColumnHeaderKey = h;
                 columnContextMenu.style.left = `${e.clientX}px`;
                 columnContextMenu.style.top = `${e.clientY}px`;
@@ -1142,70 +1201,15 @@
         MASTER_HEADERS.forEach((h, index) => {
             const th = document.createElement('th');
             th.style.verticalAlign = "middle";
-            
-            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
-                th.className = "sortable draggable-header";
-                th.setAttribute('draggable', 'true');
-                
-                th.addEventListener('dragstart', (e) => { 
-                    draggedColumnHeaderIndex = index; 
-                    th.classList.add('header-dragging');
-                    // Highlight the entire column elements immediately
-                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`)).forEach(cell => {
-                        cell.classList.add('header-dragging');
-                    });
-                });
-                th.addEventListener('dragend', () => {
-                    th.classList.remove('header-dragging');
-                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
-                        cell.classList.remove('header-dragging', 'header-drag-over-left', 'header-drag-over-right');
-                    });
-                    renderMasterTableUI();
-                });
-                th.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    const rect = th.getBoundingClientRect();
-                    const midpoint = rect.left + rect.width / 2;
-                    
-                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
-                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
-                    });
-
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => {
-                        if (e.clientX < midpoint) {
-                            cell.classList.add('header-drag-over-left');
-                        } else {
-                            cell.classList.add('header-drag-over-right');
-                        }
-                    });
-                });
-                th.addEventListener('dragleave', () => {
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
-                });
-                th.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
-                        renderMasterTableUI();
-                    }
-                });
-            }
 
             if (h === "Participant Name" || h === "Class Date") {
                 if (!isDragReorderModeActive) th.className = "sortable";
                 
                 const textSpan = document.createElement('span');
-                textSpan.style.cursor = isRankLocked ? "not-allowed" : "pointer";
+                textSpan.style.cursor = "pointer";
                 textSpan.style.fontSize = "1rem";
-                if (isRankLocked) {
-                    textSpan.style.color = "#94a3b8";
-                }
                 
-                if (!isRankLocked && !isDragReorderModeActive) {
+                if (!isDragReorderModeActive) {
                     textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
                     textSpan.onmouseout = () => textSpan.style.color = "";
                 }
@@ -1219,7 +1223,11 @@
 
                 const arrowIndicator = document.createElement('div');
                 arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
-                if (isRankLocked) arrowIndicator.classList.add('is-disabled');
+                
+                // Only grey out and deactivate the arrows when rank lock is active
+                if (isRankLocked) {
+                    arrowIndicator.classList.add('is-disabled');
+                }
                 
                 arrowIndicator.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -1227,8 +1235,8 @@
                 };
                 th.appendChild(arrowIndicator);
             } else {
+                // Ensure text rendering inputs stay default black color profiles when locked
                 th.textContent = h;
-                if (isRankLocked) th.style.color = "#94a3b8";
             }
             th.style.borderBottom = "1px solid var(--gray-300)";
             tableHeaders.appendChild(th);
@@ -1252,7 +1260,7 @@
             if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
             if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
             if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
-            
+
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
                 const totalMins = parseDurationToMinutes(row["Attended Duration"]);
                 if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
@@ -1281,7 +1289,8 @@
             indexTd.textContent = index + 1;
             indexTd.className = "excel-row-header";
             
-            indexTd.addEventListener('click', (e) => {
+            indexTd.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
                 activeContextRowDataIndex = baseIndex;
                 rowContextMenu.style.left = `${e.clientX}px`;
                 rowContextMenu.style.top = `${e.clientY}px`;
@@ -1296,8 +1305,20 @@
                 tr.addEventListener('dragstart', (e) => {
                     draggedRowDataIndex = baseIndex;
                     tr.classList.add('row-dragging');
-                    if(e.dataTransfer) {
-                        e.dataTransfer.setDragImage(tr, 0, 0);
+                    
+                    // Creates a clean moving duplicate clone that strips out the index number
+                    if (e.dataTransfer) {
+                        const dragVisualClone = tr.cloneNode(true);
+                        // Safely remove the visible number label box from the drag imagery frame
+                        const targetLeadingCell = dragVisualClone.querySelector('.excel-row-header');
+                        if (targetLeadingCell) targetLeadingCell.textContent = '';
+                        
+                        dragVisualClone.style.position = "absolute";
+                        dragVisualClone.style.top = "-9999px";
+                        document.body.appendChild(dragVisualClone);
+                        
+                        e.dataTransfer.setDragImage(dragVisualClone, 0, 15);
+                        setTimeout(() => document.body.removeChild(dragVisualClone), 0);
                     }
                 });
                 tr.addEventListener('dragend', () => {
