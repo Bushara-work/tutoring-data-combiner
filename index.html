@@ -17,6 +17,8 @@
             --gray-700: #374151;
             --excel-green: #107c41;
             --excel-green-hover: #0b5931;
+            --amber-500: #f59e0b;
+            --amber-600: #d97706;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -176,7 +178,7 @@
         .filter-header-title {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: space-between;
             font-weight: bold;
             color: var(--gray-700);
             width: 100%;
@@ -264,6 +266,13 @@
         .btn-danger:hover {
             background: var(--danger-hover);
         }
+        .btn-amber {
+            background: var(--amber-500);
+            color: white;
+        }
+        .btn-amber:hover {
+            background: var(--amber-600);
+        }
         .table-container {
             overflow-x: auto;
             background: white;
@@ -326,7 +335,7 @@
             vertical-align: middle;
             margin-left: 6px;
             cursor: pointer;
-            transition: transform 0.1s, border-color 0.2s;
+            transition: transform 0.2s, border-color 0.2s;
         }
         .css-arrow-icon.arrow-up {
             border-bottom: 7px solid #2563eb;
@@ -432,11 +441,10 @@
             background-color: #eff6ff !important;
         }
         .header-dragging {
-            opacity: 0.4;
             background-color: #dbeafe !important;
+            color: #1e3a8a !important;
         }
         .row-dragging {
-            opacity: 0.4;
             background-color: #dbeafe !important;
         }
         .excel-row-header {
@@ -461,14 +469,25 @@
             width: 100%;
         }
         
-        /* Inner action label pill for consolidated reordering state */
+        /* Inner structural layouts for reordering controls */
         .sub-toggle-pill {
-            background: #2563eb;
-            color: #ffffff;
-            font-size: 0.75rem;
-            padding: 0.15rem 0.4rem;
+            font-weight: bold;
+            padding: 2px 6px;
             border-radius: 3px;
-            margin-left: 4px;
+            margin-left: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        /* Highlight rule modifier for matched duplicate entries */
+        tr.duplicate-highlight td {
+            background-color: #fef08a !important;
+        }
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #d97706;
         }
     </style>
 </head>
@@ -526,7 +545,7 @@
                 </div> 
                 <div class="vertical-button-stack" style="flex-direction: row; align-items: center;"> 
                     <button id="time-convert-btn" class="btn-toggle-time" style="margin-right: 0.5rem;">Time Format (12h ⇄ 24h)</button> 
-                    <button id="toggle-reorder-btn" class="switch-btn" style="font-weight:600; margin-right: 0.5rem;">Organize: Off</button> 
+                    <button id="toggle-reorder-btn" class="switch-btn" style="font-weight:600; margin-right: 0.5rem;">Organize <span class="sub-toggle-pill" style="color: #94a3b8; background: transparent; cursor: not-allowed;">||</span></button> 
                 </div> 
             </div> 
         </div> 
@@ -576,8 +595,9 @@
                     <label>Stopped At</label>
                     <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
                 </div>
-                <div class="filter-box">
-                    <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 100%; font-size: 0.875rem;">Reset Filters ↺</button>
+                <div class="filter-box" style="display: flex; gap: 0.5rem; width: 100%;">
+                    <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 50%; font-size: 0.85rem; padding: 0.5rem 0.25rem;">Reset Filters ↺</button>
+                    <button class="btn btn-warning" id="duplicate-sift-btn" style="height: 38px; width: 50%; font-size: 0.85rem; padding: 0.5rem 0.25rem; font-weight: 600;">Show Duplicates</button>
                 </div>
             </div>
         </div>
@@ -639,6 +659,11 @@
     let activeContextColumnHeaderKey = null;
     let activeContextRowDataIndex = null;
 
+    // Cache management variables for processing identical rows sequentially
+    let duplicateGroupsCache = [];
+    let currentDuplicateGroupIndex = -1;
+    let duplicateScanModeActive = false;
+
     const csvPicker = document.getElementById('csv-picker');
     const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
@@ -648,6 +673,7 @@
     const timeConvertBtn = document.getElementById('time-convert-btn');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const toggleReorderBtn = document.getElementById('toggle-reorder-btn');
+    const duplicateSiftBtn = document.getElementById('duplicate-sift-btn');
     
     const nameSortRule = document.getElementById('name-sort-rule');
     const dateSortRule = document.getElementById('date-sort-rule');
@@ -679,7 +705,7 @@
     const columnContextMenu = document.getElementById('column-context-menu');
     const rowContextMenu = document.getElementById('row-context-menu');
 
-    // Rank Locking System Interactions
+    // Rank Locking Interactions
     rankLockBtn.addEventListener('click', () => {
         isRankLocked = !isRankLocked;
         if (isRankLocked) {
@@ -708,6 +734,58 @@
 
     nameSortRule.addEventListener('change', () => { if(!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
     dateSortRule.addEventListener('change', () => { if(!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
+
+    // Core Duplicate Scanner & Sequential Resolver Engine Logic
+    duplicateSiftBtn.addEventListener('click', () => {
+        // If we are already in an active split process, click advances to the next group or resets
+        if (duplicateScanModeActive) {
+            currentDuplicateGroupIndex++;
+            if (currentDuplicateGroupIndex >= duplicateGroupsCache.length) {
+                // Sift phase completed successfully, perform fresh lookahead check re-evaluation
+                findAndCacheDuplicateSets(true); 
+            } else {
+                renderMasterTableUI();
+            }
+            return;
+        }
+        
+        // Initial button trigger execution pass
+        findAndCacheDuplicateSets(false);
+    });
+
+    function findAndCacheDuplicateSets(isReevaluationPass) {
+        const fingerPrintMap = {};
+        
+        // Compute exact string copies by serializing base values across active system keys
+        masterData.forEach(row => {
+            const fingerprintToken = MASTER_HEADERS.map(h => String(row[h] || '').trim()).join('|||');
+            if (!fingerPrintMap[fingerprintToken]) {
+                fingerPrintMap[fingerprintToken] = [];
+            }
+            fingerPrintMap[fingerprintToken].push(row);
+        });
+
+        // Filter keys where more than one precise structural data clone exists
+        duplicateGroupsCache = Object.values(fingerPrintMap).filter(group => group.length > 1);
+
+        if (duplicateGroupsCache.length === 0) {
+            alert("There is no duplicated data.");
+            duplicateScanModeActive = false;
+            currentDuplicateGroupIndex = -1;
+            duplicateSiftBtn.textContent = "Show Duplicates";
+            duplicateSiftBtn.style.backgroundColor = "#f59e0b";
+            renderMasterTableUI();
+            return;
+        }
+
+        duplicateScanModeActive = true;
+        currentDuplicateGroupIndex = 0;
+        
+        // Render updated state buttons with loop indicator controls
+        duplicateSiftBtn.textContent = `Next Group (${currentDuplicateGroupIndex + 1}/${duplicateGroupsCache.length}) ↻`;
+        duplicateSiftBtn.style.backgroundColor = "#ea580c"; // Turns to a deeper orange alert color scheme
+        renderMasterTableUI();
+    }
 
     function handleFileSelection(files) {
         if (!files) return;
@@ -931,9 +1009,10 @@
         stage2.classList.remove('active');
     });
 
-    // Cleaned up, self-contained interaction button state loop switcher
+    // Integrated self-contained sub-toggle reordering indicator button switch
     toggleReorderBtn.addEventListener('click', (e) => {
         if (e.target.classList.contains('sub-toggle-pill')) {
+            if (!isDragReorderModeActive) return; // Prevent action clicks while button disabled state runs
             currentDragOrientation = (currentDragOrientation === "vertical") ? "horizontal" : "vertical";
             updateReorderButtonText();
             renderMasterTableUI();
@@ -947,10 +1026,11 @@
 
     function updateReorderButtonText() {
         if (!isDragReorderModeActive) {
-            toggleReorderBtn.innerHTML = 'Organize: Off';
+            const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
+            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #94a3b8; background: transparent; cursor: not-allowed; padding: 0 4px; margin-left: 6px;">${visualGlyph}</span>`;
         } else {
-            const modeLabel = (currentDragOrientation === "vertical") ? "Columns" : "Rows";
-            toggleReorderBtn.innerHTML = `Organize: On <span class="sub-toggle-pill">[ ${modeLabel} ]</span>`;
+            const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
+            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #000000; background: #e5e7eb; cursor: pointer; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">${visualGlyph}</span>`;
         }
     }
 
@@ -960,9 +1040,9 @@
         contextMask.style.display = "none";
     }
     contextMask.addEventListener('click', closeAllContextMenus);
-    
+
     document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (!activeContextColumnHeaderKey) return; // Removed isRankLocked blocker constraint check cleanly
+        if (!activeContextColumnHeaderKey) return; 
         const newColName = prompt("Enter a unique name for your new custom column:");
         if (!newColName) return;
         const cleanCol = newColName.trim();
@@ -978,7 +1058,7 @@
     });
 
     document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (!activeContextColumnHeaderKey) return; // Removed isRankLocked blocker constraint check cleanly
+        if (!activeContextColumnHeaderKey) return; 
         if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
             alert("Protected base headers cannot be deleted.");
             return;
@@ -991,7 +1071,6 @@
         closeAllContextMenus();
         renderMasterTableUI();
     });
-
 
     document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
         if (activeContextRowDataIndex === null) return;
@@ -1030,6 +1109,14 @@
         isEndDateInclusive = true;
         startDateToggle.textContent = "Inc";
         endDateToggle.textContent = "Inc";
+        
+        // Wipe duplicate filtering caches completely on reset parameters invocation commands
+        duplicateScanModeActive = false;
+        currentDuplicateGroupIndex = -1;
+        duplicateGroupsCache = [];
+        duplicateSiftBtn.textContent = "Show Duplicates";
+        duplicateSiftBtn.style.backgroundColor = "#f59e0b";
+        
         renderMasterTableUI();
     });
 
@@ -1126,7 +1213,6 @@
             letterTh.textContent = getExcelColumnLetterLabel(index);
             letterTh.className = "excel-row-header";
             
-            // Allow column reordering only by dragging from the Excel letter headers
             if (isDragReorderModeActive && currentDragOrientation === "vertical") {
                 letterTh.className = "excel-row-header draggable-header";
                 letterTh.setAttribute('draggable', 'true');
@@ -1135,10 +1221,354 @@
                     draggedColumnHeaderIndex = index; 
                     letterTh.classList.add('header-dragging');
                     
-                    // Highlight the entire vertical column instantly during the drag
                     Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`)).forEach(cell => {
                         cell.classList.add('header-dragging');
                     });
+
+                    // Build full vertical table column preview slice instead of standard letter container
+                    if (e.dataTransfer) {
+                        const dragVerticalBox = document.createElement('div');
+                        dragVerticalBox.style.position = "absolute";
+                        dragVerticalBox.style.top = "-9999px";
+                        dragVerticalBox.style.display = "flex";
+                        dragVerticalBox.style.flexDirection = "column";
+                        dragVerticalBox.style.background = "#ffffff";
+                        dragVerticalBox.style.border = "1px solid var(--primary)";
+                        dragVerticalBox.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+
+                        const letterClone = letterTh.cloneNode(true);
+                        letterClone.style.padding = "0.5rem";
+                        letterClone.style.background = "#cbd5e1";
+                        dragVerticalBox.appendChild(letterClone);
+
+                        const mainHeaderNode = document.querySelector(`#table-headers th:nth-child(${index + 2})`);
+                        if (mainHeaderNode) {
+                            const headerClone = mainHeaderNode.cloneNode(true);
+                            headerClone.style.padding = "0.5rem";
+                            dragVerticalBox.appendChild(headerClone);
+                        }
+
+                        Array.from(document.querySelectorAll(`#table-body tr td:nth-child(${index + 2}) input`)).forEach(inputNode => {
+                            const dummyCell = document.createElement('div');
+                            dummyCell.style.padding = "0.5rem";
+                            dummyCell.style.borderTop = "1px solid var(--gray-200)";
+                            dummyCell.style.fontSize = "0.875rem";
+                            dummyCell.style.whiteSpace = "nowrap";
+                            dummyCell.textContent = inputNode.value;
+                            dragVerticalBox.appendChild(dummyCell);
+                        });
+
+                        document.body.appendChild(dragVerticalBox);
+                        e.dataTransfer.setDragImage(dragVerticalBox, 25, 15);
+                        setTimeout(() => document.body.removeChild(dragVerticalBox), 0);
+                    }
+                });
+                
+                letterTh.addEventListener('dragend', () => {
+                    letterTh.classList.remove('header-dragging');
+                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
+                        cell.classList.remove('header-dragging', 'header-drag-over-left', 'header-drag-over-right');
+                    });
+                    renderMasterTableUI();
+                });
+                
+                letterTh.addEventListener('dragover', (e) => { 
+                    e.preventDefault(); 
+                    const rect = letterTh.getBoundingClientRect();
+                    const midpoint = rect.left + rect.width / 2;
+                    
+                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
+                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
+                    });
+
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => {
+                        if (e.clientX < midpoint) {
+                            cell.classList.add('header-drag-over-left');
+                        } else {
+                            cell.classList.add('header-drag-over-right');
+                        }
+                    });
+                });
+                
+                letterTh.addEventListener('dragleave', () => {
+                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
+                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
+                });
+                
+                letterTh.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
+                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
+                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
+                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
+                        renderMasterTableUI();
+                    }
+                });
+            }
+            
+            letterTh.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                activeContextColumnHeaderKey = h;
+                columnContextMenu.style.left = `${e.clientX}px`;
+                columnContextMenu.style.top = `${e.clientY}px`;
+                columnContextMenu.style.display = "block";
+                contextMask.style.display = "block";
+            });
+            tableHeaderLetters.appendChild(letterTh);
+        });
+
+        const cornerTh = document.createElement('th');
+        cornerTh.className = "excel-row-header";
+        tableHeaders.appendChild(cornerTh);
+
+        MASTER_HEADERS.forEach((h, index) => {
+            const th = document.createElement('th');
+            th.style.verticalAlign = "middle";
+
+            if (h === "Participant Name" || h === "Class Date") {
+                if (!isDragReorderModeActive) th.className = "sortable";
+                
+                const textSpan = document.createElement('span');
+                textSpan.style.cursor = "pointer";
+                textSpan.style.fontSize = "1rem";
+                
+                if (!isDragReorderModeActive) {
+                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
+                    const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
+            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #94a3b8; background: transparent; font-weight: bold; cursor: not-allowed; padding: 0 4px; margin-left: 6px;">${visualGlyph}</span>`;
+        } else {
+            const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
+            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #000000; background: #e5e7eb; font-weight: bold; cursor: pointer; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">${visualGlyph}</span>`;
+        }
+    }
+
+    function closeAllContextMenus() {
+        columnContextMenu.style.display = "none";
+        rowContextMenu.style.display = "none";
+        contextMask.style.display = "none";
+    }
+    contextMask.addEventListener('click', closeAllContextMenus);
+
+    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
+        if (!activeContextColumnHeaderKey) return; 
+        const newColName = prompt("Enter a unique name for your new custom column:");
+        if (!newColName) return;
+        const cleanCol = newColName.trim();
+        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
+        
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) {
+            MASTER_HEADERS.splice(idx, 0, cleanCol);
+            masterData.forEach(row => { row[cleanCol] = ""; });
+        }
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-col').addEventListener('click', () => {
+        if (!activeContextColumnHeaderKey) return; 
+        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
+            alert("Protected base headers cannot be deleted.");
+            return;
+        }
+        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
+        if (idx !== -1) {
+            MASTER_HEADERS.splice(idx, 1);
+            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
+        }
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
+        if (activeContextRowDataIndex === null) return;
+        let blankRow = {};
+        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
+        masterData.splice(activeContextRowDataIndex, 0, blankRow);
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    document.getElementById('ctx-delete-row').addEventListener('click', () => {
+        if (activeContextRowDataIndex === null) return;
+        masterData.splice(activeContextRowDataIndex, 1);
+        closeAllContextMenus();
+        renderMasterTableUI();
+    });
+
+    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
+        input.addEventListener('input', () => { renderMasterTableUI(); });
+    });
+
+    startDateToggle.addEventListener('click', () => {
+        isStartDateInclusive = !isStartDateInclusive;
+        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+    endDateToggle.addEventListener('click', () => {
+        isEndDateInclusive = !isEndDateInclusive;
+        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
+        renderMasterTableUI();
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
+        isStartDateInclusive = true;
+        isEndDateInclusive = true;
+        startDateToggle.textContent = "Inc";
+        endDateToggle.textContent = "Inc";
+        
+        duplicateScanModeActive = false;
+        currentDuplicateGroupIndex = -1;
+        duplicateGroupsCache = [];
+        duplicateSiftBtn.textContent = "Show Duplicates";
+        duplicateSiftBtn.style.backgroundColor = "#f59e0b";
+        
+        renderMasterTableUI();
+    });
+
+    timeConvertBtn.addEventListener('click', () => {
+        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
+        masterData.forEach(row => {
+            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
+                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
+            });
+        });
+        renderMasterTableUI(); 
+    });
+
+    function sortMasterData() {
+        if (isRankLocked) return;
+
+        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
+        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
+
+        function checkNameLayer(a, b) {
+            const nameA = (a["Participant Name"] || "").toLowerCase();
+            const nameB = (b["Participant Name"] || "").toLowerCase();
+            return nameA.localeCompare(nameB) * nameDirection;
+        }
+
+        function checkDateLayer(a, b) {
+            const dateA = parseCustomDate(a["Class Date"]);
+            const dateB = parseCustomDate(b["Class Date"]);
+            return (dateA - dateB) * dateDirection;
+        }
+
+        masterData.sort((a, b) => {
+            if (isNamePriorityPrimary) {
+                const res = checkNameLayer(a, b);
+                if (res !== 0) return res;
+                return checkDateLayer(a, b);
+            } else {
+                const res = checkDateLayer(a, b);
+                if (res !== 0) return res;
+                return checkNameLayer(a, b);
+            }
+        });
+    }
+
+    function flipDirectionOnly(columnKey) {
+        if (isRankLocked) return;
+        
+        if (columnKey === "Participant Name") {
+            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
+            sortMasterData();
+            renderMasterTableUI();
+        } else if (columnKey === "Class Date") {
+            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
+            sortMasterData();
+            renderMasterTableUI();
+        }
+    }
+
+    function setPrimaryRankFromHeaderClick(columnKey) {
+        if (isDragReorderModeActive || isRankLocked) return;
+        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
+            isNamePriorityPrimary = true;
+            prioritySwitchBtn.textContent = "Name Priority First ⇄";
+            sortMasterData();
+            renderMasterTableUI();
+        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
+            isNamePriorityPrimary = false;
+            prioritySwitchBtn.textContent = "Date Priority First ⇄";
+            sortMasterData();
+            renderMasterTableUI();
+        }
+    }
+
+    function getExcelColumnLetterLabel(index) {
+        let label = '';
+        while (index >= 0) {
+            label = String.fromCharCode((index % 26) + 65) + label;
+            index = Math.floor(index / 26) - 1;
+        }
+        return label;
+    }
+
+    function renderMasterTableUI() {
+        tableHeaders.innerHTML = '';
+        tableHeaderLetters.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        const emptyTh = document.createElement('th');
+        emptyTh.style.width = "50px";
+        tableHeaderLetters.appendChild(emptyTh);
+
+        MASTER_HEADERS.forEach((h, index) => {
+            const letterTh = document.createElement('th');
+            letterTh.textContent = getExcelColumnLetterLabel(index);
+            letterTh.className = "excel-row-header";
+            
+            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
+                letterTh.className = "excel-row-header draggable-header";
+                letterTh.setAttribute('draggable', 'true');
+                
+                letterTh.addEventListener('dragstart', (e) => { 
+                    draggedColumnHeaderIndex = index; 
+                    letterTh.classList.add('header-dragging');
+                    
+                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`)).forEach(cell => {
+                        cell.classList.add('header-dragging');
+                    });
+
+                    if (e.dataTransfer) {
+                        const dragVerticalBox = document.createElement('div');
+                        dragVerticalBox.style.position = "absolute";
+                        dragVerticalBox.style.top = "-9999px";
+                        dragVerticalBox.style.display = "flex";
+                        dragVerticalBox.style.flexDirection = "column";
+                        dragVerticalBox.style.background = "#ffffff";
+                        dragVerticalBox.style.border = "1px solid var(--primary)";
+                        dragVerticalBox.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+
+                        const letterClone = letterTh.cloneNode(true);
+                        letterClone.style.padding = "0.5rem";
+                        letterClone.style.background = "#cbd5e1";
+                        dragVerticalBox.appendChild(letterClone);
+
+                        const mainHeaderNode = document.querySelector(`#table-headers th:nth-child(${index + 2})`);
+                        if (mainHeaderNode) {
+                            const headerClone = mainHeaderNode.cloneNode(true);
+                            headerClone.style.padding = "0.5rem";
+                            dragVerticalBox.appendChild(headerClone);
+                        }
+
+                        Array.from(document.querySelectorAll(`#table-body tr td:nth-child(${index + 2}) input`)).forEach(inputNode => {
+                            const dummyCell = document.createElement('div');
+                            dummyCell.style.padding = "0.5rem";
+                            dummyCell.style.borderTop = "1px solid var(--gray-200)";
+                            dummyCell.style.fontSize = "0.875rem";
+                            dummyCell.style.whiteSpace = "nowrap";
+                            dummyCell.textContent = inputNode.value;
+                            dragVerticalBox.appendChild(dummyCell);
+                        });
+
+                        document.body.appendChild(dragVerticalBox);
+                        e.dataTransfer.setDragImage(dragVerticalBox, 25, 15);
+                        setTimeout(() => document.body.removeChild(dragVerticalBox), 0);
+                    }
                 });
                 
                 letterTh.addEventListener('dragend', () => {
@@ -1225,7 +1655,6 @@
                 const arrowIndicator = document.createElement('div');
                 arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
                 
-                // Only grey out and deactivate the arrows when rank lock is active
                 if (isRankLocked) {
                     arrowIndicator.classList.add('is-disabled');
                 }
@@ -1236,7 +1665,6 @@
                 };
                 th.appendChild(arrowIndicator);
             } else {
-                // Ensure text rendering inputs stay default black color profiles when locked
                 th.textContent = h;
             }
             th.style.borderBottom = "1px solid var(--gray-300)";
@@ -1254,14 +1682,15 @@
         const valJoined = filterJoinedTime.value.toLowerCase().trim();
         const valStopped = filterStoppedTime.value.toLowerCase().trim();
 
-        const filteredData = masterData.filter(row => {
+        // Compute the main base records set filtering matrices
+        let filteredData = masterData.filter(row => {
             if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
             if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
             if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
             if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
             if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
             if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
-
+            
             if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
                 const totalMins = parseDurationToMinutes(row["Attended Duration"]);
                 if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
@@ -1281,10 +1710,21 @@
             return true;
         });
 
+        // Intercept and isolate spreadsheet grid view visibility maps to active duplicate groups when scan profiles run
+        if (duplicateScanModeActive && currentDuplicateGroupIndex !== -1 && duplicateGroupsCache[currentDuplicateGroupIndex]) {
+            const currentActiveGroup = duplicateGroupsCache[currentDuplicateGroupIndex];
+            filteredData = filteredData.filter(row => currentActiveGroup.includes(row));
+        }
+
         tableBody.innerHTML = '';
         filteredData.forEach((row, index) => {
             const tr = document.createElement('tr');
             const baseIndex = masterData.indexOf(row);
+            
+            // Highlight identical cloned entries in bright yellow cleanly
+            if (duplicateScanModeActive) {
+                tr.classList.add('duplicate-highlight');
+            }
             
             const indexTd = document.createElement('td');
             indexTd.textContent = index + 1;
@@ -1307,10 +1747,8 @@
                     draggedRowDataIndex = baseIndex;
                     tr.classList.add('row-dragging');
                     
-                    // Creates a clean moving duplicate clone that strips out the index number
                     if (e.dataTransfer) {
                         const dragVisualClone = tr.cloneNode(true);
-                        // Safely remove the visible number label box from the drag imagery frame
                         const targetLeadingCell = dragVisualClone.querySelector('.excel-row-header');
                         if (targetLeadingCell) targetLeadingCell.textContent = '';
                         
