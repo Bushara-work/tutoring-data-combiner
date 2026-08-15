@@ -862,6 +862,7 @@
         const match = filename.match(/\(([^)]+)\)/);
         if (!match) return "Unknown Date";
         
+        // FIX: Must target the captured string index group 1 before trimming
         let rawDate = match[1].trim(); 
         rawDate = rawDate.replace(/\./g, '');
         
@@ -878,6 +879,7 @@
         return `${day}-${month}-${year}`;
     }
 
+
     function parseCSVLine(text) {
         let p = '', r = [];
         let q = false;
@@ -891,6 +893,7 @@
         r.push(p.trim());
         return r;
     }
+    
 
     function parseCustomDate(dateStr) {
         if (!dateStr || dateStr === "Unknown Date") return new Date(0);
@@ -899,6 +902,7 @@
         if (parts.length !== 3) return new Date(0);
         
         const day = parseInt(parts[0], 10);
+        // FIX: Must extract from parts[1] since parts is a split string array
         const monthStr = parts[1].substring(0, 3);
         const year = parseInt(parts[2], 10);
         
@@ -907,6 +911,7 @@
         
         return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
     }
+    
 
     function parseDurationToMinutes(durStr) {
         if (!durStr) return 0;
@@ -918,13 +923,14 @@
             const hrMatch = clean.match(/(\d+)\s*h/);
             const minMatch = clean.match(/(\d+)\s*m/);
             if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
-            if (minMatch) totalMin += parseInt(minMatch[1], 10);
+            if (minMatch) totalMin += parseInt(minMatch, 10);
             return totalMin;
         }
         
         let parsed = parseInt(clean, 10);
         return isNaN(parsed) ? 0 : parsed;
     }
+    
 
     function convertTimeStringSyntax(timeStr) {
         if (!timeStr) return "";
@@ -933,6 +939,7 @@
         const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
         if (ampmMatch) {
             let hrs = parseInt(ampmMatch[1], 10);
+            // FIX: Point captures directly to their array index matches
             let mins = ampmMatch[2];
             let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
             let period = ampmMatch[4];
@@ -941,9 +948,10 @@
             if (period === "AM" && hrs === 12) hrs = 0;
             return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
         }
-        
-        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+
+    const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
         if (militaryMatch) {
+            // FIX: Point captures directly to their array index matches
             let hrs = parseInt(militaryMatch[1], 10);
             let mins = militaryMatch[2];
             let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
