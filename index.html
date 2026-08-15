@@ -667,7 +667,7 @@
     const csvPicker = document.getElementById('csv-picker');
     const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
-    const nextBtn = document.getElementById('next-btn');
+    const nextBtn = document.getElementById('next-btn');  
     const backBtn = document.getElementById('back-btn');
     const downloadBtn = document.getElementById('download-btn');
     const timeConvertBtn = document.getElementById('time-convert-btn');
@@ -956,6 +956,7 @@
         return timeStr; 
     }
 
+    
     nextBtn.addEventListener('click', async () => {
         if (uploadedFilesArray.length === 0) {
             alert('Please upload or drag-and-drop at least one CSV file.');
@@ -970,6 +971,7 @@
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 if (lines.length === 0) continue;
 
+                // FIX: Must target index 0 to parse only the first line row header string
                 const fileHeaders = parseCSVLine(lines[0]); 
                 const fileDate = extractDateFromFilename(file.name);
                 
@@ -1004,10 +1006,14 @@
         stage2.classList.add('active');
     });
 
+
+
+
+    
     backBtn.addEventListener('click', () => {
         stage1.classList.add('active');
         stage2.classList.remove('active');
-    });
+    });   
 
     // Integrated self-contained sub-toggle reordering indicator button switch
     toggleReorderBtn.addEventListener('click', (e) => {
