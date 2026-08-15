@@ -12,7 +12,7 @@
             --danger-hover: #b91c1c;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
+            --gray-300: #d1d5db;f
             --gray-400: #9ca3af;
             --gray-700: #374151;
             --excel-green: #107c41;
@@ -949,7 +949,7 @@
             return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
         }
 
-    const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
         if (militaryMatch) {
             // FIX: Point captures directly to their array index matches
             let hrs = parseInt(militaryMatch[1], 10);
