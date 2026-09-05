@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Attendance Merger</title>
+    <title>CSV Attendance Merger & Editor</title>
     <style>
         :root {
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --danger: #dc2626;
             --danger-hover: #b91c1c;
+            --success: #16a34a;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;f
+            --gray-300: #d1d5db;
             --gray-400: #9ca3af;
             --gray-700: #374151;
             --excel-green: #107c41;
-            --excel-green-hover: #0b5931;
+            --amber-100: #fef3c7;
             --amber-500: #f59e0b;
-            --amber-600: #d97706;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -26,587 +26,135 @@
             color: var(--gray-700);
             background-color: #fafafa;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .stage {
-            display: none;
-        }
-        .stage.active {
-            display: block;
-        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .stage { display: none; }
+        .stage.active { display: block; }
+        
+        /* Drag and Drop File Zone */
         .upload-section {
             border: 2px dashed var(--gray-300);
             padding: 3rem;
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
             background: white;
             margin-bottom: 1.5rem;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .upload-section:hover {
+        .upload-section.drag-over {
             border-color: var(--primary);
+            background-color: #eff6ff;
+            transform: scale(1.01);
         }
-        .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            max-width: 600px;
-        }
-        .file-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: white;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-        }
-        .file-name {
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-        .remove-btn {
-            background: none;
-            border: none;
-            color: var(--danger);
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.25rem;
-            padding: 0 0.5rem;
-        }
-        .remove-btn:hover {
-            color: var(--danger-hover);
-        }
-        .stage-2-header {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        .header-row-1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header-row-2 {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .vertical-button-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .sort-controls {
-            background: #ffffff;
-            border: 1px solid var(--gray-300);
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            font-size: 0.9rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .sort-controls select {
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            border: 1px solid var(--gray-300);
-            background-color: #fff;
-            color: var(--gray-700);
-            font-weight: 500;
-        }
-        .sort-controls select:disabled {
-            background-color: #e2e8f0;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
-        .switch-btn {
-            padding: 0.4rem 0.8rem;
-            background: var(--gray-100);
-            border: 1px solid var(--gray-300);
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--gray-700);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-        }
-        .switch-btn:hover:not(:disabled) {
-            background: #e5e7eb;
-        }
-        .switch-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        .btn-toggle-time {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: white;
-            border: 1px solid var(--gray-300);
-            border-radius: 4px;
-            color: var(--gray-700);
-            cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            transition: border-color 0.2s, color 0.2s;
-        }
-        .btn-toggle-time:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .filter-panel {
-            background: #ffffff;
-            border: 1px solid var(--gray-300);
-            padding: 1.25rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .filter-header-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: bold;
-            color: var(--gray-700);
-            width: 100%;
-        }
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-top: 0.75rem;
-            align-items: flex-end;
-        }
-        .filter-box {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-        .filter-box label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-        .filter-input {
-            padding: 0.45rem 0.6rem;
-            border-radius: 4px;
-            border: 1px solid var(--gray-300);
-            font-size: 0.875rem;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .filter-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .range-inputs {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .range-inputs input {
-            width: 50%;
-        }
-        .toggle-link {
-            font-size: 0.75rem;
-            color: var(--primary);
-            cursor: pointer;
-            text-decoration: underline;
-            user-select: none;
-            font-weight: normal;
-        }
-        button.btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-        .btn-secondary {
-            background: var(--gray-300);
-            color: var(--gray-700);
-        }
-        .btn-secondary:hover {
-            background: #cbd5e1;
-        }
-        .btn-success {
-            background: #16a34a;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #15803d;
-        }
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        .btn-danger:hover {
-            background: var(--danger-hover);
-        }
-        .btn-amber {
-            background: var(--amber-500);
-            color: white;
-        }
-        .btn-amber:hover {
-            background: var(--amber-600);
-        }
+
+        /* Table Styling */
         .table-container {
-            overflow-x: auto;
+            overflow: auto;
             background: white;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--gray-300);
             margin-top: 1rem;
+            max-height: 70vh;
         }
-        .lock-container {
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            padding: 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s ease;
-        }
-        .lock-container:hover {
-            transform: scale(1.2);
-        }
-        .css-lock {
-            width: 14px;
-            height: 11px;
-            background-color: #9ca3af;
-            border-radius: 3px;
-            position: relative;
-            margin-top: 6px;
-            transition: background-color 0.2s;
-        }
-        .css-lock::before {
-            content: "";
-            position: absolute;
-            border: 2px solid #9ca3af;
-            border-bottom: none;
-            border-top-left-radius: 6px;
-            border-top-right-radius: 6px;
-            width: 6px;
-            height: 7px;
-            left: 2px;
-            top: -7px;
-            transition: transform 0.2s, left 0.2s, border-color 0.2s;
-        }
-        .lock-container.is-locked .css-lock {
-            background-color: #dc2626;
-        }
-        .lock-container.is-locked .css-lock::before {
-            border-color: #dc2626;
-            transform: translate(0, 0);
-        }
-        .lock-container.is-unlocked .css-lock::before {
-            transform: translate(2px, -2px) rotate(15deg);
-        }
-        .css-arrow-icon {
-            display: inline-block;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            vertical-align: middle;
-            margin-left: 6px;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .css-arrow-icon.arrow-up {
-            border-bottom: 7px solid #2563eb;
-        }
-        .css-arrow-icon.arrow-down {
-            border-top: 7px solid #2563eb;
-        }
-        .css-arrow-icon.is-disabled { 
-            border-bottom-color: #9ca3af !important; 
-            border-top-color: #9ca3af !important; 
-            cursor: not-allowed; 
-        } 
-        .css-arrow-icon:hover:not(.is-disabled) { 
-            transform: scale(1.3); 
-        } 
-        .css-trash-icon { 
-            width: 12px; 
-            height: 14px; 
-            position: relative; 
-            border: 2px solid currentColor; 
-            border-bottom-left-radius: 2px; 
-            border-bottom-right-radius: 2px; 
-            box-sizing: border-box; 
-            display: inline-block; 
-        } 
-        .css-trash-icon::before { 
-            content: ""; 
-            position: absolute; 
-            top: -4px; 
-            left: -3px; 
-            width: 14px; 
-            height: 2px; 
-            background: currentColor; 
-        } 
-        .css-trash-icon::after { 
-            content: ""; 
-            position: absolute; 
-            top: -6px; 
-            left: 2px; 
-            width: 4px; 
-            height: 2px; 
-            border: 2px solid currentColor; 
-            border-bottom: none; 
-            border-top-left-radius: 1px; 
-            border-top-right-radius: 1px; 
-        } 
-        td input { 
-            width: 100%; 
-            border: 1px solid transparent; 
-            background: transparent; 
-            padding: 0.25rem 0; 
-            font-size: 0.875rem; 
-            color: var(--gray-700); 
-            box-sizing: border-box; 
-        } 
-        td input:focus { 
-            border-color: var(--primary); 
-            background: white; 
-            outline: none; 
-            border-radius: 4px; 
-        }
-        
-        /* Context Menus */
-        .context-menu-mask {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: transparent; z-index: 999; display: none;
-        }
-        .excel-context-menu {
-            position: fixed; background: white; border: 1px solid var(--gray-300);
-            border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            padding: 0.25rem 0; min-width: 160px; z-index: 1000; display: none;
-        }
-        .context-item {
-            display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem;
-            font-size: 0.875rem; color: var(--gray-700); cursor: pointer;
-        }
-        .context-item:hover { background: var(--gray-100); }
-        .context-item.item-danger { color: var(--danger); }
-        .context-item.item-danger:hover { background: #fef2f2; }
-        
-        /* Drag and Drop Structural Indicators */
-        .draggable-header, .draggable-row {
-            cursor: grab !important;
-        }
-        .draggable-header:active, .draggable-row:active {
-            cursor: grabbing !important;
-        }
-        .header-drag-over-left {
-            border-left: 3px dashed var(--primary) !important;
-            background-color: #eff6ff !important;
-        }
-        .header-drag-over-right {
-            border-right: 3px dashed var(--primary) !important;
-            background-color: #eff6ff !important;
-        }
-        .row-drag-over-top {
-            border-top: 3px dashed var(--primary) !important;
-            background-color: #eff6ff !important;
-        }
-        .row-drag-over-bottom {
-            border-bottom: 3px dashed var(--primary) !important;
-            background-color: #eff6ff !important;
-        }
-        .header-dragging {
-            background-color: #dbeafe !important;
-            color: #1e3a8a !important;
-        }
-        .row-dragging {
-            background-color: #dbeafe !important;
+        table { border-collapse: collapse; width: 100%; }
+        th, td {
+            border: 1px solid var(--gray-200);
+            padding: 8px;
+            font-size: 0.875rem;
+            white-space: nowrap;
         }
         .excel-row-header {
             background: var(--gray-100);
             font-weight: bold;
             text-align: center;
-            user-select: none;
-            cursor: pointer;
+            position: sticky;
+            left: 0;
+            z-index: 2;
         }
-        th.sortable {
-            position: relative;
-            padding-right: 1.5rem;
-        }
-        #master-table th, #master-table td {
-            border: 1px solid var(--gray-200);
-            padding: 0.5rem;
-            font-size: 0.875rem;
-            white-space: nowrap;
-        }
-        #master-table {
-            border-collapse: collapse;
-            width: 100%;
-        }
+
+        /* Duplicate & Approval System */
+        tr.duplicate-row td { background-color: var(--amber-100) !important; }
+        tr.approved-row td { background-color: white !important; }
         
-        /* Inner structural layouts for reordering controls */
-        .sub-toggle-pill {
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 3px;
-            margin-left: 6px;
-            transition: all 0.2s ease;
-        }
-        
-        /* Highlight rule modifier for matched duplicate entries */
-        tr.duplicate-highlight td {
-            background-color: #fef08a !important;
-        }
-        .btn-warning {
-            background-color: #f59e0b;
+        .btn-approve {
+            background: var(--success);
             color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
         }
-        .btn-warning:hover {
-            background-color: #d97706;
+        .btn-approve:hover { opacity: 0.8; }
+
+        /* Drag Ghosting Styles */
+        .ghost-container {
+            position: fixed;
+            top: -1000px;
+            background: white;
+            border: 2px solid var(--primary);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 9999;
         }
+        .ghost-first-item {
+            background: var(--primary) !important;
+            color: white !important;
+            font-weight: bold;
+            padding: 10px;
+        }
+        .ghost-rest {
+            opacity: 0.4;
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Buttons & UI */
+        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-warning { background: var(--amber-500); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
+        
+        .header-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+        .file-list { margin: 1rem 0; display: flex; flex-direction: column; gap: 5px; }
+        .file-item { display: flex; justify-content: space-between; background: white; padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 4px; }
     </style>
 </head>
 <body>
-<div class="container"> 
-    <h2>CSV Attendance Merger & Editor</h2> 
-    
-    <!-- STAGE 1: UPLOAD PHASE --> 
-    <div id="stage-1" class="stage active"> 
-        <h3>Stage 1: Upload Attendance CSV Files</h3> 
-        <div class="upload-section" onclick="document.getElementById('csv-picker').click()"> 
-            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;"> 
-            <button class="btn btn-primary">Select CSV Files</button> 
-            <p style="color: #6b7280; margin-top: 0.5rem;">Click to pick files or drag-and-drop multiple items here.</p> 
-        </div> 
-        <h4>Uploaded Files Queue</h4> 
-        <div class="file-list" id="file-queue"> 
-            <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p> 
-        </div> 
-        <div class="actions"> 
-            <button class="btn btn-primary" id="next-btn">Combine & Process Data</button> 
-        </div> 
-    </div> 
-    
-    <!-- STAGE 2: CONFIRM, EDIT & DOWNLOAD PHASE --> 
-    <div id="stage-2" class="stage"> 
-        <h3>Stage 2: Verify, Edit & Export Combined Master File</h3> 
-        <div class="stage-2-header"> 
-            <div class="header-row-1"> 
-                <button class="btn btn-secondary" id="back-btn">← Go Back / Add More Files</button> 
-                <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button> 
-            </div> 
-            <div class="header-row-2"> 
-                <div class="sort-controls"> 
-                    <div class="control-group"> 
-                        <label for="name-sort-rule"><b>Name Order:</b></label> 
-                        <select id="name-sort-rule"> 
-                            <option value="asc" selected>Alphabetical (A → Z)</option> 
-                            <option value="desc">Reverse Alphabetical (Z → A)</option> 
-                        </select> 
-                    </div> 
-                    <button id="priority-switch-btn" class="switch-btn">Name Priority First ⇄</button> 
-                    <div class="control-group"> 
-                        <label for="date-sort-rule"><b>Date Order:</b></label> 
-                        <select id="date-sort-rule"> 
-                            <option value="desc" selected>Newest → Oldest</option> 
-                            <option value="asc">Oldest → Newest</option> 
-                        </select> 
-                    </div> 
-                    <div class="control-group" style="margin-left: 12px;"> 
-                        <button id="rank-lock-btn" class="lock-container is-unlocked" title="Lock Sort Configuration Layouts">
-                            <div class="css-lock"></div>
-                        </button> 
-                    </div> 
-                </div> 
-                <div class="vertical-button-stack" style="flex-direction: row; align-items: center;"> 
-                    <button id="time-convert-btn" class="btn-toggle-time" style="margin-right: 0.5rem;">Time Format (12h ⇄ 24h)</button> 
-                    <button id="toggle-reorder-btn" class="switch-btn" style="font-weight:600; margin-right: 0.5rem;">Organize <span class="sub-toggle-pill" style="color: #94a3b8; background: transparent; cursor: not-allowed;">||</span></button> 
-                </div> 
-            </div> 
-        </div> 
-        <div class="filter-panel"> 
-            <div class="filter-header-title"> 
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #4b5563; margin-right: 4px;"> 
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon> 
-                </svg> 
-                <span>Condition Filters</span> 
-            </div> 
-            <div class="filter-grid"> 
-                <div class="filter-box"> 
-                    <label>Participant Name</label> 
-                    <input type="text" id="filter-name" class="filter-input" placeholder="Search name..."> 
-                </div> 
-                <div class="filter-box"> 
-                    <label>Meeting Code</label> 
-                    <input type="text" id="filter-code" class="filter-input" placeholder="Search code..."> 
-                </div> 
-                <div class="filter-box"> 
-                    <label>Duration Threshold (Minutes)</label> 
-                    <div class="range-inputs"> 
-                        <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min (e.g. 45)"> 
-                        <input type="number" id="filter-dur-max" class="filter-input" placeholder="Max"> 
-                    </div> 
-                </div> 
-                <div class="filter-box"> 
-                    <label> Class Date Bounds <span id="start-date-toggle" class="toggle-link">Inc</span> <span id="end-date-toggle" class="toggle-link">Inc</span> </label> 
-                    <div class="range-inputs"> 
-                        <input type="text" id="filter-date-start" class="filter-input" placeholder="Start Date"> 
-                        <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date/Now"> 
-                    </div> 
-                </div> 
-                <div class="filter-box">
-                    <label>Student Number</label>
-                    <input type="text" id="filter-sno" class="filter-input" placeholder="Search student number...">
-                </div>
-                <div class="filter-box">
-                    <label>Started At</label>
-                    <input type="text" id="filter-started-time" class="filter-input" placeholder="Search join time...">
-                </div>
-                <div class="filter-box">
-                    <label>Joined At (beta)</label>
-                    <input type="text" id="filter-joined-time" class="filter-input" placeholder="Search beta timestamp...">
-                </div>
-                <div class="filter-box">
-                    <label>Stopped At</label>
-                    <input type="text" id="filter-stopped-time" class="filter-input" placeholder="Search leave time...">
-                </div>
-                <div class="filter-box" style="display: flex; gap: 0.5rem; width: 100%;">
-                    <button class="btn btn-danger" id="reset-filters-btn" style="height: 38px; width: 50%; font-size: 0.85rem; padding: 0.5rem 0.25rem;">Reset Filters ↺</button>
-                    <button class="btn btn-warning" id="duplicate-sift-btn" style="height: 38px; width: 50%; font-size: 0.85rem; padding: 0.5rem 0.25rem; font-weight: 600;">Show Duplicates</button>
-                </div>
-            </div>
+
+<div class="container">
+    <h2>CSV Attendance Merger & Editor</h2>
+
+    <!-- STAGE 1 -->
+    <div id="stage-1" class="stage active">
+        <div class="upload-section" id="drop-zone">
+            <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
+            <p><strong>Drag & Drop CSV files here</strong> or click to select</p>
+            <button class="btn btn-primary" onclick="document.getElementById('csv-picker').click()">Select Files</button>
+        </div>
+        <div class="file-list" id="file-queue"></div>
+        <button class="btn btn-success" id="process-btn">Combine & Process Data</button>
+    </div>
+
+    <!-- STAGE 2 -->
+    <div id="stage-2" class="stage">
+        <div class="header-controls">
+            <button class="btn btn-secondary" id="back-btn">← Back</button>
+            <button class="btn btn-warning" id="scan-duplicates-btn">Find Duplicates</button>
+            <button class="btn btn-secondary" id="reset-scan-btn">Reset Scan & Approvals ↺</button>
+            <button class="btn btn-primary" id="toggle-reorder-btn">Organize (Drag Rows/Cols)</button>
+            <button class="btn btn-success" id="download-btn">Export CSV</button>
         </div>
 
-        <div class="table-container" style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--gray-300); margin-top: 1rem;">
+        <div class="table-container">
             <table id="master-table">
                 <thead>
-                    <tr id="table-header-letters"></tr>
-                    <tr id="table-headers"></tr>
+                    <tr id="header-letters"></tr>
+                    <tr id="header-names"></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -614,1244 +162,288 @@
     </div>
 </div>
 
-<div id="context-mask" class="context-menu-mask"></div>
-<div id="column-context-menu" class="excel-context-menu">
-    <div class="context-item" id="ctx-insert-col-left">
-        <span style="font-weight: bold; color: var(--primary);">+</span>
-        <span>Insert Column Left</span>
-    </div>
-    <div class="context-item item-danger" id="ctx-delete-col">
-        <div class="css-trash-icon"></div>
-        <span>Delete Column</span>
-    </div>
-</div>
-<div id="row-context-menu" class="excel-context-menu">
-    <div class="context-item" id="ctx-insert-row-above">
-        <span style="font-weight: bold; color: var(--primary);">+</span>
-        <span>Insert Row Above</span>
-    </div>
-    <div class="context-item item-danger" id="ctx-delete-row">
-        <div class="css-trash-icon"></div>
-        <span>Delete Row</span>
-    </div>
-</div>
-
 <script>
-    let MASTER_HEADERS = [
-        "SNo", "Participant Name", "Attendance Started at", 
-        "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"
-    ];
-    const SYSTEM_PROTECTED_HEADERS = [...MASTER_HEADERS];
-    
-    let uploadedFilesArray = [];
+    // Configuration & State
+    let MASTER_HEADERS = ["SNo", "Participant Name", "Attendance Started at", "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"];
     let masterData = [];
-    let isRankLocked = false; 
-    let isNamePriorityPrimary = true;
-    let isStartDateInclusive = true;
-    let isEndDateInclusive = true;
-    
-    let currentActiveTimeMode = "12h";
+    let uploadedFiles = [];
+    let isReorderMode = false;
+    let duplicateGroups = [];
+    let currentGroupIndex = -1;
 
-    let isDragReorderModeActive = false;
-    let currentDragOrientation = "vertical"; 
-    let draggedColumnHeaderIndex = null;
-    let draggedRowDataIndex = null;
-    let activeContextColumnHeaderKey = null;
-    let activeContextRowDataIndex = null;
-
-    // Cache management variables for processing identical rows sequentially
-    let duplicateGroupsCache = [];
-    let currentDuplicateGroupIndex = -1;
-    let duplicateScanModeActive = false;
-
+    // Elements
+    const dropZone = document.getElementById('drop-zone');
     const csvPicker = document.getElementById('csv-picker');
-    const uploadSection = document.querySelector('.upload-section');
     const fileQueue = document.getElementById('file-queue');
-    const nextBtn = document.getElementById('next-btn');  
-    const backBtn = document.getElementById('back-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const timeConvertBtn = document.getElementById('time-convert-btn');
-    const resetFiltersBtn = document.getElementById('reset-filters-btn');
-    const toggleReorderBtn = document.getElementById('toggle-reorder-btn');
-    const duplicateSiftBtn = document.getElementById('duplicate-sift-btn');
-    
-    const nameSortRule = document.getElementById('name-sort-rule');
-    const dateSortRule = document.getElementById('date-sort-rule');
-    const prioritySwitchBtn = document.getElementById('priority-switch-btn');
-    const rankLockBtn = document.getElementById('rank-lock-btn');
-    
-    const filterName = document.getElementById('filter-name');
-    const filterCode = document.getElementById('filter-code');
-    const filterDurMin = document.getElementById('filter-dur-min');
-    const filterDurMax = document.getElementById('filter-dur-max');
-    const filterDateStart = document.getElementById('filter-date-start');
-    const filterDateEnd = document.getElementById('filter-date-end');
-    const startDateToggle = document.getElementById('start-date-toggle');
-    const endDateToggle = document.getElementById('end-date-toggle');
-    
-    const filterSno = document.getElementById('filter-sno');
-    const filterStartedTime = document.getElementById('filter-started-time');
-    const filterJoinedTime = document.getElementById('filter-joined-time');
-    const filterStoppedTime = document.getElementById('filter-stopped-time');
-    
     const stage1 = document.getElementById('stage-1');
     const stage2 = document.getElementById('stage-2');
-    
-    const tableHeaders = document.getElementById('table-headers');
-    const tableHeaderLetters = document.getElementById('table-header-letters');
-    const tableBody = document.getElementById('table-body');
-    
-    const contextMask = document.getElementById('context-mask');
-    const columnContextMenu = document.getElementById('column-context-menu');
-    const rowContextMenu = document.getElementById('row-context-menu');
 
-    // Rank Locking Interactions
-    rankLockBtn.addEventListener('click', () => {
-        isRankLocked = !isRankLocked;
-        if (isRankLocked) {
-            rankLockBtn.classList.remove('is-unlocked');
-            rankLockBtn.classList.add('is-locked');
-            nameSortRule.disabled = true;
-            dateSortRule.disabled = true;
-            prioritySwitchBtn.disabled = true;
-        } else {
-            rankLockBtn.classList.remove('is-locked');
-            rankLockBtn.classList.add('is-unlocked');
-            nameSortRule.disabled = false;
-            dateSortRule.disabled = false;
-            prioritySwitchBtn.disabled = false;
-        }
-        renderMasterTableUI();
+    // --- FILE HANDLING ---
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); });
     });
 
-    prioritySwitchBtn.addEventListener('click', () => {
-        if (isRankLocked) return;
-        isNamePriorityPrimary = !isNamePriorityPrimary;
-        prioritySwitchBtn.textContent = isNamePriorityPrimary ? "Name Priority First ⇄" : "Date Priority First ⇄";
-        sortMasterData();
-        renderMasterTableUI();
+    dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', (e) => {
+        dropZone.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
     });
 
-    nameSortRule.addEventListener('change', () => { if(!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
-    dateSortRule.addEventListener('change', () => { if(!isRankLocked) { sortMasterData(); renderMasterTableUI(); } });
+    csvPicker.addEventListener('change', (e) => handleFiles(e.target.files));
 
-    // Core Duplicate Scanner & Sequential Resolver Engine Logic
-    duplicateSiftBtn.addEventListener('click', () => {
-        // If we are already in an active split process, click advances to the next group or resets
-        if (duplicateScanModeActive) {
-            currentDuplicateGroupIndex++;
-            if (currentDuplicateGroupIndex >= duplicateGroupsCache.length) {
-                // Sift phase completed successfully, perform fresh lookahead check re-evaluation
-                findAndCacheDuplicateSets(true); 
-            } else {
-                renderMasterTableUI();
-            }
-            return;
-        }
-        
-        // Initial button trigger execution pass
-        findAndCacheDuplicateSets(false);
-    });
-
-    function findAndCacheDuplicateSets(isReevaluationPass) {
-        const fingerPrintMap = {};
-        
-        // Compute exact string copies by serializing base values across active system keys
-        masterData.forEach(row => {
-            const fingerprintToken = MASTER_HEADERS.map(h => String(row[h] || '').trim()).join('|||');
-            if (!fingerPrintMap[fingerprintToken]) {
-                fingerPrintMap[fingerprintToken] = [];
-            }
-            fingerPrintMap[fingerprintToken].push(row);
-        });
-
-        // Filter keys where more than one precise structural data clone exists
-        duplicateGroupsCache = Object.values(fingerPrintMap).filter(group => group.length > 1);
-
-        if (duplicateGroupsCache.length === 0) {
-            alert("There is no duplicated data.");
-            duplicateScanModeActive = false;
-            currentDuplicateGroupIndex = -1;
-            duplicateSiftBtn.textContent = "Show Duplicates";
-            duplicateSiftBtn.style.backgroundColor = "#f59e0b";
-            renderMasterTableUI();
-            return;
-        }
-
-        duplicateScanModeActive = true;
-        currentDuplicateGroupIndex = 0;
-        
-        // Render updated state buttons with loop indicator controls
-        duplicateSiftBtn.textContent = `Next Group (${currentDuplicateGroupIndex + 1}/${duplicateGroupsCache.length}) ↻`;
-        duplicateSiftBtn.style.backgroundColor = "#ea580c"; // Turns to a deeper orange alert color scheme
-        renderMasterTableUI();
-    }
-
-    function handleFileSelection(files) {
-        if (!files) return;
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.name.toLowerCase().endsWith('.csv')) {
-                if (!uploadedFilesArray.some(f => f.name === file.name)) {
-                    uploadedFilesArray.push(file);
+    function handleFiles(files) {
+        for (let file of files) {
+            if (file.name.endsWith('.csv')) {
+                if (!uploadedFiles.find(f => f.name === file.name)) {
+                    uploadedFiles.push(file);
                 }
             }
         }
-        renderQueueUI();
+        renderFileList();
     }
 
-    csvPicker.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files);
-        csvPicker.value = ""; 
-    });
+    function renderFileList() {
+        fileQueue.innerHTML = uploadedFiles.map((f, i) => `
+            <div class="file-item">
+                <span>${f.name}</span>
+                <button class="btn-danger" style="padding:2px 8px" onclick="removeFile(${i})">×</button>
+            </div>
+        `).join('');
+    }
 
-    uploadSection.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--primary)';
-        uploadSection.style.background = '#eff6ff'; 
-    });
+    function removeFile(index) {
+        uploadedFiles.splice(index, 1);
+        renderFileList();
+    }
 
-    uploadSection.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-    });
+    // --- PROCESSING ---
 
-    uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadSection.style.borderColor = 'var(--gray-300)';
-        uploadSection.style.background = 'white';
-        if (e.dataTransfer && e.dataTransfer.files) {
-            handleFileSelection(e.dataTransfer.files);
-        }
-    });
-
-    function renderQueueUI() {
-        fileQueue.innerHTML = '';
-        if (uploadedFilesArray.length === 0) {
-            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
-            return;
-        }
-        uploadedFilesArray.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
+    document.getElementById('process-btn').addEventListener('click', async () => {
+        if (uploadedFiles.length === 0) return alert("Select files first");
+        masterData = [];
+        
+        for (let file of uploadedFiles) {
+            const text = await file.text();
+            const rows = text.split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, '')));
+            const headers = rows[0].map(h => h.toLowerCase());
             
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'file-name';
-            nameSpan.textContent = file.name;
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = (e) => {
-                e.stopPropagation(); 
-                uploadedFilesArray.splice(index, 1);
-                renderQueueUI();
-            };
-            
-            fileItem.appendChild(nameSpan);
-            fileItem.appendChild(removeBtn);
-            fileQueue.appendChild(fileItem);
-        });
-    }
-
-    function extractDateFromFilename(filename) {
-        const match = filename.match(/\(([^)]+)\)/);
-        if (!match) return "Unknown Date";
-        
-        // FIX: Must target the captured string index group 1 before trimming
-        let rawDate = match[1].trim(); 
-        rawDate = rawDate.replace(/\./g, '');
-        
-        const parts = rawDate.split('-');
-        if (parts.length !== 3) return rawDate; 
-        
-        let day = parts[0].trim();
-        let month = parts[1].trim();
-        let year = parts[2].trim();
-        
-        month = month.substring(0, 3);
-        month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-
-        return `${day}-${month}-${year}`;
-    }
-
-
-    function parseCSVLine(text) {
-        let p = '', r = [];
-        let q = false;
-        const cleanText = text.replace(/\r$/, '');
-        for (let i = 0; i < cleanText.length; i++) {
-            let c = cleanText[i];
-            if (c === '"') { q = !q; }
-            else if (c === ',' && !q) { r.push(p.trim()); p = ''; }
-            else { p += c; }
-        }
-        r.push(p.trim());
-        return r;
-    }
-    
-
-    function parseCustomDate(dateStr) {
-        if (!dateStr || dateStr === "Unknown Date") return new Date(0);
-        let cleanStr = dateStr.replace(/\./g, '').toLowerCase();
-        const parts = cleanStr.split('-');
-        if (parts.length !== 3) return new Date(0);
-        
-        const day = parseInt(parts[0], 10);
-        // FIX: Must extract from parts[1] since parts is a split string array
-        const monthStr = parts[1].substring(0, 3);
-        const year = parseInt(parts[2], 10);
-        
-        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        const monthIndex = months.indexOf(monthStr);
-        
-        return monthIndex !== -1 ? new Date(year, monthIndex, day) : new Date(0);
-    }
-    
-
-    function parseDurationToMinutes(durStr) {
-        if (!durStr) return 0;
-        let clean = durStr.toLowerCase().replace(/[^0-9\shm]/g, '').trim();
-        if (!clean) return 0;
-        
-        if (clean.includes('h') || clean.includes('m')) {
-            let totalMin = 0;
-            const hrMatch = clean.match(/(\d+)\s*h/);
-            const minMatch = clean.match(/(\d+)\s*m/);
-            if (hrMatch) totalMin += parseInt(hrMatch[1], 10) * 60;
-            if (minMatch) totalMin += parseInt(minMatch, 10);
-            return totalMin;
-        }
-        
-        let parsed = parseInt(clean, 10);
-        return isNaN(parsed) ? 0 : parsed;
-    }
-    
-
-    function convertTimeStringSyntax(timeStr) {
-        if (!timeStr) return "";
-        let clean = timeStr.trim().toUpperCase();
-        
-        const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/);
-        if (ampmMatch) {
-            let hrs = parseInt(ampmMatch[1], 10);
-            // FIX: Point captures directly to their array index matches
-            let mins = ampmMatch[2];
-            let secs = ampmMatch[3] ? `:${ampmMatch[3]}` : "";
-            let period = ampmMatch[4];
-            
-            if (period === "PM" && hrs < 12) hrs += 12;
-            if (period === "AM" && hrs === 12) hrs = 0;
-            return `${String(hrs).padStart(2, '0')}:${mins}${secs}`;
-        }
-
-        const militaryMatch = clean.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
-        if (militaryMatch) {
-            // FIX: Point captures directly to their array index matches
-            let hrs = parseInt(militaryMatch[1], 10);
-            let mins = militaryMatch[2];
-            let secs = militaryMatch[3] ? `:${militaryMatch[3]}` : "";
-            let period = "AM";
-            
-            if (hrs >= 12) { period = "PM"; if (hrs > 12) hrs -= 12; }
-            if (hrs === 0) hrs = 12;
-            return `${hrs}:${mins}${secs} ${period}`;
-        }
-        return timeStr; 
-    }
-
-    
-        nextBtn.addEventListener('click', async () => {
-        if (uploadedFilesArray.length === 0) {
-            alert('Please upload or drag-and-drop at least one CSV file.');
-            return;
-        }
-
-        masterData = []; 
-
-        for (let file of uploadedFilesArray) {
-            try {
-                const text = await file.text();
-                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                if (lines.length === 0) continue;
-
-                // FIX: Must target index 0 to parse only the first line row header string
-                const fileHeaders = parseCSVLine(lines[0]); 
-                const fileDate = extractDateFromFilename(file.name);
-                
-                const indexMap = {};
-                MASTER_HEADERS.forEach(header => {
-                    indexMap[header] = fileHeaders.findIndex(fh => fh.toLowerCase() === header.toLowerCase());
+            // Basic mapping
+            for (let i = 1; i < rows.length; i++) {
+                if (rows[i].length < 2) continue;
+                let obj = { _approved: false, _isDuplicate: false };
+                MASTER_HEADERS.forEach(h => {
+                    const idx = headers.indexOf(h.toLowerCase());
+                    obj[h] = idx > -1 ? rows[i][idx] : (h === "Class Date" ? file.name.match(/\(([^)]+)\)/)?.[1] || "Unknown" : "");
                 });
-
-                for (let i = 1; i < lines.length; i++) {
-                    const rowValues = parseCSVLine(lines[i]);
-                    if (rowValues.length === 0 || rowValues.every(val => val === '')) continue;
-
-                    let structuredObj = {};
-                    MASTER_HEADERS.forEach(header => {
-                        if (header === "Class Date") {
-                            structuredObj[header] = fileDate;
-                        } else {
-                            const mappedIdx = indexMap[header];
-                            structuredObj[header] = (mappedIdx !== -1 && mappedIdx < rowValues.length) ? rowValues[mappedIdx] : '';
-                        }
-                    });
-                    masterData.push(structuredObj);
-                }
-            } catch (err) {
-                console.error("Error reading file: " + file.name, err);
+                masterData.push(obj);
             }
         }
-
-        sortMasterData();
-        renderMasterTableUI();
+        
+        renderTable();
         stage1.classList.remove('active');
         stage2.classList.add('active');
     });
 
+    // --- DUPLICATE LOGIC ---
 
-
-
-    
-    backBtn.addEventListener('click', () => {
-        stage1.classList.add('active');
-        stage2.classList.remove('active');
-    });   
-
-    // Integrated self-contained sub-toggle reordering indicator button switch
-    toggleReorderBtn.addEventListener('click', (e) => {
-        if (e.target.classList.contains('sub-toggle-pill')) {
-            if (!isDragReorderModeActive) return; // Prevent action clicks while button disabled state runs
-            currentDragOrientation = (currentDragOrientation === "vertical") ? "horizontal" : "vertical";
-            updateReorderButtonText();
-            renderMasterTableUI();
-            return;
-        }
-        
-        isDragReorderModeActive = !isDragReorderModeActive;
-        updateReorderButtonText();
-        renderMasterTableUI();
+    document.getElementById('scan-duplicates-btn').addEventListener('click', () => {
+        findDuplicates();
+        if (duplicateGroups.length === 0) alert("No identical rows found!");
+        renderTable();
     });
 
-    function updateReorderButtonText() {
-        if (!isDragReorderModeActive) {
-            const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
-            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #94a3b8; background: transparent; cursor: not-allowed; padding: 0 4px; margin-left: 6px;">${visualGlyph}</span>`;
-        } else {
-            const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
-            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #000000; background: #e5e7eb; cursor: pointer; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">${visualGlyph}</span>`;
-        }
-    }
-
-    function closeAllContextMenus() {
-        columnContextMenu.style.display = "none";
-        rowContextMenu.style.display = "none";
-        contextMask.style.display = "none";
-    }
-    contextMask.addEventListener('click', closeAllContextMenus);
-
-    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (!activeContextColumnHeaderKey) return; 
-        const newColName = prompt("Enter a unique name for your new custom column:");
-        if (!newColName) return;
-        const cleanCol = newColName.trim();
-        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
-        
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 0, cleanCol);
-            masterData.forEach(row => { row[cleanCol] = ""; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (!activeContextColumnHeaderKey) return; 
-        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
-            alert("Protected base headers cannot be deleted.");
-            return;
-        }
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 1);
-            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        let blankRow = {};
-        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
-        masterData.splice(activeContextRowDataIndex, 0, blankRow);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-row').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        masterData.splice(activeContextRowDataIndex, 1);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
-        input.addEventListener('input', () => { renderMasterTableUI(); });
-    });
-
-    startDateToggle.addEventListener('click', () => {
-        isStartDateInclusive = !isStartDateInclusive;
-        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-    endDateToggle.addEventListener('click', () => {
-        isEndDateInclusive = !isEndDateInclusive;
-        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
-        isStartDateInclusive = true;
-        isEndDateInclusive = true;
-        startDateToggle.textContent = "Inc";
-        endDateToggle.textContent = "Inc";
-        
-        // Wipe duplicate filtering caches completely on reset parameters invocation commands
-        duplicateScanModeActive = false;
-        currentDuplicateGroupIndex = -1;
-        duplicateGroupsCache = [];
-        duplicateSiftBtn.textContent = "Show Duplicates";
-        duplicateSiftBtn.style.backgroundColor = "#f59e0b";
-        
-        renderMasterTableUI();
-    });
-
-    timeConvertBtn.addEventListener('click', () => {
-        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
+    document.getElementById('reset-scan-btn').addEventListener('click', () => {
         masterData.forEach(row => {
-            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
-                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
+            row._approved = false;
+            row._isDuplicate = false;
+        });
+        duplicateGroups = [];
+        renderTable();
+    });
+
+    function findDuplicates() {
+        const counts = {};
+        // Reset state
+        masterData.forEach(r => r._isDuplicate = false);
+        
+        masterData.forEach((row, idx) => {
+            const key = MASTER_HEADERS.map(h => row[h]).join('|');
+            if (!counts[key]) counts[key] = [];
+            counts[key].push(idx);
+        });
+
+        duplicateGroups = Object.values(counts).filter(group => group.length > 1);
+        duplicateGroups.forEach(group => {
+            group.forEach(dataIndex => {
+                masterData[dataIndex]._isDuplicate = true;
             });
         });
-        renderMasterTableUI(); 
-    });
+    }
 
-    function sortMasterData() {
-        if (isRankLocked) return;
+    function approveRow(index) {
+        masterData[index]._approved = true;
+        renderTable();
+    }
 
-        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
-        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
+    // --- TABLE RENDERING & DRAG/DROP ---
 
-        function checkNameLayer(a, b) {
-            const nameA = (a["Participant Name"] || "").toLowerCase();
-            const nameB = (b["Participant Name"] || "").toLowerCase();
-            return nameA.localeCompare(nameB) * nameDirection;
-        }
+    function renderTable() {
+        const hLetters = document.getElementById('header-letters');
+        const hNames = document.getElementById('header-names');
+        const tbody = document.getElementById('table-body');
 
-        function checkDateLayer(a, b) {
-            const dateA = parseCustomDate(a["Class Date"]);
-            const dateB = parseCustomDate(b["Class Date"]);
-            return (dateA - dateB) * dateDirection;
-        }
+        hLetters.innerHTML = '<th class="excel-row-header">#</th>';
+        hNames.innerHTML = '<th class="excel-row-header">Actions</th>';
 
-        masterData.sort((a, b) => {
-            if (isNamePriorityPrimary) {
-                const res = checkNameLayer(a, b);
-                if (res !== 0) return res;
-                return checkDateLayer(a, b);
-            } else {
-                const res = checkDateLayer(a, b);
-                if (res !== 0) return res;
-                return checkNameLayer(a, b);
+        MASTER_HEADERS.forEach((h, i) => {
+            const letter = String.fromCharCode(65 + (i % 26));
+            const thL = document.createElement('th');
+            thL.textContent = letter;
+            thL.className = 'excel-row-header';
+            if (isReorderMode) {
+                thL.draggable = true;
+                thL.style.cursor = 'grab';
+                thL.addEventListener('dragstart', (e) => handleColDrag(e, i));
             }
-        });
-    }
+            hLetters.appendChild(thL);
 
-    function flipDirectionOnly(columnKey) {
-        if (isRankLocked) return;
-        
-        if (columnKey === "Participant Name") {
-            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date") {
-            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function setPrimaryRankFromHeaderClick(columnKey) {
-        if (isDragReorderModeActive || isRankLocked) return;
-        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
-            isNamePriorityPrimary = true;
-            prioritySwitchBtn.textContent = "Name Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
-            isNamePriorityPrimary = false;
-            prioritySwitchBtn.textContent = "Date Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function getExcelColumnLetterLabel(index) {
-        let label = '';
-        while (index >= 0) {
-            label = String.fromCharCode((index % 26) + 65) + label;
-            index = Math.floor(index / 26) - 1;
-        }
-        return label;
-    }
-
-    function renderMasterTableUI() {
-        tableHeaders.innerHTML = '';
-        tableHeaderLetters.innerHTML = '';
-        tableBody.innerHTML = '';
-
-        const emptyTh = document.createElement('th');
-        emptyTh.style.width = "50px";
-        tableHeaderLetters.appendChild(emptyTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const letterTh = document.createElement('th');
-            letterTh.textContent = getExcelColumnLetterLabel(index);
-            letterTh.className = "excel-row-header";
-            
-            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
-                letterTh.className = "excel-row-header draggable-header";
-                letterTh.setAttribute('draggable', 'true');
-                
-                letterTh.addEventListener('dragstart', (e) => { 
-                    draggedColumnHeaderIndex = index; 
-                    letterTh.classList.add('header-dragging');
-                    
-                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`)).forEach(cell => {
-                        cell.classList.add('header-dragging');
-                    });
-
-                    // Build full vertical table column preview slice instead of standard letter container
-                    if (e.dataTransfer) {
-                        const dragVerticalBox = document.createElement('div');
-                        dragVerticalBox.style.position = "absolute";
-                        dragVerticalBox.style.top = "-9999px";
-                        dragVerticalBox.style.display = "flex";
-                        dragVerticalBox.style.flexDirection = "column";
-                        dragVerticalBox.style.background = "#ffffff";
-                        dragVerticalBox.style.border = "1px solid var(--primary)";
-                        dragVerticalBox.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
-
-                        const letterClone = letterTh.cloneNode(true);
-                        letterClone.style.padding = "0.5rem";
-                        letterClone.style.background = "#cbd5e1";
-                        dragVerticalBox.appendChild(letterClone);
-
-                        const mainHeaderNode = document.querySelector(`#table-headers th:nth-child(${index + 2})`);
-                        if (mainHeaderNode) {
-                            const headerClone = mainHeaderNode.cloneNode(true);
-                            headerClone.style.padding = "0.5rem";
-                            dragVerticalBox.appendChild(headerClone);
-                        }
-
-                        Array.from(document.querySelectorAll(`#table-body tr td:nth-child(${index + 2}) input`)).forEach(inputNode => {
-                            const dummyCell = document.createElement('div');
-                            dummyCell.style.padding = "0.5rem";
-                            dummyCell.style.borderTop = "1px solid var(--gray-200)";
-                            dummyCell.style.fontSize = "0.875rem";
-                            dummyCell.style.whiteSpace = "nowrap";
-                            dummyCell.textContent = inputNode.value;
-                            dragVerticalBox.appendChild(dummyCell);
-                        });
-
-                        document.body.appendChild(dragVerticalBox);
-                        e.dataTransfer.setDragImage(dragVerticalBox, 25, 15);
-                        setTimeout(() => document.body.removeChild(dragVerticalBox), 0);
-                    }
-                });
-                
-                letterTh.addEventListener('dragend', () => {
-                    letterTh.classList.remove('header-dragging');
-                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
-                        cell.classList.remove('header-dragging', 'header-drag-over-left', 'header-drag-over-right');
-                    });
-                    renderMasterTableUI();
-                });
-                
-                letterTh.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    const rect = letterTh.getBoundingClientRect();
-                    const midpoint = rect.left + rect.width / 2;
-                    
-                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
-                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
-                    });
-
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => {
-                        if (e.clientX < midpoint) {
-                            cell.classList.add('header-drag-over-left');
-                        } else {
-                            cell.classList.add('header-drag-over-right');
-                        }
-                    });
-                });
-                
-                letterTh.addEventListener('dragleave', () => {
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
-                });
-                
-                letterTh.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
-                        renderMasterTableUI();
-                    }
-                });
-            }
-            
-            letterTh.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                activeContextColumnHeaderKey = h;
-                columnContextMenu.style.left = `${e.clientX}px`;
-                columnContextMenu.style.top = `${e.clientY}px`;
-                columnContextMenu.style.display = "block";
-                contextMask.style.display = "block";
-            });
-            tableHeaderLetters.appendChild(letterTh);
+            const thN = document.createElement('th');
+            thN.textContent = h;
+            hNames.appendChild(thN);
         });
 
-        const cornerTh = document.createElement('th');
-        cornerTh.className = "excel-row-header";
-        tableHeaders.appendChild(cornerTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const th = document.createElement('th');
-            th.style.verticalAlign = "middle";
-
-            if (h === "Participant Name" || h === "Class Date") {
-                if (!isDragReorderModeActive) th.className = "sortable";
-                
-                const textSpan = document.createElement('span');
-                textSpan.style.cursor = "pointer";
-                textSpan.style.fontSize = "1rem";
-                
-                if (!isDragReorderModeActive) {
-                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
-                    const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
-            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #94a3b8; background: transparent; font-weight: bold; cursor: not-allowed; padding: 0 4px; margin-left: 6px;">${visualGlyph}</span>`;
-        } else {
-            const visualGlyph = (currentDragOrientation === "vertical") ? "||" : "═";
-            toggleReorderBtn.innerHTML = `Organize <span class="sub-toggle-pill" style="color: #000000; background: #e5e7eb; font-weight: bold; cursor: pointer; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">${visualGlyph}</span>`;
-        }
-    }
-
-    function closeAllContextMenus() {
-        columnContextMenu.style.display = "none";
-        rowContextMenu.style.display = "none";
-        contextMask.style.display = "none";
-    }
-    contextMask.addEventListener('click', closeAllContextMenus);
-
-    document.getElementById('ctx-insert-col-left').addEventListener('click', () => {
-        if (!activeContextColumnHeaderKey) return; 
-        const newColName = prompt("Enter a unique name for your new custom column:");
-        if (!newColName) return;
-        const cleanCol = newColName.trim();
-        if (cleanCol === "" || MASTER_HEADERS.includes(cleanCol)) { alert("Duplicate column name."); return; }
-        
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 0, cleanCol);
-            masterData.forEach(row => { row[cleanCol] = ""; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-col').addEventListener('click', () => {
-        if (!activeContextColumnHeaderKey) return; 
-        if (SYSTEM_PROTECTED_HEADERS.includes(activeContextColumnHeaderKey)) {
-            alert("Protected base headers cannot be deleted.");
-            return;
-        }
-        const idx = MASTER_HEADERS.indexOf(activeContextColumnHeaderKey);
-        if (idx !== -1) {
-            MASTER_HEADERS.splice(idx, 1);
-            masterData.forEach(row => { delete row[activeContextColumnHeaderKey]; });
-        }
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-insert-row-above').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        let blankRow = {};
-        MASTER_HEADERS.forEach(h => { blankRow[h] = ""; });
-        masterData.splice(activeContextRowDataIndex, 0, blankRow);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    document.getElementById('ctx-delete-row').addEventListener('click', () => {
-        if (activeContextRowDataIndex === null) return;
-        masterData.splice(activeContextRowDataIndex, 1);
-        closeAllContextMenus();
-        renderMasterTableUI();
-    });
-
-    [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(input => {
-        input.addEventListener('input', () => { renderMasterTableUI(); });
-    });
-
-    startDateToggle.addEventListener('click', () => {
-        isStartDateInclusive = !isStartDateInclusive;
-        startDateToggle.textContent = isStartDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-    endDateToggle.addEventListener('click', () => {
-        isEndDateInclusive = !isEndDateInclusive;
-        endDateToggle.textContent = isEndDateInclusive ? "Inc" : "Exc";
-        renderMasterTableUI();
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        [filterName, filterCode, filterDurMin, filterDurMax, filterDateStart, filterDateEnd, filterSno, filterStartedTime, filterJoinedTime, filterStoppedTime].forEach(f => f.value = "");
-        isStartDateInclusive = true;
-        isEndDateInclusive = true;
-        startDateToggle.textContent = "Inc";
-        endDateToggle.textContent = "Inc";
-        
-        duplicateScanModeActive = false;
-        currentDuplicateGroupIndex = -1;
-        duplicateGroupsCache = [];
-        duplicateSiftBtn.textContent = "Show Duplicates";
-        duplicateSiftBtn.style.backgroundColor = "#f59e0b";
-        
-        renderMasterTableUI();
-    });
-
-    timeConvertBtn.addEventListener('click', () => {
-        currentActiveTimeMode = (currentActiveTimeMode === "12h") ? "24h" : "12h";
-        masterData.forEach(row => {
-            ["Attendance Started at", "Joined at(beta)", "Attendance Stopped at"].forEach(header => {
-                if (row[header]) row[header] = convertTimeStringSyntax(row[header]);
-            });
-        });
-        renderMasterTableUI(); 
-    });
-
-    function sortMasterData() {
-        if (isRankLocked) return;
-
-        const nameDirection = nameSortRule.value === 'asc' ? 1 : -1;
-        const dateDirection = dateSortRule.value === 'asc' ? 1 : -1;
-
-        function checkNameLayer(a, b) {
-            const nameA = (a["Participant Name"] || "").toLowerCase();
-            const nameB = (b["Participant Name"] || "").toLowerCase();
-            return nameA.localeCompare(nameB) * nameDirection;
-        }
-
-        function checkDateLayer(a, b) {
-            const dateA = parseCustomDate(a["Class Date"]);
-            const dateB = parseCustomDate(b["Class Date"]);
-            return (dateA - dateB) * dateDirection;
-        }
-
-        masterData.sort((a, b) => {
-            if (isNamePriorityPrimary) {
-                const res = checkNameLayer(a, b);
-                if (res !== 0) return res;
-                return checkDateLayer(a, b);
-            } else {
-                const res = checkDateLayer(a, b);
-                if (res !== 0) return res;
-                return checkNameLayer(a, b);
-            }
-        });
-    }
-
-    function flipDirectionOnly(columnKey) {
-        if (isRankLocked) return;
-        
-        if (columnKey === "Participant Name") {
-            nameSortRule.value = (nameSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date") {
-            dateSortRule.value = (dateSortRule.value === 'asc') ? 'desc' : 'asc';
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function setPrimaryRankFromHeaderClick(columnKey) {
-        if (isDragReorderModeActive || isRankLocked) return;
-        if (columnKey === "Participant Name" && !isNamePriorityPrimary) {
-            isNamePriorityPrimary = true;
-            prioritySwitchBtn.textContent = "Name Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        } else if (columnKey === "Class Date" && isNamePriorityPrimary) {
-            isNamePriorityPrimary = false;
-            prioritySwitchBtn.textContent = "Date Priority First ⇄";
-            sortMasterData();
-            renderMasterTableUI();
-        }
-    }
-
-    function getExcelColumnLetterLabel(index) {
-        let label = '';
-        while (index >= 0) {
-            label = String.fromCharCode((index % 26) + 65) + label;
-            index = Math.floor(index / 26) - 1;
-        }
-        return label;
-    }
-
-    function renderMasterTableUI() {
-        tableHeaders.innerHTML = '';
-        tableHeaderLetters.innerHTML = '';
-        tableBody.innerHTML = '';
-
-        const emptyTh = document.createElement('th');
-        emptyTh.style.width = "50px";
-        tableHeaderLetters.appendChild(emptyTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const letterTh = document.createElement('th');
-            letterTh.textContent = getExcelColumnLetterLabel(index);
-            letterTh.className = "excel-row-header";
-            
-            if (isDragReorderModeActive && currentDragOrientation === "vertical") {
-                letterTh.className = "excel-row-header draggable-header";
-                letterTh.setAttribute('draggable', 'true');
-                
-                letterTh.addEventListener('dragstart', (e) => { 
-                    draggedColumnHeaderIndex = index; 
-                    letterTh.classList.add('header-dragging');
-                    
-                    Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`)).forEach(cell => {
-                        cell.classList.add('header-dragging');
-                    });
-
-                    if (e.dataTransfer) {
-                        const dragVerticalBox = document.createElement('div');
-                        dragVerticalBox.style.position = "absolute";
-                        dragVerticalBox.style.top = "-9999px";
-                        dragVerticalBox.style.display = "flex";
-                        dragVerticalBox.style.flexDirection = "column";
-                        dragVerticalBox.style.background = "#ffffff";
-                        dragVerticalBox.style.border = "1px solid var(--primary)";
-                        dragVerticalBox.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
-
-                        const letterClone = letterTh.cloneNode(true);
-                        letterClone.style.padding = "0.5rem";
-                        letterClone.style.background = "#cbd5e1";
-                        dragVerticalBox.appendChild(letterClone);
-
-                        const mainHeaderNode = document.querySelector(`#table-headers th:nth-child(${index + 2})`);
-                        if (mainHeaderNode) {
-                            const headerClone = mainHeaderNode.cloneNode(true);
-                            headerClone.style.padding = "0.5rem";
-                            dragVerticalBox.appendChild(headerClone);
-                        }
-
-                        Array.from(document.querySelectorAll(`#table-body tr td:nth-child(${index + 2}) input`)).forEach(inputNode => {
-                            const dummyCell = document.createElement('div');
-                            dummyCell.style.padding = "0.5rem";
-                            dummyCell.style.borderTop = "1px solid var(--gray-200)";
-                            dummyCell.style.fontSize = "0.875rem";
-                            dummyCell.style.whiteSpace = "nowrap";
-                            dummyCell.textContent = inputNode.value;
-                            dragVerticalBox.appendChild(dummyCell);
-                        });
-
-                        document.body.appendChild(dragVerticalBox);
-                        e.dataTransfer.setDragImage(dragVerticalBox, 25, 15);
-                        setTimeout(() => document.body.removeChild(dragVerticalBox), 0);
-                    }
-                });
-                
-                letterTh.addEventListener('dragend', () => {
-                    letterTh.classList.remove('header-dragging');
-                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
-                        cell.classList.remove('header-dragging', 'header-drag-over-left', 'header-drag-over-right');
-                    });
-                    renderMasterTableUI();
-                });
-                
-                letterTh.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    const rect = letterTh.getBoundingClientRect();
-                    const midpoint = rect.left + rect.width / 2;
-                    
-                    Array.from(document.querySelectorAll(`tr td, tr th`)).forEach(cell => {
-                        cell.classList.remove('header-drag-over-left', 'header-drag-over-right');
-                    });
-
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => {
-                        if (e.clientX < midpoint) {
-                            cell.classList.add('header-drag-over-left');
-                        } else {
-                            cell.classList.add('header-drag-over-right');
-                        }
-                    });
-                });
-                
-                letterTh.addEventListener('dragleave', () => {
-                    const cellCollection = Array.from(document.querySelectorAll(`tr td:nth-child(${index + 2}), tr th:nth-child(${index + 2})`));
-                    cellCollection.forEach(cell => cell.classList.remove('header-drag-over-left', 'header-drag-over-right'));
-                });
-                
-                letterTh.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedColumnHeaderIndex !== null && draggedColumnHeaderIndex !== index) {
-                        const tempTargetItem = MASTER_HEADERS[draggedColumnHeaderIndex];
-                        MASTER_HEADERS.splice(draggedColumnHeaderIndex, 1);
-                        MASTER_HEADERS.splice(index, 0, tempTargetItem);
-                        renderMasterTableUI();
-                    }
-                });
-            }
-            
-            letterTh.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                activeContextColumnHeaderKey = h;
-                columnContextMenu.style.left = `${e.clientX}px`;
-                columnContextMenu.style.top = `${e.clientY}px`;
-                columnContextMenu.style.display = "block";
-                contextMask.style.display = "block";
-            });
-            tableHeaderLetters.appendChild(letterTh);
-        });
-
-        const cornerTh = document.createElement('th');
-        cornerTh.className = "excel-row-header";
-        tableHeaders.appendChild(cornerTh);
-
-        MASTER_HEADERS.forEach((h, index) => {
-            const th = document.createElement('th');
-            th.style.verticalAlign = "middle";
-
-            if (h === "Participant Name" || h === "Class Date") {
-                if (!isDragReorderModeActive) th.className = "sortable";
-                
-                const textSpan = document.createElement('span');
-                textSpan.style.cursor = "pointer";
-                textSpan.style.fontSize = "1rem";
-                
-                if (!isDragReorderModeActive) {
-                    textSpan.onmouseover = () => textSpan.style.color = "var(--primary)";
-                    textSpan.onmouseout = () => textSpan.style.color = "";
-                }
-                
-                let rankLabel = isNamePriorityPrimary ? (h === "Participant Name" ? " (Primary)" : " (Secondary)") : (h === "Class Date" ? " (Primary)" : " (Secondary)");
-                let isActiveDirection = h === "Participant Name" ? nameSortRule.value : dateSortRule.value;
-                
-                textSpan.textContent = h + rankLabel;
-                textSpan.onclick = (e) => { e.stopPropagation(); setPrimaryRankFromHeaderClick(h); };
-                th.appendChild(textSpan);
-
-                const arrowIndicator = document.createElement('div');
-                arrowIndicator.className = `css-arrow-icon ${isActiveDirection === 'asc' ? 'arrow-up' : 'arrow-down'}`;
-                
-                if (isRankLocked) {
-                    arrowIndicator.classList.add('is-disabled');
-                }
-                
-                arrowIndicator.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    if (!isRankLocked) flipDirectionOnly(h); 
-                };
-                th.appendChild(arrowIndicator);
-            } else {
-                th.textContent = h;
-            }
-            th.style.borderBottom = "1px solid var(--gray-300)";
-            tableHeaders.appendChild(th);
-        });
-
-        const valName = filterName.value.toLowerCase().trim();
-        const valCode = filterCode.value.toLowerCase().trim();
-        const valSno = filterSno.value.toLowerCase().trim();
-        const valMinDur = parseFloat(filterDurMin.value);
-        const valMaxDur = parseFloat(filterDurMax.value);
-        const dateStartObj = parseCustomDate(filterDateStart.value.trim());
-        const dateEndObj = parseCustomDate(filterDateEnd.value.trim());
-        const valStarted = filterStartedTime.value.toLowerCase().trim();
-        const valJoined = filterJoinedTime.value.toLowerCase().trim();
-        const valStopped = filterStoppedTime.value.toLowerCase().trim();
-
-        // Compute the main base records set filtering matrices
-        let filteredData = masterData.filter(row => {
-            if (valName && !String(row["Participant Name"] || "").toLowerCase().includes(valName)) return false;
-            if (valCode && !String(row["Meeting code"] || "").toLowerCase().includes(valCode)) return false;
-            if (valStarted && !String(row["Attendance Started at"] || "").toLowerCase().includes(valStarted)) return false;
-            if (valJoined && !String(row["Joined at(beta)"] || "").toLowerCase().includes(valJoined)) return false;
-            if (valStopped && !String(row["Attendance Stopped at"] || "").toLowerCase().includes(valStopped)) return false;
-            if (valSno && !String(row["SNo"] || "").toLowerCase().includes(valSno)) return false;
-            
-            if (!isNaN(valMinDur) || !isNaN(valMaxDur)) {
-                const totalMins = parseDurationToMinutes(row["Attended Duration"]);
-                if (!isNaN(valMinDur) && totalMins < valMinDur) return false;
-                if (!isNaN(valMaxDur) && totalMins > valMaxDur) return false;
-            }
-            if (filterDateStart.value.trim() || filterDateEnd.value.trim()) {
-                const targetDateObj = parseCustomDate(row["Class Date"]);
-                if (filterDateStart.value.trim()) {
-                    if (isStartDateInclusive && targetDateObj < dateStartObj) return false;
-                    if (!isStartDateInclusive && targetDateObj <= dateStartObj) return false;
-                }
-                if (filterDateEnd.value.trim()) {
-                    if (isEndDateInclusive && targetDateObj > dateEndObj) return false;
-                    if (!isEndDateInclusive && targetDateObj >= dateEndObj) return false;
-                }
-            }
-            return true;
-        });
-
-        // Intercept and isolate spreadsheet grid view visibility maps to active duplicate groups when scan profiles run
-        if (duplicateScanModeActive && currentDuplicateGroupIndex !== -1 && duplicateGroupsCache[currentDuplicateGroupIndex]) {
-            const currentActiveGroup = duplicateGroupsCache[currentDuplicateGroupIndex];
-            filteredData = filteredData.filter(row => currentActiveGroup.includes(row));
-        }
-
-        tableBody.innerHTML = '';
-        filteredData.forEach((row, index) => {
+        tbody.innerHTML = '';
+        masterData.forEach((row, i) => {
             const tr = document.createElement('tr');
-            const baseIndex = masterData.indexOf(row);
+            if (row._isDuplicate && !row._approved) tr.className = 'duplicate-row';
+            if (row._approved) tr.className = 'approved-row';
             
-            // Highlight identical cloned entries in bright yellow cleanly
-            if (duplicateScanModeActive) {
-                tr.classList.add('duplicate-highlight');
-            }
-            
-            const indexTd = document.createElement('td');
-            indexTd.textContent = index + 1;
-            indexTd.className = "excel-row-header";
-            
-            indexTd.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                activeContextRowDataIndex = baseIndex;
-                rowContextMenu.style.left = `${e.clientX}px`;
-                rowContextMenu.style.top = `${e.clientY}px`;
-                rowContextMenu.style.display = "block";
-                contextMask.style.display = "block";
-            });
-            tr.appendChild(indexTd);
-
-            if (isDragReorderModeActive && currentDragOrientation === "horizontal") {
-                tr.setAttribute('draggable', 'true');
-                
-                tr.addEventListener('dragstart', (e) => {
-                    draggedRowDataIndex = baseIndex;
-                    tr.classList.add('row-dragging');
-                    
-                    if (e.dataTransfer) {
-                        const dragVisualClone = tr.cloneNode(true);
-                        const targetLeadingCell = dragVisualClone.querySelector('.excel-row-header');
-                        if (targetLeadingCell) targetLeadingCell.textContent = '';
-                        
-                        dragVisualClone.style.position = "absolute";
-                        dragVisualClone.style.top = "-9999px";
-                        document.body.appendChild(dragVisualClone);
-                        
-                        e.dataTransfer.setDragImage(dragVisualClone, 0, 15);
-                        setTimeout(() => document.body.removeChild(dragVisualClone), 0);
-                    }
-                });
-                tr.addEventListener('dragend', () => {
-                    tr.classList.remove('row-dragging');
-                    renderMasterTableUI();
-                });
-                tr.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const rect = tr.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
-                    
-                    Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
-                        if (e.clientY < midpoint) {
-                            cell.className = "row-drag-over-top";
-                        } else {
-                            cell.className = "row-drag-over-bottom";
-                        }
-                    });
-                });
-                tr.addEventListener('dragleave', () => {
-                    Array.from(tr.querySelectorAll("td:not(.excel-row-header)")).forEach(cell => {
-                        cell.className = "";
-                    });
-                });
-                tr.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (draggedRowDataIndex !== null && draggedRowDataIndex !== baseIndex) {
-                        const tempRow = masterData[draggedRowDataIndex];
-                        masterData.splice(draggedRowDataIndex, 1);
-                        masterData.splice(baseIndex, 0, tempRow);
-                        renderMasterTableUI();
-                    }
-                });
+            if (isReorderMode) {
+                tr.draggable = true;
+                tr.addEventListener('dragstart', (e) => handleRowDrag(e, i));
             }
 
-            MASTER_HEADERS.forEach(header => {
+            // Action Cell
+            const tdAction = document.createElement('td');
+            tdAction.className = 'excel-row-header';
+            tdAction.innerHTML = `<span>${i + 1}</span> `;
+            if (row._isDuplicate && !row._approved) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-approve';
+                btn.textContent = '✓';
+                btn.title = "Approve/Ignore Duplicate";
+                btn.onclick = () => approveRow(i);
+                tdAction.appendChild(btn);
+            }
+            tr.appendChild(tdAction);
+
+            MASTER_HEADERS.forEach(h => {
                 const td = document.createElement('td');
-                const input = document.createElement('input');
-                
-                input.value = row[header] || '';
-                input.addEventListener('input', (e) => {
-                    if (baseIndex !== -1) masterData[baseIndex][header] = e.target.value.trim();
-                });
-                
-                td.style.borderBottom = "1px solid var(--gray-300)";
-                td.appendChild(input);
+                td.textContent = row[h];
                 tr.appendChild(td);
             });
-            tableBody.appendChild(tr);
+            tbody.appendChild(tr);
         });
     }
 
-    downloadBtn.addEventListener('click', () => {
-        if (masterData.length === 0) return;
+    // --- GHOST DRAGGING LOGIC ---
 
-        let csvContent = MASTER_HEADERS.join(",") + "\n";
-        const dynamicSpacer = ",".repeat(MASTER_HEADERS.length - 1);
-        csvContent += dynamicSpacer + "\n";
-             
-        masterData.forEach(row => {
-            let rowLine = MASTER_HEADERS.map(header => {
-                let cellValue = row[header] || '';
-                if (cellValue.includes(',') || cellValue.includes('"')) {
-                    cellValue = `"${cellValue.replace(/"/g, '""')}"`;
-                }
-                return cellValue;
-            }).join(",");
-            csvContent += rowLine + "\n";
+    function createGhost(title, items) {
+        const ghost = document.createElement('div');
+        ghost.className = 'ghost-container';
+        ghost.id = 'drag-ghost';
+        
+        const top = document.createElement('div');
+        top.className = 'ghost-first-item';
+        top.textContent = title;
+        ghost.appendChild(top);
+
+        items.slice(0, 5).forEach(text => {
+            const d = document.createElement('div');
+            d.className = 'ghost-rest';
+            d.textContent = text;
+            ghost.appendChild(d);
         });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        if (items.length > 5) {
+            const more = document.createElement('div');
+            more.className = 'ghost-rest';
+            more.textContent = `... +${items.length - 5} more`;
+            ghost.appendChild(more);
+        }
+
+        document.body.appendChild(ghost);
+        return ghost;
+    }
+
+    function handleRowDrag(e, index) {
+        const row = masterData[index];
+        const ghost = createGhost(`Row ${index + 1}: ${row["Participant Name"] || 'Empty'}`, Object.values(row).filter(v => typeof v === 'string'));
+        e.dataTransfer.setDragImage(ghost, 0, 0);
+        e.dataTransfer.setData('text/plain', `row:${index}`);
+        setTimeout(() => ghost.remove(), 1);
+    }
+
+    function handleColDrag(e, index) {
+        const colName = MASTER_HEADERS[index];
+        const samples = masterData.slice(0, 5).map(r => r[colName]);
+        const ghost = createGhost(`Column: ${colName}`, samples);
+        e.dataTransfer.setDragImage(ghost, 0, 0);
+        e.dataTransfer.setData('text/plain', `col:${index}`);
+        setTimeout(() => ghost.remove(), 1);
+    }
+
+    // --- TABLE DROP LOGIC ---
+
+    document.getElementById('master-table').addEventListener('dragover', e => e.preventDefault());
+    document.getElementById('master-table').addEventListener('drop', e => {
+        const data = e.dataTransfer.getData('text/plain');
+        const [type, oldIndex] = data.split(':');
+        const target = e.target.closest('td, th');
+        if (!target) return;
+
+        if (type === 'row') {
+            const newIndex = target.parentElement.rowIndex - 2; // offset for 2 header rows
+            if (newIndex >= 0) {
+                const item = masterData.splice(oldIndex, 1)[0];
+                masterData.splice(newIndex, 0, item);
+            }
+        } else if (type === 'col') {
+            const newIndex = target.cellIndex - 1;
+            if (newIndex >= 0) {
+                const item = MASTER_HEADERS.splice(oldIndex, 1)[0];
+                MASTER_HEADERS.splice(newIndex, 0, item);
+            }
+        }
+        renderTable();
+    });
+
+    document.getElementById('toggle-reorder-btn').addEventListener('click', () => {
+        isReorderMode = !isReorderMode;
+        document.getElementById('toggle-reorder-btn').classList.toggle('btn-success');
+        renderTable();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+        stage2.classList.remove('active');
+        stage1.classList.add('active');
+    });
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+        let csv = MASTER_HEADERS.join(',') + '\n';
+        masterData.forEach(row => {
+            csv += MASTER_HEADERS.map(h => `"${row[h] || ''}"`).join(',') + '\n';
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "combined_attendance_report.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'merged_attendance.csv';
+        a.click();
     });
 </script>
+
 </body>
 </html>
