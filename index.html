@@ -1,91 +1,165 @@
-<style>
-    :root {
-        --primary: #2563eb; --primary-hover: #1d4ed8; --danger: #dc2626;
-        --danger-hover: #b91c1c; --success: #16a34a; --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-700: #374151;
-        --amber-500: #f59e0b; --amber-100: #fef3c7;
-    }
-    body { font-family: sans-serif; margin: 2rem; background-color: #fafafa; color: var(--gray-700); }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .stage { display: none; } .stage.active { display: block; }
-    
-    /* Upload Zone */
-    .upload-section {
-        border: 2px dashed var(--gray-300); padding: 3rem;
-        border-radius: 12px; text-align: center; background: white;
-        cursor: pointer; transition: all 0.2s;
-    }
-    .upload-section.drag-over { border-color: var(--primary); background: #eff6ff; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Attendance Merger & Editor</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #16a34a;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-700: #374151;
+            --excel-green: #107c41;
+            --amber-100: #fef3c7;
+            --amber-500: #f59e0b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 2rem;
+            color: var(--gray-700);
+            background-color: #fafafa;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .stage { display: none; }
+        .stage.active { display: block; }
 
-    /* Tables */
-    .table-container { 
-        overflow: auto; background: white; border-radius: 8px; 
-        border: 1px solid var(--gray-300); margin-top: 1rem; max-height: 70vh;
-    }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid var(--gray-200); padding: 0.5rem; font-size: 0.875rem; white-space: nowrap; }
-    .excel-row-header { background: var(--gray-100); font-weight: bold; text-align: center; }
+        /* Upload Section Fixes */
+        .upload-section {
+            border: 2px dashed var(--gray-300);
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .upload-section.drag-over {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        
+        .file-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 600px; }
+        .file-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: white; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid var(--gray-300);
+        }
+        .remove-btn { background: none; border: none; color: var(--danger); font-weight: bold; cursor: pointer; font-size: 1.25rem; }
 
-    /* Duplicate Highlighting & Approval */
-    tr.duplicate-highlight td { background-color: var(--amber-100) !important; }
-    tr.approved-row td { background-color: white !important; opacity: 0.8; }
-    .btn-approve { 
-        background: var(--success); color: white; border: none; 
-        border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 10px;
-    }
+        /* Original Table & Editor Styles */
+        .stage-2-header { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+        .header-row-1 { display: flex; justify-content: space-between; align-items: center; }
+        .header-row-2 { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .sort-controls {
+            background: #ffffff; border: 1px solid var(--gray-300); padding: 0.75rem 1rem;
+            border-radius: 6px; display: flex; gap: 1rem; align-items: center; font-size: 0.9rem;
+        }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--amber-500); color: white; }
+        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
 
-    /* Drag Ghosting */
-    .drag-ghost {
-        position: fixed; top: -1000px; background: white;
-        border: 2px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        z-index: 9999; pointer-events: none; opacity: 0.9;
-    }
-    .ghost-head { background: var(--primary); color: white; padding: 8px; font-weight: bold; }
-    .ghost-body { padding: 8px; font-size: 12px; color: #666; }
+        .filter-panel { background: #ffffff; border: 1px solid var(--gray-300); padding: 1.25rem; border-radius: 6px; margin-top: 1rem; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.75rem; }
+        .filter-input { padding: 0.45rem 0.6rem; border-radius: 4px; border: 1px solid var(--gray-300); width: 100%; box-sizing: border-box; }
 
-    /* Original Components */
-    .btn { padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
-    .filter-panel { background: white; border: 1px solid var(--gray-300); padding: 1rem; border-radius: 6px; margin-top: 1rem; }
-    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-    .context-menu { position: fixed; background: white; border: 1px solid #ccc; display: none; z-index: 1000; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
-    .context-item { padding: 8px 12px; cursor: pointer; } .context-item:hover { background: #eee; }
-</style>
+        .table-container { overflow: auto; background: white; border-radius: 8px; border: 1px solid var(--gray-300); margin-top: 1rem; max-height: 600px; }
+        #master-table { border-collapse: collapse; width: 100%; }
+        #master-table th, #master-table td { border: 1px solid var(--gray-200); padding: 0.5rem; font-size: 0.875rem; white-space: nowrap; }
+        .excel-row-header { background: var(--gray-100); font-weight: bold; text-align: center; position: sticky; left: 0; z-index: 2; }
+
+        /* Duplicate Approval Styles */
+        tr.duplicate-highlight td { background-color: var(--amber-100) !important; }
+        tr.approved-row td { background-color: white !important; }
+        .approve-btn {
+            background: var(--success); color: white; border: none; border-radius: 4px;
+            padding: 2px 6px; cursor: pointer; font-size: 10px; margin-left: 5px;
+        }
+
+        /* Drag Ghost Visuals */
+        .drag-ghost {
+            position: fixed; top: -1000px; background: white;
+            border: 2px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            z-index: 9999; pointer-events: none; opacity: 0.9;
+        }
+        .ghost-head { background: var(--primary); color: white; padding: 8px; font-weight: bold; }
+        .ghost-body { padding: 8px; font-size: 12px; color: #666; }
+
+        /* Context Menus */
+        .context-menu-mask { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 999; display: none; }
+        .excel-context-menu {
+            position: fixed; background: white; border: 1px solid var(--gray-300);
+            border-radius: 6px; padding: 0.25rem 0; min-width: 160px; z-index: 1000; display: none;
+        }
+        .context-item { padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--gray-700); cursor: pointer; }
+        .context-item:hover { background: var(--gray-100); }
+    </style>
+</head>
+<body>
 
 <div class="container">
     <h2>CSV Attendance Merger & Editor</h2>
 
     <!-- STAGE 1: UPLOAD -->
     <div id="stage-1" class="stage active">
+        <h3>Stage 1: Upload Attendance CSV Files</h3>
         <div class="upload-section" id="drop-zone">
             <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
-            <p><strong>Drag & Drop files here</strong> or click to select</p>
-            <button class="btn btn-primary" onclick="document.getElementById('csv-picker').click()">Browse Files</button>
+            <p><strong>Drag & Drop CSV files here</strong> or click to select manually</p>
+            <button class="btn btn-primary">Select CSV Files</button>
         </div>
-        <div id="file-queue" style="margin: 1rem 0;"></div>
+        <h4>Uploaded Files Queue</h4>
+        <div class="file-list" id="file-queue">
+            <p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>
+        </div>
         <button class="btn btn-success" id="process-btn">Combine & Process Data</button>
     </div>
 
     <!-- STAGE 2: EDITOR -->
     <div id="stage-2" class="stage">
-        <div class="header-controls" style="display:flex; gap:10px; margin-bottom:15px;">
-            <button class="btn btn-primary" id="back-btn">← Back</button>
-            <button class="btn btn-success" id="download-btn">Download Master File</button>
-            <button class="btn btn-primary" id="toggle-reorder-btn">Toggle Reorder Mode</button>
-            <button class="btn btn-danger" id="scan-duplicates-btn">Find & Resolve Duplicates</button>
-            <button class="btn btn-primary" id="reset-approvals-btn">Reset Scan/Approvals ↺</button>
+        <div class="stage-2-header">
+            <div class="header-row-1">
+                <button class="btn btn-secondary" id="back-btn">← Go Back</button>
+                <button class="btn btn-success" id="download-btn">Download Master File (.csv)</button>
+            </div>
+            <div class="header-row-2">
+                <div class="sort-controls">
+                    <label><b>Name Order:</b></label>
+                    <select id="name-sort-rule">
+                        <option value="asc">A → Z</option>
+                        <option value="desc">Z → A</option>
+                    </select>
+                    <button id="priority-switch-btn" class="btn btn-secondary">Name Priority First ⇄</button>
+                    <label><b>Date Order:</b></label>
+                    <select id="date-sort-rule">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+                <button id="scan-duplicates-btn" class="btn btn-warning">Find Duplicates</button>
+                <button id="reset-scan-btn" class="btn btn-secondary">Reset Scan/Approvals ↺</button>
+                <button id="toggle-reorder-btn" class="btn btn-primary">Organize (Drag Rows/Cols)</button>
+                <button id="time-convert-btn" class="btn btn-secondary">Time Format (12h ⇄ 24h)</button>
+            </div>
         </div>
 
-        <!-- Filters (Your Original Logic) -->
+        <!-- Filters -->
         <div class="filter-panel">
             <div class="filter-grid">
-                <input type="text" id="filter-name" placeholder="Filter Name">
-                <input type="text" id="filter-code" placeholder="Filter Meeting Code">
-                <input type="number" id="filter-dur-min" placeholder="Min Duration">
-                <input type="text" id="filter-date-start" placeholder="Start Date">
-                <input type="text" id="filter-date-end" placeholder="End Date">
+                <input type="text" id="filter-name" class="filter-input" placeholder="Search Participant Name">
+                <input type="text" id="filter-code" class="filter-input" placeholder="Search Meeting Code">
+                <input type="number" id="filter-dur-min" class="filter-input" placeholder="Min Duration (m)">
+                <input type="text" id="filter-date-start" class="filter-input" placeholder="Start Date Bounds">
+                <input type="text" id="filter-date-end" class="filter-input" placeholder="End Date Bounds">
                 <button class="btn btn-danger" id="reset-filters-btn">Reset Filters</button>
             </div>
         </div>
@@ -103,208 +177,278 @@
 </div>
 
 <!-- Context Menus -->
-<div id="col-ctx" class="context-menu">
-    <div class="context-item" id="ctx-del-col">Delete Column</div>
+<div id="context-mask" class="context-menu-mask"></div>
+<div id="column-context-menu" class="excel-context-menu">
+    <div class="context-item" id="ctx-delete-col">Delete Column</div>
+</div>
+<div id="row-context-menu" class="excel-context-menu">
+    <div class="context-item" id="ctx-delete-row">Delete Row</div>
 </div>
 
 <script>
-let MASTER_HEADERS = ["SNo", "Participant Name", "Attendance Started at", "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"];
-let masterData = []; // Each row: { data: {}, isDuplicate: bool, isApproved: bool }
-let uploadedFiles = [];
-let isReorderMode = false;
+    let MASTER_HEADERS = ["SNo", "Participant Name", "Attendance Started at", "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"];
+    let masterData = []; // { data: {}, isApproved: false, isDuplicate: false }
+    let uploadedFilesArray = [];
+    let isReorderMode = false;
+    let currentActiveTimeMode = "12h";
+    let isNamePriorityPrimary = true;
 
-// --- FILE INPUT & DRAG DROP ---
-const dropZone = document.getElementById('drop-zone');
-const csvPicker = document.getElementById('csv-picker');
+    // --- FILE UPLOAD LOGIC ---
+    const dropZone = document.getElementById('drop-zone');
+    const csvPicker = document.getElementById('csv-picker');
+    const fileQueue = document.getElementById('file-queue');
 
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
-    dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); });
-});
+    // Click to select
+    dropZone.addEventListener('click', () => csvPicker.click());
+    csvPicker.addEventListener('change', (e) => handleFileSelection(e.target.files));
 
-dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', (e) => {
-    dropZone.classList.remove('drag-over');
-    handleFiles(e.dataTransfer.files);
-});
-csvPicker.addEventListener('change', (e) => handleFiles(e.target.files));
+    // Drag and Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => {
+        dropZone.addEventListener(eName, (e) => { e.preventDefault(); e.stopPropagation(); });
+    });
+    dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', (e) => {
+        dropZone.classList.remove('drag-over');
+        handleFileSelection(e.dataTransfer.files);
+    });
 
-function handleFiles(files) {
-    for (let f of files) { if (f.name.endsWith('.csv')) uploadedFiles.push(f); }
-    renderQueue();
-}
-
-function renderQueue() {
-    document.getElementById('file-queue').innerHTML = uploadedFiles.map((f, i) => 
-        `<div style="background:#fff; padding:5px; border:1px solid #ddd; margin-bottom:2px;">${f.name}</div>`).join('');
-}
-
-// --- CSV PROCESSING ---
-document.getElementById('process-btn').addEventListener('click', async () => {
-    if (!uploadedFiles.length) return alert("Pick files!");
-    masterData = [];
-    for (let file of uploadedFiles) {
-        const text = await file.text();
-        const lines = text.split('\n').filter(l => l.trim());
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
-        
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-            let rowObj = { data: {}, isDuplicate: false, isApproved: false };
-            MASTER_HEADERS.forEach(h => {
-                const idx = headers.indexOf(h.toLowerCase());
-                rowObj.data[h] = idx > -1 ? values[idx] : "";
-            });
-            // Auto-detect date from filename if missing
-            if (!rowObj.data["Class Date"]) rowObj.data["Class Date"] = file.name;
-            masterData.push(rowObj);
+    function handleFileSelection(files) {
+        for (let file of files) {
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                if (!uploadedFilesArray.find(f => f.name === file.name)) {
+                    uploadedFilesArray.push(file);
+                }
+            }
         }
+        renderQueueUI();
     }
-    renderMasterTableUI();
-    document.getElementById('stage-1').classList.remove('active');
-    document.getElementById('stage-2').classList.add('active');
-});
 
-// --- DUPLICATE SYSTEM ---
-document.getElementById('scan-duplicates-btn').addEventListener('click', () => {
-    const map = new Map();
-    masterData.forEach((row, idx) => {
-        const fingerprint = JSON.stringify(row.data);
-        if (!map.has(fingerprint)) map.set(fingerprint, []);
-        map.get(fingerprint).push(idx);
-    });
-    
-    map.forEach(indices => {
-        if (indices.length > 1) {
-            indices.forEach(i => masterData[i].isDuplicate = true);
+    function renderQueueUI() {
+        fileQueue.innerHTML = '';
+        if (uploadedFilesArray.length === 0) {
+            fileQueue.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No files selected yet.</p>';
+            return;
         }
-    });
-    renderMasterTableUI();
-});
-
-document.getElementById('reset-approvals-btn').addEventListener('click', () => {
-    masterData.forEach(r => { r.isDuplicate = false; r.isApproved = false; });
-    renderMasterTableUI();
-});
-
-// --- DRAG GHOSTING LOGIC ---
-function createGhost(label, subtext) {
-    const g = document.createElement('div');
-    g.className = 'drag-ghost';
-    g.innerHTML = `<div class="ghost-head">${label}</div><div class="ghost-body">${subtext}</div>`;
-    document.body.appendChild(g);
-    return g;
-}
-
-// --- UI RENDERING ---
-function renderMasterTableUI() {
-    const theadL = document.getElementById('table-header-letters');
-    const theadH = document.getElementById('table-headers');
-    const tbody = document.getElementById('table-body');
-    
-    theadL.innerHTML = '<th>#</th>';
-    theadH.innerHTML = '<th>Idx</th>';
-
-    MASTER_HEADERS.forEach((h, i) => {
-        const thL = document.createElement('th');
-        thL.textContent = String.fromCharCode(65 + i);
-        thL.className = 'excel-row-header';
-        if (isReorderMode) {
-            thL.draggable = true;
-            thL.onsubmit = e => e.preventDefault();
-            thL.ondragstart = (e) => {
-                e.dataTransfer.setData('col', i);
-                const ghost = createGhost(`Moving Column: ${h}`, `Data type: CSV Column`);
-                e.dataTransfer.setDragImage(ghost, 0, 0);
-                setTimeout(() => ghost.remove(), 1);
-            };
-        }
-        theadL.appendChild(thL);
-        const thH = document.createElement('th');
-        thH.textContent = h;
-        theadH.appendChild(thH);
-    });
-
-    tbody.innerHTML = '';
-    masterData.forEach((row, idx) => {
-        const tr = document.createElement('tr');
-        if (row.isDuplicate && !row.isApproved) tr.className = 'duplicate-highlight';
-        if (row.isApproved) tr.className = 'approved-row';
-        
-        if (isReorderMode) {
-            tr.draggable = true;
-            tr.ondragstart = (e) => {
-                e.dataTransfer.setData('row', idx);
-                const ghost = createGhost(`Moving Row ${idx+1}`, row.data["Participant Name"] || "Unknown");
-                e.dataTransfer.setDragImage(ghost, 0, 0);
-                setTimeout(() => ghost.remove(), 1);
-            };
-        }
-
-        // Action Cell (Approval)
-        const tdIdx = document.createElement('td');
-        tdIdx.className = 'excel-row-header';
-        tdIdx.innerHTML = `<span>${idx+1}</span>`;
-        if (row.isDuplicate && !row.isApproved) {
-            const btn = document.createElement('button');
-            btn.className = 'btn-approve';
-            btn.textContent = '✓';
-            btn.onclick = () => { row.isApproved = true; renderMasterTableUI(); };
-            tdIdx.appendChild(btn);
-        }
-        tr.appendChild(tdIdx);
-
-        MASTER_HEADERS.forEach(h => {
-            const td = document.createElement('td');
-            const input = document.createElement('input');
-            input.value = row.data[h];
-            input.style.border = 'none'; input.style.width = '100%';
-            input.onchange = (e) => row.data[h] = e.target.value;
-            td.appendChild(input);
-            tr.appendChild(td);
+        uploadedFilesArray.forEach((file, index) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `<span>${file.name}</span><button class="remove-btn" onclick="removeFile(${index})">×</button>`;
+            fileQueue.appendChild(div);
         });
-        tbody.appendChild(tr);
-    });
-}
-
-// --- DRAG DROP TABLE HANDLING ---
-document.getElementById('master-table').ondragover = e => e.preventDefault();
-document.getElementById('master-table').ondrop = e => {
-    const colIdx = e.dataTransfer.getData('col');
-    const rowIdx = e.dataTransfer.getData('row');
-    const target = e.target.closest('td, th');
-    if (!target) return;
-
-    if (colIdx !== "") {
-        const newIdx = target.cellIndex - 1;
-        const item = MASTER_HEADERS.splice(colIdx, 1)[0];
-        MASTER_HEADERS.splice(newIdx, 0, item);
     }
-    if (rowIdx !== "") {
-        const newIdx = target.parentElement.rowIndex - 2;
-        const item = masterData.splice(rowIdx, 1)[0];
-        masterData.splice(newIdx, 0, item);
-    }
-    renderMasterTableUI();
-};
 
-document.getElementById('toggle-reorder-btn').onclick = () => {
-    isReorderMode = !isReorderMode;
-    renderMasterTableUI();
-};
+    window.removeFile = (index) => {
+        uploadedFilesArray.splice(index, 1);
+        renderQueueUI();
+    };
 
-document.getElementById('download-btn').onclick = () => {
-    let csv = MASTER_HEADERS.join(',') + '\n';
-    masterData.forEach(r => {
-        csv += MASTER_HEADERS.map(h => `"${r.data[h]}"`).join(',') + '\n';
+    // --- CSV PROCESSING ---
+    document.getElementById('process-btn').addEventListener('click', async () => {
+        if (uploadedFilesArray.length === 0) return alert("Select files first");
+        masterData = [];
+        
+        for (let file of uploadedFilesArray) {
+            const text = await file.text();
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+            const dateFromFilename = file.name.match(/\(([^)]+)\)/)?.[1] || file.name;
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                let row = { data: {}, isApproved: false, isDuplicate: false };
+                MASTER_HEADERS.forEach(h => {
+                    const idx = headers.indexOf(h.toLowerCase());
+                    row.data[h] = idx > -1 ? values[idx] : (h === "Class Date" ? dateFromFilename : "");
+                });
+                masterData.push(row);
+            }
+        }
+        sortMasterData();
+        renderMasterTableUI();
+        document.getElementById('stage-1').classList.remove('active');
+        document.getElementById('stage-2').classList.add('active');
     });
-    const blob = new Blob([csv], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'master_attendance.csv'; a.click();
-};
 
-document.getElementById('back-btn').onclick = () => {
-    document.getElementById('stage-2').classList.remove('active');
-    document.getElementById('stage-1').classList.add('active');
-};
+    // --- DUPLICATE & APPROVAL SYSTEM ---
+    document.getElementById('scan-duplicates-btn').addEventListener('click', () => {
+        const counts = new Map();
+        // Reset duplicate status before scan
+        masterData.forEach(r => r.isDuplicate = false);
+
+        masterData.forEach((row, idx) => {
+            const fingerprint = JSON.stringify(row.data);
+            if (!counts.has(fingerprint)) counts.set(fingerprint, []);
+            counts.get(fingerprint).push(idx);
+        });
+
+        let found = false;
+        counts.forEach(indices => {
+            if (indices.length > 1) {
+                found = true;
+                indices.forEach(i => masterData[i].isDuplicate = true);
+            }
+        });
+        if (!found) alert("No identical rows found!");
+        renderMasterTableUI();
+    });
+
+    document.getElementById('reset-scan-btn').addEventListener('click', () => {
+        masterData.forEach(r => { r.isDuplicate = false; r.isApproved = false; });
+        renderMasterTableUI();
+    });
+
+    function approveRow(idx) {
+        masterData[idx].isApproved = true;
+        renderMasterTableUI();
+    }
+
+    // --- VISUAL GHOST DRAGGING ---
+    function createGhost(title, bodyText) {
+        const g = document.createElement('div');
+        g.className = 'drag-ghost';
+        g.innerHTML = `<div class="ghost-head">${title}</div><div class="ghost-body">${bodyText}</div>`;
+        document.body.appendChild(g);
+        return g;
+    }
+
+    // --- TABLE UI & FILTERS ---
+    function renderMasterTableUI() {
+        const theadL = document.getElementById('table-header-letters');
+        const theadH = document.getElementById('table-headers');
+        const tbody = document.getElementById('table-body');
+
+        theadL.innerHTML = '<th class="excel-row-header">#</th>';
+        theadH.innerHTML = '<th class="excel-row-header">Idx</th>';
+
+        MASTER_HEADERS.forEach((h, i) => {
+            const thL = document.createElement('th');
+            thL.textContent = String.fromCharCode(65 + i);
+            thL.className = 'excel-row-header';
+            if (isReorderMode) {
+                thL.draggable = true;
+                thL.style.cursor = 'grab';
+                thL.ondragstart = (e) => {
+                    e.dataTransfer.setData('col', i);
+                    const ghost = createGhost(`Moving Column: ${h}`, `A → ${h}`);
+                    e.dataTransfer.setDragImage(ghost, 0, 0);
+                    setTimeout(() => ghost.remove(), 1);
+                };
+            }
+            theadL.appendChild(thL);
+
+            const thH = document.createElement('th');
+            thH.textContent = h;
+            theadH.appendChild(thH);
+        });
+
+        tbody.innerHTML = '';
+        const valName = document.getElementById('filter-name').value.toLowerCase();
+        
+        masterData.forEach((row, idx) => {
+            // Apply original filtering logic
+            if (valName && !row.data["Participant Name"].toLowerCase().includes(valName)) return;
+
+            const tr = document.createElement('tr');
+            if (row.isDuplicate && !row.isApproved) tr.className = 'duplicate-highlight';
+            if (row.isApproved) tr.className = 'approved-row';
+
+            if (isReorderMode) {
+                tr.draggable = true;
+                tr.ondragstart = (e) => {
+                    e.dataTransfer.setData('row', idx);
+                    const ghost = createGhost(`Moving Row ${idx + 1}`, row.data["Participant Name"] || "New Row");
+                    e.dataTransfer.setDragImage(ghost, 0, 0);
+                    setTimeout(() => ghost.remove(), 1);
+                };
+            }
+
+            // Index/Action Cell
+            const tdIdx = document.createElement('td');
+            tdIdx.className = 'excel-row-header';
+            tdIdx.innerHTML = `<span>${idx + 1}</span>`;
+            if (row.isDuplicate && !row.isApproved) {
+                const btn = document.createElement('button');
+                btn.className = 'approve-btn';
+                btn.textContent = '✓';
+                btn.title = "Dismiss Duplicate Flag";
+                btn.onclick = () => approveRow(idx);
+                tdIdx.appendChild(btn);
+            }
+            tr.appendChild(tdIdx);
+
+            MASTER_HEADERS.forEach(h => {
+                const td = document.createElement('td');
+                const inp = document.createElement('input');
+                inp.value = row.data[h];
+                inp.style.border = 'none'; inp.style.width = '100%'; inp.style.background = 'transparent';
+                inp.onchange = (e) => row.data[h] = e.target.value;
+                td.appendChild(inp);
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    // --- REORDER DROP LOGIC ---
+    document.getElementById('master-table').ondragover = e => e.preventDefault();
+    document.getElementById('master-table').ondrop = e => {
+        const colIdx = e.dataTransfer.getData('col');
+        const rowIdx = e.dataTransfer.getData('row');
+        const target = e.target.closest('td, th');
+        if (!target) return;
+
+        if (colIdx !== "") {
+            const newIdx = target.cellIndex - 1;
+            const item = MASTER_HEADERS.splice(colIdx, 1)[0];
+            MASTER_HEADERS.splice(newIdx, 0, item);
+        }
+        if (rowIdx !== "") {
+            const newIdx = target.parentElement.rowIndex - 2;
+            const item = masterData.splice(rowIdx, 1)[0];
+            masterData.splice(newIdx, 0, item);
+        }
+        renderMasterTableUI();
+    };
+
+    // --- SORTING LOGIC ---
+    function sortMasterData() {
+        const nameDir = document.getElementById('name-sort-rule').value === 'asc' ? 1 : -1;
+        masterData.sort((a, b) => {
+            const nameA = (a.data["Participant Name"] || "").toLowerCase();
+            const nameB = (b.data["Participant Name"] || "").toLowerCase();
+            return nameA.localeCompare(nameB) * nameDir;
+        });
+    }
+
+    document.getElementById('name-sort-rule').onchange = () => { sortMasterData(); renderMasterTableUI(); };
+
+    // --- OTHER ORIGINAL FEATURES ---
+    document.getElementById('toggle-reorder-btn').onclick = () => {
+        isReorderMode = !isReorderMode;
+        document.getElementById('toggle-reorder-btn').classList.toggle('btn-success');
+        renderMasterTableUI();
+    };
+
+    document.getElementById('reset-filters-btn').onclick = () => {
+        document.getElementById('filter-name').value = '';
+        renderMasterTableUI();
+    };
+
+    document.getElementById('download-btn').onclick = () => {
+        let csv = MASTER_HEADERS.join(',') + '\n';
+        masterData.forEach(r => {
+            csv += MASTER_HEADERS.map(h => `"${r.data[h]}"`).join(',') + '\n';
+        });
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'attendance_report.csv'; a.click();
+    };
+
+    document.getElementById('back-btn').onclick = () => {
+        document.getElementById('stage-2').classList.remove('active');
+        document.getElementById('stage-1').classList.add('active');
+    };
 </script>
+</body>
+</html>
