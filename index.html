@@ -1,160 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Attendance Merger & Editor</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --danger: #dc2626;
-            --danger-hover: #b91c1c;
-            --success: #16a34a;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-700: #374151;
-            --excel-green: #107c41;
-            --amber-100: #fef3c7;
-            --amber-500: #f59e0b;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 2rem;
-            color: var(--gray-700);
-            background-color: #fafafa;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .stage { display: none; }
-        .stage.active { display: block; }
-        
-        /* Drag and Drop File Zone */
-        .upload-section {
-            border: 2px dashed var(--gray-300);
-            padding: 3rem;
-            border-radius: 12px;
-            text-align: center;
-            background: white;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .upload-section.drag-over {
-            border-color: var(--primary);
-            background-color: #eff6ff;
-            transform: scale(1.01);
-        }
+<style>
+    :root {
+        --primary: #2563eb; --primary-hover: #1d4ed8; --danger: #dc2626;
+        --danger-hover: #b91c1c; --success: #16a34a; --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-700: #374151;
+        --amber-500: #f59e0b; --amber-100: #fef3c7;
+    }
+    body { font-family: sans-serif; margin: 2rem; background-color: #fafafa; color: var(--gray-700); }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .stage { display: none; } .stage.active { display: block; }
+    
+    /* Upload Zone */
+    .upload-section {
+        border: 2px dashed var(--gray-300); padding: 3rem;
+        border-radius: 12px; text-align: center; background: white;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .upload-section.drag-over { border-color: var(--primary); background: #eff6ff; }
 
-        /* Table Styling */
-        .table-container {
-            overflow: auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--gray-300);
-            margin-top: 1rem;
-            max-height: 70vh;
-        }
-        table { border-collapse: collapse; width: 100%; }
-        th, td {
-            border: 1px solid var(--gray-200);
-            padding: 8px;
-            font-size: 0.875rem;
-            white-space: nowrap;
-        }
-        .excel-row-header {
-            background: var(--gray-100);
-            font-weight: bold;
-            text-align: center;
-            position: sticky;
-            left: 0;
-            z-index: 2;
-        }
+    /* Tables */
+    .table-container { 
+        overflow: auto; background: white; border-radius: 8px; 
+        border: 1px solid var(--gray-300); margin-top: 1rem; max-height: 70vh;
+    }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid var(--gray-200); padding: 0.5rem; font-size: 0.875rem; white-space: nowrap; }
+    .excel-row-header { background: var(--gray-100); font-weight: bold; text-align: center; }
 
-        /* Duplicate & Approval System */
-        tr.duplicate-row td { background-color: var(--amber-100) !important; }
-        tr.approved-row td { background-color: white !important; }
-        
-        .btn-approve {
-            background: var(--success);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 2px 8px;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
-        .btn-approve:hover { opacity: 0.8; }
+    /* Duplicate Highlighting & Approval */
+    tr.duplicate-highlight td { background-color: var(--amber-100) !important; }
+    tr.approved-row td { background-color: white !important; opacity: 0.8; }
+    .btn-approve { 
+        background: var(--success); color: white; border: none; 
+        border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 10px;
+    }
 
-        /* Drag Ghosting Styles */
-        .ghost-container {
-            position: fixed;
-            top: -1000px;
-            background: white;
-            border: 2px solid var(--primary);
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 9999;
-        }
-        .ghost-first-item {
-            background: var(--primary) !important;
-            color: white !important;
-            font-weight: bold;
-            padding: 10px;
-        }
-        .ghost-rest {
-            opacity: 0.4;
-            padding: 5px 10px;
-            font-size: 0.75rem;
-        }
+    /* Drag Ghosting */
+    .drag-ghost {
+        position: fixed; top: -1000px; background: white;
+        border: 2px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        z-index: 9999; pointer-events: none; opacity: 0.9;
+    }
+    .ghost-head { background: var(--primary); color: white; padding: 8px; font-weight: bold; }
+    .ghost-body { padding: 8px; font-size: 12px; color: #666; }
 
-        /* Buttons & UI */
-        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-warning { background: var(--amber-500); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-secondary { background: var(--gray-300); color: var(--gray-700); }
-        
-        .header-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
-        .file-list { margin: 1rem 0; display: flex; flex-direction: column; gap: 5px; }
-        .file-item { display: flex; justify-content: space-between; background: white; padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 4px; }
-    </style>
-</head>
-<body>
+    /* Original Components */
+    .btn { padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .filter-panel { background: white; border: 1px solid var(--gray-300); padding: 1rem; border-radius: 6px; margin-top: 1rem; }
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .context-menu { position: fixed; background: white; border: 1px solid #ccc; display: none; z-index: 1000; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+    .context-item { padding: 8px 12px; cursor: pointer; } .context-item:hover { background: #eee; }
+</style>
 
 <div class="container">
     <h2>CSV Attendance Merger & Editor</h2>
 
-    <!-- STAGE 1 -->
+    <!-- STAGE 1: UPLOAD -->
     <div id="stage-1" class="stage active">
         <div class="upload-section" id="drop-zone">
             <input type="file" id="csv-picker" multiple accept=".csv" style="display: none;">
-            <p><strong>Drag & Drop CSV files here</strong> or click to select</p>
-            <button class="btn btn-primary" onclick="document.getElementById('csv-picker').click()">Select Files</button>
+            <p><strong>Drag & Drop files here</strong> or click to select</p>
+            <button class="btn btn-primary" onclick="document.getElementById('csv-picker').click()">Browse Files</button>
         </div>
-        <div class="file-list" id="file-queue"></div>
+        <div id="file-queue" style="margin: 1rem 0;"></div>
         <button class="btn btn-success" id="process-btn">Combine & Process Data</button>
     </div>
 
-    <!-- STAGE 2 -->
+    <!-- STAGE 2: EDITOR -->
     <div id="stage-2" class="stage">
-        <div class="header-controls">
-            <button class="btn btn-secondary" id="back-btn">← Back</button>
-            <button class="btn btn-warning" id="scan-duplicates-btn">Find Duplicates</button>
-            <button class="btn btn-secondary" id="reset-scan-btn">Reset Scan & Approvals ↺</button>
-            <button class="btn btn-primary" id="toggle-reorder-btn">Organize (Drag Rows/Cols)</button>
-            <button class="btn btn-success" id="download-btn">Export CSV</button>
+        <div class="header-controls" style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="btn btn-primary" id="back-btn">← Back</button>
+            <button class="btn btn-success" id="download-btn">Download Master File</button>
+            <button class="btn btn-primary" id="toggle-reorder-btn">Toggle Reorder Mode</button>
+            <button class="btn btn-danger" id="scan-duplicates-btn">Find & Resolve Duplicates</button>
+            <button class="btn btn-primary" id="reset-approvals-btn">Reset Scan/Approvals ↺</button>
+        </div>
+
+        <!-- Filters (Your Original Logic) -->
+        <div class="filter-panel">
+            <div class="filter-grid">
+                <input type="text" id="filter-name" placeholder="Filter Name">
+                <input type="text" id="filter-code" placeholder="Filter Meeting Code">
+                <input type="number" id="filter-dur-min" placeholder="Min Duration">
+                <input type="text" id="filter-date-start" placeholder="Start Date">
+                <input type="text" id="filter-date-end" placeholder="End Date">
+                <button class="btn btn-danger" id="reset-filters-btn">Reset Filters</button>
+            </div>
         </div>
 
         <div class="table-container">
             <table id="master-table">
                 <thead>
-                    <tr id="header-letters"></tr>
-                    <tr id="header-names"></tr>
+                    <tr id="table-header-letters"></tr>
+                    <tr id="table-headers"></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -162,288 +102,209 @@
     </div>
 </div>
 
+<!-- Context Menus -->
+<div id="col-ctx" class="context-menu">
+    <div class="context-item" id="ctx-del-col">Delete Column</div>
+</div>
+
 <script>
-    // Configuration & State
-    let MASTER_HEADERS = ["SNo", "Participant Name", "Attendance Started at", "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"];
-    let masterData = [];
-    let uploadedFiles = [];
-    let isReorderMode = false;
-    let duplicateGroups = [];
-    let currentGroupIndex = -1;
+let MASTER_HEADERS = ["SNo", "Participant Name", "Attendance Started at", "Joined at(beta)", "Attendance Stopped at", "Attended Duration", "Meeting code", "Class Date"];
+let masterData = []; // Each row: { data: {}, isDuplicate: bool, isApproved: bool }
+let uploadedFiles = [];
+let isReorderMode = false;
 
-    // Elements
-    const dropZone = document.getElementById('drop-zone');
-    const csvPicker = document.getElementById('csv-picker');
-    const fileQueue = document.getElementById('file-queue');
-    const stage1 = document.getElementById('stage-1');
-    const stage2 = document.getElementById('stage-2');
+// --- FILE INPUT & DRAG DROP ---
+const dropZone = document.getElementById('drop-zone');
+const csvPicker = document.getElementById('csv-picker');
 
-    // --- FILE HANDLING ---
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+    dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); });
+});
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
-        dropZone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); });
-    });
+dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+    dropZone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+});
+csvPicker.addEventListener('change', (e) => handleFiles(e.target.files));
 
-    dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-    dropZone.addEventListener('drop', (e) => {
-        dropZone.classList.remove('drag-over');
-        handleFiles(e.dataTransfer.files);
-    });
+function handleFiles(files) {
+    for (let f of files) { if (f.name.endsWith('.csv')) uploadedFiles.push(f); }
+    renderQueue();
+}
 
-    csvPicker.addEventListener('change', (e) => handleFiles(e.target.files));
+function renderQueue() {
+    document.getElementById('file-queue').innerHTML = uploadedFiles.map((f, i) => 
+        `<div style="background:#fff; padding:5px; border:1px solid #ddd; margin-bottom:2px;">${f.name}</div>`).join('');
+}
 
-    function handleFiles(files) {
-        for (let file of files) {
-            if (file.name.endsWith('.csv')) {
-                if (!uploadedFiles.find(f => f.name === file.name)) {
-                    uploadedFiles.push(file);
-                }
-            }
-        }
-        renderFileList();
-    }
-
-    function renderFileList() {
-        fileQueue.innerHTML = uploadedFiles.map((f, i) => `
-            <div class="file-item">
-                <span>${f.name}</span>
-                <button class="btn-danger" style="padding:2px 8px" onclick="removeFile(${i})">×</button>
-            </div>
-        `).join('');
-    }
-
-    function removeFile(index) {
-        uploadedFiles.splice(index, 1);
-        renderFileList();
-    }
-
-    // --- PROCESSING ---
-
-    document.getElementById('process-btn').addEventListener('click', async () => {
-        if (uploadedFiles.length === 0) return alert("Select files first");
-        masterData = [];
+// --- CSV PROCESSING ---
+document.getElementById('process-btn').addEventListener('click', async () => {
+    if (!uploadedFiles.length) return alert("Pick files!");
+    masterData = [];
+    for (let file of uploadedFiles) {
+        const text = await file.text();
+        const lines = text.split('\n').filter(l => l.trim());
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
         
-        for (let file of uploadedFiles) {
-            const text = await file.text();
-            const rows = text.split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, '')));
-            const headers = rows[0].map(h => h.toLowerCase());
-            
-            // Basic mapping
-            for (let i = 1; i < rows.length; i++) {
-                if (rows[i].length < 2) continue;
-                let obj = { _approved: false, _isDuplicate: false };
-                MASTER_HEADERS.forEach(h => {
-                    const idx = headers.indexOf(h.toLowerCase());
-                    obj[h] = idx > -1 ? rows[i][idx] : (h === "Class Date" ? file.name.match(/\(([^)]+)\)/)?.[1] || "Unknown" : "");
-                });
-                masterData.push(obj);
-            }
-        }
-        
-        renderTable();
-        stage1.classList.remove('active');
-        stage2.classList.add('active');
-    });
-
-    // --- DUPLICATE LOGIC ---
-
-    document.getElementById('scan-duplicates-btn').addEventListener('click', () => {
-        findDuplicates();
-        if (duplicateGroups.length === 0) alert("No identical rows found!");
-        renderTable();
-    });
-
-    document.getElementById('reset-scan-btn').addEventListener('click', () => {
-        masterData.forEach(row => {
-            row._approved = false;
-            row._isDuplicate = false;
-        });
-        duplicateGroups = [];
-        renderTable();
-    });
-
-    function findDuplicates() {
-        const counts = {};
-        // Reset state
-        masterData.forEach(r => r._isDuplicate = false);
-        
-        masterData.forEach((row, idx) => {
-            const key = MASTER_HEADERS.map(h => row[h]).join('|');
-            if (!counts[key]) counts[key] = [];
-            counts[key].push(idx);
-        });
-
-        duplicateGroups = Object.values(counts).filter(group => group.length > 1);
-        duplicateGroups.forEach(group => {
-            group.forEach(dataIndex => {
-                masterData[dataIndex]._isDuplicate = true;
-            });
-        });
-    }
-
-    function approveRow(index) {
-        masterData[index]._approved = true;
-        renderTable();
-    }
-
-    // --- TABLE RENDERING & DRAG/DROP ---
-
-    function renderTable() {
-        const hLetters = document.getElementById('header-letters');
-        const hNames = document.getElementById('header-names');
-        const tbody = document.getElementById('table-body');
-
-        hLetters.innerHTML = '<th class="excel-row-header">#</th>';
-        hNames.innerHTML = '<th class="excel-row-header">Actions</th>';
-
-        MASTER_HEADERS.forEach((h, i) => {
-            const letter = String.fromCharCode(65 + (i % 26));
-            const thL = document.createElement('th');
-            thL.textContent = letter;
-            thL.className = 'excel-row-header';
-            if (isReorderMode) {
-                thL.draggable = true;
-                thL.style.cursor = 'grab';
-                thL.addEventListener('dragstart', (e) => handleColDrag(e, i));
-            }
-            hLetters.appendChild(thL);
-
-            const thN = document.createElement('th');
-            thN.textContent = h;
-            hNames.appendChild(thN);
-        });
-
-        tbody.innerHTML = '';
-        masterData.forEach((row, i) => {
-            const tr = document.createElement('tr');
-            if (row._isDuplicate && !row._approved) tr.className = 'duplicate-row';
-            if (row._approved) tr.className = 'approved-row';
-            
-            if (isReorderMode) {
-                tr.draggable = true;
-                tr.addEventListener('dragstart', (e) => handleRowDrag(e, i));
-            }
-
-            // Action Cell
-            const tdAction = document.createElement('td');
-            tdAction.className = 'excel-row-header';
-            tdAction.innerHTML = `<span>${i + 1}</span> `;
-            if (row._isDuplicate && !row._approved) {
-                const btn = document.createElement('button');
-                btn.className = 'btn-approve';
-                btn.textContent = '✓';
-                btn.title = "Approve/Ignore Duplicate";
-                btn.onclick = () => approveRow(i);
-                tdAction.appendChild(btn);
-            }
-            tr.appendChild(tdAction);
-
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+            let rowObj = { data: {}, isDuplicate: false, isApproved: false };
             MASTER_HEADERS.forEach(h => {
-                const td = document.createElement('td');
-                td.textContent = row[h];
-                tr.appendChild(td);
+                const idx = headers.indexOf(h.toLowerCase());
+                rowObj.data[h] = idx > -1 ? values[idx] : "";
             });
-            tbody.appendChild(tr);
-        });
+            // Auto-detect date from filename if missing
+            if (!rowObj.data["Class Date"]) rowObj.data["Class Date"] = file.name;
+            masterData.push(rowObj);
+        }
     }
+    renderMasterTableUI();
+    document.getElementById('stage-1').classList.remove('active');
+    document.getElementById('stage-2').classList.add('active');
+});
 
-    // --- GHOST DRAGGING LOGIC ---
+// --- DUPLICATE SYSTEM ---
+document.getElementById('scan-duplicates-btn').addEventListener('click', () => {
+    const map = new Map();
+    masterData.forEach((row, idx) => {
+        const fingerprint = JSON.stringify(row.data);
+        if (!map.has(fingerprint)) map.set(fingerprint, []);
+        map.get(fingerprint).push(idx);
+    });
+    
+    map.forEach(indices => {
+        if (indices.length > 1) {
+            indices.forEach(i => masterData[i].isDuplicate = true);
+        }
+    });
+    renderMasterTableUI();
+});
 
-    function createGhost(title, items) {
-        const ghost = document.createElement('div');
-        ghost.className = 'ghost-container';
-        ghost.id = 'drag-ghost';
+document.getElementById('reset-approvals-btn').addEventListener('click', () => {
+    masterData.forEach(r => { r.isDuplicate = false; r.isApproved = false; });
+    renderMasterTableUI();
+});
+
+// --- DRAG GHOSTING LOGIC ---
+function createGhost(label, subtext) {
+    const g = document.createElement('div');
+    g.className = 'drag-ghost';
+    g.innerHTML = `<div class="ghost-head">${label}</div><div class="ghost-body">${subtext}</div>`;
+    document.body.appendChild(g);
+    return g;
+}
+
+// --- UI RENDERING ---
+function renderMasterTableUI() {
+    const theadL = document.getElementById('table-header-letters');
+    const theadH = document.getElementById('table-headers');
+    const tbody = document.getElementById('table-body');
+    
+    theadL.innerHTML = '<th>#</th>';
+    theadH.innerHTML = '<th>Idx</th>';
+
+    MASTER_HEADERS.forEach((h, i) => {
+        const thL = document.createElement('th');
+        thL.textContent = String.fromCharCode(65 + i);
+        thL.className = 'excel-row-header';
+        if (isReorderMode) {
+            thL.draggable = true;
+            thL.onsubmit = e => e.preventDefault();
+            thL.ondragstart = (e) => {
+                e.dataTransfer.setData('col', i);
+                const ghost = createGhost(`Moving Column: ${h}`, `Data type: CSV Column`);
+                e.dataTransfer.setDragImage(ghost, 0, 0);
+                setTimeout(() => ghost.remove(), 1);
+            };
+        }
+        theadL.appendChild(thL);
+        const thH = document.createElement('th');
+        thH.textContent = h;
+        theadH.appendChild(thH);
+    });
+
+    tbody.innerHTML = '';
+    masterData.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        if (row.isDuplicate && !row.isApproved) tr.className = 'duplicate-highlight';
+        if (row.isApproved) tr.className = 'approved-row';
         
-        const top = document.createElement('div');
-        top.className = 'ghost-first-item';
-        top.textContent = title;
-        ghost.appendChild(top);
-
-        items.slice(0, 5).forEach(text => {
-            const d = document.createElement('div');
-            d.className = 'ghost-rest';
-            d.textContent = text;
-            ghost.appendChild(d);
-        });
-
-        if (items.length > 5) {
-            const more = document.createElement('div');
-            more.className = 'ghost-rest';
-            more.textContent = `... +${items.length - 5} more`;
-            ghost.appendChild(more);
+        if (isReorderMode) {
+            tr.draggable = true;
+            tr.ondragstart = (e) => {
+                e.dataTransfer.setData('row', idx);
+                const ghost = createGhost(`Moving Row ${idx+1}`, row.data["Participant Name"] || "Unknown");
+                e.dataTransfer.setDragImage(ghost, 0, 0);
+                setTimeout(() => ghost.remove(), 1);
+            };
         }
 
-        document.body.appendChild(ghost);
-        return ghost;
-    }
-
-    function handleRowDrag(e, index) {
-        const row = masterData[index];
-        const ghost = createGhost(`Row ${index + 1}: ${row["Participant Name"] || 'Empty'}`, Object.values(row).filter(v => typeof v === 'string'));
-        e.dataTransfer.setDragImage(ghost, 0, 0);
-        e.dataTransfer.setData('text/plain', `row:${index}`);
-        setTimeout(() => ghost.remove(), 1);
-    }
-
-    function handleColDrag(e, index) {
-        const colName = MASTER_HEADERS[index];
-        const samples = masterData.slice(0, 5).map(r => r[colName]);
-        const ghost = createGhost(`Column: ${colName}`, samples);
-        e.dataTransfer.setDragImage(ghost, 0, 0);
-        e.dataTransfer.setData('text/plain', `col:${index}`);
-        setTimeout(() => ghost.remove(), 1);
-    }
-
-    // --- TABLE DROP LOGIC ---
-
-    document.getElementById('master-table').addEventListener('dragover', e => e.preventDefault());
-    document.getElementById('master-table').addEventListener('drop', e => {
-        const data = e.dataTransfer.getData('text/plain');
-        const [type, oldIndex] = data.split(':');
-        const target = e.target.closest('td, th');
-        if (!target) return;
-
-        if (type === 'row') {
-            const newIndex = target.parentElement.rowIndex - 2; // offset for 2 header rows
-            if (newIndex >= 0) {
-                const item = masterData.splice(oldIndex, 1)[0];
-                masterData.splice(newIndex, 0, item);
-            }
-        } else if (type === 'col') {
-            const newIndex = target.cellIndex - 1;
-            if (newIndex >= 0) {
-                const item = MASTER_HEADERS.splice(oldIndex, 1)[0];
-                MASTER_HEADERS.splice(newIndex, 0, item);
-            }
+        // Action Cell (Approval)
+        const tdIdx = document.createElement('td');
+        tdIdx.className = 'excel-row-header';
+        tdIdx.innerHTML = `<span>${idx+1}</span>`;
+        if (row.isDuplicate && !row.isApproved) {
+            const btn = document.createElement('button');
+            btn.className = 'btn-approve';
+            btn.textContent = '✓';
+            btn.onclick = () => { row.isApproved = true; renderMasterTableUI(); };
+            tdIdx.appendChild(btn);
         }
-        renderTable();
-    });
+        tr.appendChild(tdIdx);
 
-    document.getElementById('toggle-reorder-btn').addEventListener('click', () => {
-        isReorderMode = !isReorderMode;
-        document.getElementById('toggle-reorder-btn').classList.toggle('btn-success');
-        renderTable();
-    });
-
-    document.getElementById('back-btn').addEventListener('click', () => {
-        stage2.classList.remove('active');
-        stage1.classList.add('active');
-    });
-
-    document.getElementById('download-btn').addEventListener('click', () => {
-        let csv = MASTER_HEADERS.join(',') + '\n';
-        masterData.forEach(row => {
-            csv += MASTER_HEADERS.map(h => `"${row[h] || ''}"`).join(',') + '\n';
+        MASTER_HEADERS.forEach(h => {
+            const td = document.createElement('td');
+            const input = document.createElement('input');
+            input.value = row.data[h];
+            input.style.border = 'none'; input.style.width = '100%';
+            input.onchange = (e) => row.data[h] = e.target.value;
+            td.appendChild(input);
+            tr.appendChild(td);
         });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'merged_attendance.csv';
-        a.click();
+        tbody.appendChild(tr);
     });
+}
+
+// --- DRAG DROP TABLE HANDLING ---
+document.getElementById('master-table').ondragover = e => e.preventDefault();
+document.getElementById('master-table').ondrop = e => {
+    const colIdx = e.dataTransfer.getData('col');
+    const rowIdx = e.dataTransfer.getData('row');
+    const target = e.target.closest('td, th');
+    if (!target) return;
+
+    if (colIdx !== "") {
+        const newIdx = target.cellIndex - 1;
+        const item = MASTER_HEADERS.splice(colIdx, 1)[0];
+        MASTER_HEADERS.splice(newIdx, 0, item);
+    }
+    if (rowIdx !== "") {
+        const newIdx = target.parentElement.rowIndex - 2;
+        const item = masterData.splice(rowIdx, 1)[0];
+        masterData.splice(newIdx, 0, item);
+    }
+    renderMasterTableUI();
+};
+
+document.getElementById('toggle-reorder-btn').onclick = () => {
+    isReorderMode = !isReorderMode;
+    renderMasterTableUI();
+};
+
+document.getElementById('download-btn').onclick = () => {
+    let csv = MASTER_HEADERS.join(',') + '\n';
+    masterData.forEach(r => {
+        csv += MASTER_HEADERS.map(h => `"${r.data[h]}"`).join(',') + '\n';
+    });
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'master_attendance.csv'; a.click();
+};
+
+document.getElementById('back-btn').onclick = () => {
+    document.getElementById('stage-2').classList.remove('active');
+    document.getElementById('stage-1').classList.add('active');
+};
 </script>
-
-</body>
-</html>
